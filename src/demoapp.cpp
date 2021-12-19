@@ -23,27 +23,25 @@ int main()
 		return 1;
 
 	Canvas canvas(app.screen());
-	//color::Constant sampler(Color(0x206090));
-	color::LinearGradient sampler({ color::Red, color::Yellow, color::Green, color::Cyan, color::Blue, color::Purple });
+	color::LinearGradient gradient({ color::Red, color::Yellow, color::Green, color::Cyan, color::Blue, color::Purple });
 
 	float rotation { 45 };
 	float offset { 0 };
 
-	auto draw_rect = [&app, &canvas, &rotation, &sampler, &offset]() {
+	auto render_demo = [&app, &canvas, &rotation, &gradient, &offset]() {
 		canvas.clear();
 		app.screen().print({ 10, 10 }, "Yeah!", color::Black, color::Unchanged);
-		offset += 0.1f;
-		sampler.set_offset(offset);
-		canvas.fill(&sampler, rotation);
+		gradient.set_offset(offset);
+		canvas.fill(&gradient, rotation);
 		app.screen().print({ 6, 12 }, "Things and stuff...", color::Red, color::Unchanged);
+		app.screen().print({ 70, 40 }, "TERMIC", color::Green, color::Unchanged);
 	};
 
-	app.on_app_start.connect([&draw_rect]() {
-		draw_rect();
+	app.on_app_start.connect([&render_demo]() {
+		render_demo();
 	});
 
-	int seq { -1 };
-	app.on_key_event.connect([&app, &seq, &draw_rect, &rotation](const event::Key &k) {
+	app.on_key_event.connect([&app, &render_demo, &rotation, &offset](const event::Key &k) {
 		fmt::print(g_log, "[main]    key: {}\n", key::to_string(k.key, k.modifiers));
 
 		if(k.key == key::ESCAPE and k.modifiers == key::NoMod)
@@ -51,40 +49,26 @@ int main()
 
 		if(k.key == key::RIGHT and k.modifiers == key::NoMod)
 		{
-			seq++;
-
 			rotation = std::fmod(std::fmod(rotation + 2.f, 360.f) + 360.f, 360.f);
 			fmt::print(g_log, "rotation: {}\n", rotation);
-			draw_rect();
+			render_demo();
 		}
 		else if(k.key == key::LEFT and k.modifiers == key::NoMod)
 		{
-			seq--;
-
 			rotation = std::fmod(std::fmod(rotation - 2.f, 360.f) + 360.f, 360.f);
 			fmt::print(g_log, "rotation: {}\n", rotation);
-			draw_rect();
+			render_demo();
 		}
-
-//		fmt::print(g_log, "\x1b[97;32;1mtest seq: {}\x1b[m\n", seq);
-//		canvas.clear();
-//		switch(seq)
-//		{
-//		case 0: app.screen().print({ 4, 4 }, "blue              ", color::Blue, color::Default, style::Default); break;
-//		case 1: app.screen().print({ 4, 4 }, "purple          OB", color::Purple, color::Default, style::Overstrike); break;
-//		case 2: app.screen().print({ 4, 4 }, "yellow on blue   U", color::Yellow, color::Blue, style::Underline); break;
-//		case 3: app.screen().print({ 4, 4 }, "green on (same) UI", color::Green, color::Unchanged, style::Underline | style::Italic); break;
-//		case 4: app.screen().print({ 4, 4 }, "white on red     B", color::White, color::Red, style::Bold); break;
-//		}
-
-//		switch(seq)
-//		{
-//		case 0: canvas.fill({ { 0, 0 }, { 5, 5 } }, &sampler); app.screen().print({5,5}, "+"); break;
-//		case 1: canvas.fill({ { 0, 0 }, { 5, 6 } }, &sampler); app.screen().print({5,6}, "+"); break;
-//		case 2: canvas.fill({ { 0, 0 }, { 5, 5 } }, &sampler); break;
-//		case 3: canvas.fill({ { 0, 0 }, { 5, 5 } }, &sampler); break;
-//		case 4: canvas.fill({ { 0, 0 }, { 5, 5 } }, &sampler); break;
-//		}
+		else if(k.key == key::UP and k.modifiers == key::NoMod)
+		{
+			offset += 0.02f;
+			render_demo();
+		}
+		else if(k.key == key::DOWN and k.modifiers == key::NoMod)
+		{
+			offset -= 0.02f;
+			render_demo();
+		}
 	});
 	app.on_input_event.connect([](const event::Input &c) {
 		fmt::print(g_log, "[main]  input: '{}' 0x{:08x}\n", c.to_string(), std::uint32_t(c.codepoint));
@@ -92,12 +76,6 @@ int main()
 	});
 	app.on_mouse_move_event.connect([](const event::MouseMove &mm) {
 		fmt::print(g_log, "[main]  mouse: {},{}\n", mm.x, mm.y);
-
-		//app.screen().print({ 10, 10 }, fmt::format("mouse: {},{}  ", mm.x, mm.y));
-//		draw_rect({ mm.x, mm.y });
-//		color::Gradient sampler({ color::Red, color::Cyan}, rotation);
-//		canvas.clear();
-//		canvas.fill({ { 0, 0 }, { mm.x, mm.y } }, &sampler);
 	});
 	app.on_mouse_button_event.connect([](const event::MouseButton &mb) {
 		fmt::print(g_log, "[main] button: {} {} @ {},{}\n",

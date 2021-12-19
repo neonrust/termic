@@ -27,6 +27,11 @@ LinearGradient::LinearGradient(std::initializer_list<Color> colors) :
 	});
 }
 
+void LinearGradient::set_offset(float offset)
+{
+	_offset = offset;
+}
+
 Color LinearGradient::sample(float u, float v, float angle) const
 {
 	assert(u >= 0.f and u <= 1.f and v >= 0.f and v <= 1.f);
@@ -66,6 +71,8 @@ Color LinearGradient::sample(float u, float v, float angle) const
 	// this is definitely not the correct way to do it...
 	alpha *= std::max(std::abs(std::sin(-radians)), std::abs(std::cos(-radians)));
 
+
+	alpha = std::fmod(alpha + _offset, 1.f);
 
 	const auto idx = alpha*static_cast<float>(_colors.size() - 1);
 	const auto idx0 = static_cast<std::size_t>(std::floor(idx));

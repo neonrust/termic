@@ -31,10 +31,13 @@ struct LinearGradient : public Sampler
 {
 	LinearGradient(std::initializer_list<Color> colors);
 
+	void set_offset(float offset);
+
 	Color sample(float u, float v, float angle) const override;
 
 private:
 	std::vector<Color> _colors {};
+	float _offset { 0 };
 };
 
 } // NS: color
