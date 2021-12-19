@@ -88,10 +88,8 @@ int main()
 	app.on_mouse_wheel_event.connect([](const event::MouseWheel &mw) {
 		fmt::print(g_log, "[main]  wheel: {}\n", mw.delta);
 	});
-	app.on_resize_event.connect([&app](const event::Resize &rs) {
-		(void)app;
-		(void)rs;
-		//app.screen().print(rs.size.width - 10, rs.size.height - 1, fmt::format("size: {}x{}", rs.size.width, rs.size.height));
+	app.on_resize_event.connect([&render_demo](const event::Resize &) {
+		render_demo();
 	});
 
 	return app.run();

@@ -64,12 +64,12 @@ int App::run()
 		{
 			_emit_resize_event = false;
 
+			const auto before = _screen.size();
+			const bool first_resize = before.width == 0 and before.height == 0;
+
 			const auto size = _screen.get_terminal_size();
 
 			enqueue_resize_event(size);
-
-			const auto before = _screen.size();
-			bool first_resize = before.width == 0 and before.height == 0;
 
 			_screen.set_size(size);
 
@@ -77,7 +77,6 @@ int App::run()
 				on_app_start();
 		}
 
-		// first handle any internally queued events
 		for(const auto &event: _internal_events)
 			dispatch_event(event);
 		_internal_events.clear();
