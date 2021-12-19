@@ -101,11 +101,7 @@ void ScreenBuffer::set_size(Size new_size)
 		// if taller: resize only the "old" rows; new rows are sized upon creation, above. if not, all rows
 		const auto num_rows = new_height > _height? _height: new_height;
 		for(std::size_t row = 0; row < num_rows; ++row)
-		{
-			//fmt::print(g_log, "resize:   resizing row {}: {} -> {}\n", row, (*row_iter)->size(), new_width);
-			(*row_iter)->resize(new_width);
-			row_iter++;
-		}
+			(*row_iter++)->resize(new_width);
 	}
 
 	_width = new_width;
