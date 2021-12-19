@@ -7,24 +7,8 @@
 extern std::FILE *g_log;
 
 
-namespace term
+namespace termic
 {
-
-//void ScreenBuffer::clear(Color fg, Color bg)
-//{
-//	for(auto &row: _rows)
-//	{
-//		for(auto &cell: *row)
-//		{
-//			if(fg != color::Unchanged)
-//				cell.fg = fg;
-//			if(bg != color::Unchanged)
-//				cell.bg = bg;
-//			cell.style = style::Default;
-//			cell.ch = Cell::Unchanged;
-//		}
-//	}
-//}
 
 void ScreenBuffer::clear(Color fg, Color bg)
 {
@@ -128,4 +112,4 @@ void ScreenBuffer::set_size(Size new_size)
 }
 
 
-} // NS: term
+} // NS: termic

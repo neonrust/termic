@@ -6,7 +6,7 @@
 #include <vector>
 
 
-namespace term
+namespace termic
 {
 
 namespace color
@@ -39,4 +39,4 @@ private:
 
 } // NS: color
 
-} // NS: term
+} // NS: termic

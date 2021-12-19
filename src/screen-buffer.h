@@ -6,7 +6,7 @@
 #include "cell.h"
 #include "size.h"
 
-namespace term
+namespace termic
 {
 
 struct ScreenBuffer
@@ -34,4 +34,4 @@ private:
 	std::size_t _height { 0 };
 };
 
-} // NS: term
+} // NS: termic

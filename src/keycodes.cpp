@@ -8,7 +8,7 @@
 extern std::FILE *g_log;
 
 
-namespace term
+namespace termic
 {
 
 namespace key
@@ -120,4 +120,4 @@ Modifier modifier_from_list(const std::vector<std::string> &v)
 
 } // NS: key
 
-} // NS: term
+} // NS: termic

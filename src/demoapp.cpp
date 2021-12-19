@@ -9,13 +9,6 @@
 
 std::FILE *g_log { nullptr };
 
-// these are stolen from: https://en.cppreference.com/w/cpp/utility/variant/visit
-// helper type for the visitor #4
-template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
-// explicit deduction guide (not needed as of C++20)
-template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
-
-
 int main()
 {
 	g_log = fopen("epm.log", "w");
@@ -23,7 +16,7 @@ int main()
 
 	fmt::print(g_log, "term test app!\n");
 
-	using namespace term;
+	using namespace termic;
 
 	App app(Fullscreen | HideCursor | MouseEvents);
 	if(not app)

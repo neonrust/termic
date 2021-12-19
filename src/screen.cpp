@@ -9,7 +9,7 @@
 using namespace std::literals::string_view_literals;
 
 
-namespace term
+namespace termic
 {
 
 namespace esc
@@ -289,7 +289,7 @@ void Screen::flush_buffer()
 	if(not _output_buffer.empty())
 	{
 		//fmt::print(g_log, "write: {}\n", safe(_output_buffer));
-		::write(_fd, _output_buffer.c_str(), _output_buffer.size());
+		[[maybe_unused]] auto rc = ::write(_fd, _output_buffer.c_str(), _output_buffer.size());
 		_output_buffer.clear();
 	}
 }
@@ -316,4 +316,4 @@ void Screen::flush_buffer()
 }
 
 
-} // NS: term
+} // NS: termic

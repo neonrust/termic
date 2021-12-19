@@ -2,6 +2,9 @@
 
 #include <cstdint>
 
+namespace termic
+{
+
 struct Size
 {
 	std::size_t width;
@@ -18,3 +21,6 @@ struct Pos
 	std::size_t x;
 	std::size_t y;
 };
+
+
+} // NS: termic

@@ -2,7 +2,7 @@
 
 #include "screen.h"
 
-namespace term
+namespace termic
 {
 
 namespace color
@@ -25,11 +25,11 @@ struct Canvas
 	inline Size size() const { return _scr.size(); };
 
 	void fill(Rectangle rect, Color c);
-	void fill(Rectangle rect, const color::Sampler *s, float fill_angle=0);
+	void fill(Rectangle rect, const color::Sampler *s, float sampler_angle=0);
 
 
 private:
 	Screen &_scr;
 };
 
-} // NS: term
+} // NS: termic

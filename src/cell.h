@@ -8,7 +8,7 @@ using namespace std::literals::string_view_literals;
 
 extern std::FILE *g_log;
 
-namespace term
+namespace termic
 {
 
 constexpr std::size_t max_color_seq_len { 16 };  // e.g. "8;5;r;g;b"
@@ -51,9 +51,9 @@ enum Bit
 {
 	Normal     = 0,
 	Default    = Normal,
-	Intense    = 1 << 0,   // can't be combined with 'Faint'
+	Intense    = 1 << 0,   // can't be combined with Faint/Dim
 	Bold       = Intense,
-	Faint      = 1 << 1,   // can't be combined with 'Intense'
+	Faint      = 1 << 1,   // can't be combined with Intense/Bold
 	Dim        = Faint,
 	Italic     = 1 << 2,
 	Underline  = 1 << 3,
@@ -74,12 +74,13 @@ inline std::string escify(Color c)
 {
 	if(c == color::Default)
 		return "9";
+
+	// TODO: generate 256 or "classic" colors if 24-bit isn't supported
 	return fmt::format("8;2;{};{};{}"sv, color::red_part(c), color::green_part(c), color::blue_part(c));
 }
 
 inline std::string escify(Style s)
 {
-	// TODO: compile style 's' into corresponding escape sequence
 	std::string seq;
 
 	if((s & style::Intense) > 0)
@@ -104,16 +105,11 @@ inline std::string escify(Style s)
 
 struct Cell
 {
-//	inline ~Cell()
-//	{
-//		fmt::print(g_log, "~Cell\n");
-//	}
-
 	static constexpr wchar_t Unchanged = '\0';
 
-	inline bool operator == (const Cell &that) const
+	inline bool operator == (const Cell &other) const
 	{
-		return ch == that.ch and fg == that.fg and bg == that.bg and style == that.style;
+		return ch == other.ch and fg == other.fg and bg == other.bg and style == other.style;
 	}
 
 	wchar_t ch   { '\0' };     // a single UTF-8 character
@@ -124,4 +120,4 @@ struct Cell
 };
 
 
-} // NS: term
+} // NS: termic

@@ -16,6 +16,9 @@ using namespace std::literals::string_view_literals;
 
 extern std::FILE *g_log;
 
+namespace termic
+{
+
 namespace esc
 {
 [[maybe_unused]] const auto screen_alternate { "\x1b[?1049h"sv };
@@ -38,10 +41,8 @@ namespace esc
 
 } // NS: esc
 
-namespace term
-{
 
-void write(const std::string_view s);
+ssize_t write(const std::string_view s);
 
 extern std::string safe(const std::string &s);
 
@@ -122,11 +123,9 @@ void restore_terminal()
 	write(esc::cursor_show);
 }
 
-void write(const std::string_view s)
+ssize_t write(const std::string_view s)
 {
-	//fmt::print(g_log, "write: '{}' ({})\n", safe(std::string(s)), s.size());
-	::write(STDOUT_FILENO, s.data(), s.size());
-	//::flush(STDOUT_FILENO);
+	return ::write(STDOUT_FILENO, s.data(), s.size());
 }
 
 bool clear_in_flags(IOFlag flags)
@@ -182,4 +181,4 @@ bool modify_io_flags(bool set, IOFlag flags)
 	return true;
 }
 
-} // NS: term
+} // NS: termic

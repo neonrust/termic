@@ -8,7 +8,7 @@
 
 
 
-namespace term
+namespace termic
 {
 
 namespace color
@@ -31,10 +31,10 @@ Color LinearGradient::sample(float u, float v, float angle) const
 {
 	assert(u >= 0.f and u <= 1.f and v >= 0.f and v <= 1.f);
 
-	angle = std::fmod(std::fmod(angle, 360.f) + 360.f, 360.f); // ensure in range [0, 360]
-
 	if(_colors.size() == 1)
 		return _colors.front();
+
+	angle = std::fmod(std::fmod(angle, 360.f) + 360.f, 360.f); // ensure in range [0, 360]
 
 	// rotate the vector 'uv' by -_rotation degrees
 	auto degrees = angle;
@@ -99,4 +99,4 @@ Color LinearGradient::sample(float u, float v, float angle) const
 
 } // NS: color
 
-} // NS: term
+} // NS: termic

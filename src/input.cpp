@@ -14,7 +14,7 @@ extern std::FILE *g_log;
 
 using namespace std::literals::string_view_literals;
 
-namespace term
+namespace termic
 {
 
 
@@ -406,4 +406,4 @@ static std::vector<std::string_view> split(const std::string_view s, const std::
 }
 
 
-} // NS: term
+} // NS: termic

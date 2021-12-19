@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(epm LANGUAGES CXX)
+project(termicdemo LANGUAGES CXX)
 
 set(CXX g++)
 set(CC gcc)
@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_compile_options(-Wextra -Wall -Wpedantic -Wconversion -Werror -Wno-padded)
 
 set(sources
-	src/main.cpp
+	src/demoapp.cpp
 	src/app.h
 	src/app.cpp
 	src/event.h
@@ -32,8 +32,8 @@ set(sources
 )
 
 #link_directories(epm extern/termlib/lib/)
-include_directories(epm extern/TheWhisp-signals/)
+include_directories(termicdemo extern/TheWhisp-signals/)
 
-add_executable(epm ${sources})
+add_executable(termicdemo ${sources})
 
-target_link_libraries(epm fmt pthread dl)
+target_link_libraries(termicdemo fmt pthread dl)

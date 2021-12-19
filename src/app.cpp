@@ -6,7 +6,7 @@
 #include <sys/ioctl.h>
 
 
-namespace term
+namespace termic
 {
 
 void signal_received(int signum);
@@ -170,4 +170,4 @@ void signal_received(int signum)
 	std::raise(signum);
 }
 
-} // NS: term
+} // NS: termic

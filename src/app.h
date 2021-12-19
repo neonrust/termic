@@ -9,7 +9,7 @@
 
 #include <signals.hpp>
 
-namespace term
+namespace termic
 {
 
 struct App
@@ -58,4 +58,4 @@ private:
 	bool _should_quit { false };
 };
 
-} // NS: term
+} // NS: termic

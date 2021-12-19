@@ -5,7 +5,7 @@
 
 #include "event.h"
 
-namespace term
+namespace termic
 {
 
 struct Input
@@ -29,4 +29,4 @@ private:
 	std::vector<KeySequence> _key_sequences;
 };
 
-} // NS: term
+} // NS: termic

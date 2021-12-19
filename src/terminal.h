@@ -1,8 +1,7 @@
 #pragma once
 
-namespace term
+namespace termic
 {
-
 
 enum Options
 {
@@ -23,4 +22,4 @@ inline Options operator | (Options a, Options b)
 bool init_terminal(Options opts);
 void restore_terminal();
 
-} // NS: term
+} // NS: termicic

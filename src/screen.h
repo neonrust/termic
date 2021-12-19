@@ -6,7 +6,7 @@
 #include "screen-buffer.h"
 #include "size.h"
 
-namespace term
+namespace termic
 {
 
 struct Screen
@@ -49,9 +49,7 @@ private:
 		Style style { style::Default };
 	} _cursor;
 
-	//Pos _cursor { 0, 0 };
-
 	std::string _output_buffer;
 };
 
-} // NS: term
+} // NS: termic
