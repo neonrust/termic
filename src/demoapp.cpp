@@ -28,17 +28,14 @@ int main()
 
 	float rotation { 45 };
 
-	Size rect_size; // set in on_app_start
-
-	auto draw_rect = [&canvas, &rotation, &sampler, &rect_size]() {
+	auto draw_rect = [&app, &canvas, &rotation, &sampler]() {
 		canvas.clear();
-		canvas.fill({ { 0, 0 }, rect_size }, &sampler, rotation);
+		app.screen().print({ 10, 10 }, "Yeah!", color::Black, color::Unchanged);
+		canvas.fill(&sampler, rotation);
+		app.screen().print({ 6, 12 }, "Things and stuff...", color::Red, color::Unchanged);
 	};
 
-	app.on_app_start.connect([&app, &draw_rect, &rect_size]() {
-		auto size = app.screen().size();
-		rect_size.width = size.width;
-		rect_size.height = size.height;
+	app.on_app_start.connect([&draw_rect]() {
 		draw_rect();
 	});
 

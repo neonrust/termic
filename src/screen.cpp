@@ -82,7 +82,7 @@ void Screen::print(Pos pos, const std::string_view s, const Color fg, const Colo
 		cx += static_cast<std::size_t>(width);
 	}
 
-	fmt::print(g_log, "print: updated cells: {}, width: {}\n", num_updated, total_width);
+//	fmt::print(g_log, "print: updated cells: {}, width: {}\n", num_updated, total_width);
 }
 
 void Screen::clear(Color bg, Color fg)
@@ -163,7 +163,7 @@ void Screen::update()
 		// the terminal content is now in synch with back buffer, we can copy back -> front
 		_front_buffer = _back_buffer;
 
-		fmt::print(g_log, "updated cells: {}\n", num_updated);
+//		fmt::print(g_log, "updated cells: {}\n", num_updated);
 	}
 }
 

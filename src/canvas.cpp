@@ -10,6 +10,18 @@ extern std::FILE *g_log;
 namespace termic
 {
 
+void Canvas::fill(Color c)
+{
+	auto size = _scr.size();
+	fill({ { 0, 0 }, size }, c);
+}
+
+void Canvas::fill(const color::Sampler *s, float sampler_angle)
+{
+	auto size = _scr.size();
+	fill({ { 0, 0 }, size }, s, sampler_angle);
+}
+
 void Canvas::fill(Rectangle rect, Color c)
 {
 	color::Constant cc(c);
