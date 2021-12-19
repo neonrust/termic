@@ -104,6 +104,7 @@ void ScreenBuffer::set_size(Size new_size)
 		{
 			//fmt::print(g_log, "resize:   resizing row {}: {} -> {}\n", row, (*row_iter)->size(), new_width);
 			(*row_iter)->resize(new_width);
+			row_iter++;
 		}
 	}
 
