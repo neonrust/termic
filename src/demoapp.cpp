@@ -11,7 +11,7 @@ std::FILE *g_log { nullptr };
 
 int main()
 {
-	g_log = fopen("epm.log", "w");
+	g_log = fopen("termic.log", "w");
 	::setbuf(g_log, nullptr);  // disable buffering
 
 	fmt::print(g_log, "term test app!\n");
