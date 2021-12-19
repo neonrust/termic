@@ -13,5 +13,5 @@ look around and try it.
 
 Some C++20 features might be used somewhere, but C++17 is definitely required.
 
-* libfmt  (waiting for <format> support...)
+* libfmt  (actually not, but currently used for debug logging)
 * TheWhisp signals

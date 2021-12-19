@@ -27,10 +27,13 @@ int main()
 	color::LinearGradient sampler({ color::Red, color::Yellow, color::Green, color::Cyan, color::Blue, color::Purple });
 
 	float rotation { 45 };
+	float offset { 0 };
 
-	auto draw_rect = [&app, &canvas, &rotation, &sampler]() {
+	auto draw_rect = [&app, &canvas, &rotation, &sampler, &offset]() {
 		canvas.clear();
 		app.screen().print({ 10, 10 }, "Yeah!", color::Black, color::Unchanged);
+		offset += 0.1f;
+		sampler.set_offset(offset);
 		canvas.fill(&sampler, rotation);
 		app.screen().print({ 6, 12 }, "Things and stuff...", color::Red, color::Unchanged);
 	};
