@@ -23,7 +23,16 @@ int main()
 		return 1;
 
 	Canvas canvas(app.screen());
-	color::LinearGradient gradient({ color::Red, color::Yellow, color::Green, color::Cyan, color::Blue, color::Purple });
+	color::LinearGradient gradient({
+		color::Black,
+		color::Yellow,
+		color::Blue,
+		color::Red,
+		color::Cyan,
+		color::Purple,
+		color::White,
+		color::Green,
+	});
 
 	float rotation { 45 };
 	float offset { 0 };

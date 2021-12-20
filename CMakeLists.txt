@@ -1,15 +1,14 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(termicdemo LANGUAGES CXX)
+project(termic LANGUAGES CXX)
 
-set(CXX g++)
-set(CC gcc)
+#set(CXX g++)
+#set(CC gcc)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_compile_options(-Wextra -Wall -Wpedantic -Wconversion -Werror -Wno-padded)
 
-set(sources
-	src/demoapp.cpp
+set(lib_sources
 	src/app.h
 	src/app.cpp
 	src/event.h
@@ -31,9 +30,13 @@ set(sources
 	src/keycodes.cpp
 )
 
-#link_directories(epm extern/termlib/lib/)
-include_directories(termicdemo extern/TheWhisp-signals/)
+#FetchContent_MakeAvailable(fmtlib)
 
-add_executable(termicdemo ${sources})
+include_directories(termic extern/TheWhisp-signals/)
 
-target_link_libraries(termicdemo fmt pthread dl)
+add_library(termic STATIC ${lib_sources})
+
+add_subdirectory(examples/demo1)
+
+# We need this directory, and users of our library will need it too
+target_include_directories(termic PUBLIC src)
