@@ -82,14 +82,13 @@ void ScreenBuffer::set_size(Size new_size)
 
 	fmt::print(g_log, "resize: {}x{} -> {}x{}\n", _width, _height, new_width, new_height);
 
-	_rows.resize(new_height); // if shorter, rows "outside" will be deallocated by the unique_ptr
+	_rows.resize(new_height); // if shorter, removed rows will be deallocated by the smart pointer
 
 	if(new_height > _height)
 	{
-		// if initial (re)size, this will be all rows
-		for(auto idx = _height; idx < new_height; ++idx)
+		for(auto idx = _height; idx < new_height; ++idx) // if initial (re)size, all rows
 		{
-			auto new_row = std::make_unique<CellRow>(new_width, Cell{});
+			auto new_row = std::make_unique<CellRow>(new_width);
 			//fmt::print(g_log, "resize:   adding row {} ({})\n", idx, new_row->size());
 			_rows[idx] = std::move(new_row);
 		}
