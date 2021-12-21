@@ -1,6 +1,5 @@
-#include "canvas.h"
-
-#include "samplers.h"
+#include <termic/canvas.h>
+#include <termic/samplers.h>
 
 #include <fmt/core.h>
 

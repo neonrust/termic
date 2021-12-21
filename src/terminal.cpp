@@ -1,4 +1,4 @@
-#include "app.h"
+#include <termic/app.h>
 
 #include <iostream>
 #include <tuple>

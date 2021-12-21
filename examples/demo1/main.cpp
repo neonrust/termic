@@ -1,6 +1,6 @@
-#include "app.h"
-#include "canvas.h"
-#include "samplers.h"
+#include <termic/app.h>
+#include <termic/canvas.h>
+#include <termic/samplers.h>
 
 #include <tuple>
 #include <fmt/core.h>

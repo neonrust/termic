@@ -1,4 +1,4 @@
-#include "input.h"
+#include <termic/input.h>
 
 #include <string_view>
 #include <unordered_set>

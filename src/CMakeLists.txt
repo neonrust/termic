@@ -3,17 +3,19 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_compile_options(-Wextra -Wall -Wpedantic -Wconversion -Werror -Wno-padded)
 
 set(lib_headers
-	../include/app.h
-	../include/event.h
-	../include/terminal.h
-	../include/cell.h
-	../include/size.h
-	../include/samplers.h
-	../include/screen.h
-	../include/screen-buffer.h
-	../include/input.h
-	../include/canvas.h
-	../include/keycodes.h
+	../include/termic/app.h
+	../include/termic/canvas.h
+	../include/termic/cell.h
+	../include/termic/color.h
+	../include/termic/event.h
+	../include/termic/input.h
+	../include/termic/keycodes.h
+	../include/termic/samplers.h
+	../include/termic/screen.h
+	../include/termic/screen-buffer.h
+	../include/termic/size.h
+	../include/termic/style.h
+	../include/termic/terminal.h
 )
 
 # Seems Qt Creator doesn't heed this?

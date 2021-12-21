@@ -1,5 +1,5 @@
-#include "app.h"
-#include "terminal.h"
+#include <termic/app.h>
+#include <termic/terminal.h>
 
 #include <csignal>
 

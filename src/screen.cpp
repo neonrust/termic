@@ -1,4 +1,4 @@
-#include "screen.h"
+#include <termic/screen.h>
 
 #include <string_view>
 #include <algorithm>

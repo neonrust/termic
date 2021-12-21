@@ -1,4 +1,4 @@
-#include "samplers.h"
+#include <termic/samplers.h>
 
 #include <cmath>
 #include <algorithm>
@@ -86,13 +86,13 @@ Color LinearGradient::sample(float u, float v, float angle) const
 
 	const auto color1 = _colors[idx0 + 1];
 
-	const auto color0r = color::red_part(color0);
-	const auto color0g = color::green_part(color0);
-	const auto color0b = color::blue_part(color0);
+	const auto color0r = color::red(color0);
+	const auto color0g = color::green(color0);
+	const auto color0b = color::blue(color0);
 
-	const auto color1r = color::red_part(color1);
-	const auto color1g = color::green_part(color1);
-	const auto color1b = color::blue_part(color1);
+	const auto color1r = color::red(color1);
+	const auto color1g = color::green(color1);
+	const auto color1b = color::blue(color1);
 
 	const auto r = static_cast<std::uint32_t>(color0r - blend*(color0r - color1r));
 	const auto g = static_cast<std::uint32_t>(color0g - blend*(color0g - color1g));

@@ -1,4 +1,4 @@
-#include "screen-buffer.h"
+#include <termic/screen-buffer.h>
 
 #include <fmt/core.h>
 
