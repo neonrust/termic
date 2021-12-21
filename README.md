@@ -1,5 +1,7 @@
 # termic
 
+![demo1](screenshots/demo1.jpg?raw=true "demo1")
+
 TERMinal Interface (using) Cells
 
 Inspiration was actually my own, but I later discovered https://github.com/gdamore/tcell and https://github.com/nsf/termbox.
