@@ -10,6 +10,8 @@ set(lib_headers
 	../include/termic/event.h
 	../include/termic/input.h
 	../include/termic/keycodes.h
+	../include/termic/layout.h
+	../include/termic/panel.h
 	../include/termic/samplers.h
 	../include/termic/screen.h
 	../include/termic/screen-buffer.h
