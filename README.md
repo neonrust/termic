@@ -44,14 +44,23 @@ void main()
   if(not app)
     return 1;
 
+  // listen to key presses
   app.on_key_event.connect([&app](const event::Key &k) {
     app.screen().clear();
-    app.screen().print({ 10, 10 }, fmt::format("Hello, world!  key: {}", key::to_string(k.key, k.modifiers)), color::White, color::rgb(30, 120, 20), style::Bold);
+    app.screen().print(
+      { 10, 10 },              // x, y position (zero-based)
+      fmt::format("Hello, world!  key: {}", key::to_string(k.key, k.modifiers)),
+      color::White,            // foreground color (default: default terminal text color)
+      color::rgb(30, 120, 20), // background color (default: default terminal color)
+      style::Bold,             // style (default: normal)
+	);
 
+    // exit the app if escape is pressed
     if(k.key == key::ESCAPE and k.modifiers == key::NoMod)
       app.quit();
   });
 
+  // block until requested to quit
   app.run();
 }
 ```
