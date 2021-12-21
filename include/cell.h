@@ -43,6 +43,26 @@ inline std::uint8_t red_part(Color c)   { return (c >> 16) & 0xff; };
 inline std::uint8_t green_part(Color c) { return (c >>  8) & 0xff; };
 inline std::uint8_t blue_part(Color c)  { return  c        & 0xff; };
 
+inline Color rgb(std::initializer_list<std::uint8_t> components)
+{
+	//static_assert(components.size() == 3)  why doesn't this work?  :(
+	Color color { 0 };
+	std::uint_fast16_t count = 0;
+	for(const auto &c: components)
+	{
+		color = (color << 8) | c;
+		if(++count == 3)
+			break;
+	}
+
+	return color;
+}
+
+inline Color rgb(std::uint8_t r, std::uint8_t g, std::uint8_t b)
+{
+	return Color(Color(r) << 16 | Color(g) << 8 | Color(b));
+}
+
 } // NS: color
 
 namespace style
