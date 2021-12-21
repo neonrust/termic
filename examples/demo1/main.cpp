@@ -43,7 +43,7 @@ int main()
 		gradient.set_offset(offset);
 		canvas.fill(&gradient, rotation);
 		app.screen().print({ 6, 12 }, "Things and stuff...", color::Red, color::Unchanged);
-		app.screen().print({ 70, 40 }, "TERMIC", color::Green, color::Unchanged);
+		app.screen().print({ 70, 20 }, "TERMIC", color::Green, color::Unchanged);
 	};
 
 	app.on_app_start.connect([&render_demo]() {
