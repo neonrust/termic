@@ -6,6 +6,5 @@ set(sources
 	main.cpp
 )
 
-include_directories(demo1 extern/TheWhisp-signals/)
 add_executable(demo1 ${sources})
 target_link_libraries(demo1 PRIVATE termic fmt pthread dl)
