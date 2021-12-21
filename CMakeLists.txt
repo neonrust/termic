@@ -1,6 +1,13 @@
+# https://gitlab.com/CLIUtils/modern-cmake/-/tree/master/examples/extended-project
+
 cmake_minimum_required(VERSION 3.5)
 
-project(termic LANGUAGES CXX)
+project(termic
+	VERSION 0.1
+	DESCRIPTION "TERMinal Interface (using) Cells"
+	LANGUAGES CXX
+)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 #set(CXX g++)
 #set(CC gcc)
