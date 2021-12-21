@@ -1,6 +1,6 @@
 # termic
 
-![demo1](screenshots/demo1.png?raw=true "demo1")
+![demo1](screenshots/Screenshot_2021-12-21.png?raw=true "demo1")
 
 TERMinal Interface (using) Cells
 
