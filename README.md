@@ -56,6 +56,6 @@ void main()
 }
 ```
 
-Output:
+Possible eutput (pressed key is printed):
 
 ![example](screenshots/example-output.png?raw=true "example")
