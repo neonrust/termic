@@ -2,6 +2,7 @@
 
 #include <string_view>
 #include <algorithm>
+#include <chrono>
 
 #include <sys/ioctl.h>
 
@@ -60,8 +61,8 @@ void Screen::print(Pos pos, const std::string_view s, const Color fg, const Colo
 	//u8s.resize(s.size());
 	//::mbrtoc8(u8s.data(), s.c_str(), s.size(), nullptr);
 
-	auto num_updated { 0u };
-	auto total_width { 0ul };
+//	auto num_updated { 0u };
+//	auto total_width { 0ul };
 
 	for(const auto ch: s)
 	{
@@ -76,8 +77,8 @@ void Screen::print(Pos pos, const std::string_view s, const Color fg, const Colo
 
 		_back_buffer.set_cell({ cx, pos.y }, ch, width, fg, bg, style);
 
-		++num_updated;
-		total_width += width;
+//		++num_updated;
+//		total_width += width;
 
 		cx += static_cast<std::size_t>(width);
 	}
@@ -111,6 +112,8 @@ void Screen::set_size(Size size)
 
 void Screen::update()
 {
+	const auto t0 = std::chrono::high_resolution_clock::now();
+
 	// compare '_back_buffer' and '_front_buffer',
 	//   write the difference to the output buffer (such that '_front_buffer' becomes identical to '_back_buffer')
 
@@ -164,6 +167,8 @@ void Screen::update()
 		_front_buffer = _back_buffer;
 
 //		fmt::print(g_log, "updated cells: {}\n", num_updated);
+		const auto t1 = std::chrono::high_resolution_clock::now();
+		fmt::print(g_log, "screen updated, {} µs  ({} cells)\n", std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count(), num_updated);
 	}
 }
 
@@ -288,9 +293,13 @@ void Screen::flush_buffer()
 {
 	if(not _output_buffer.empty())
 	{
+		const auto t0 = std::chrono::high_resolution_clock::now();
 		//fmt::print(g_log, "write: {}\n", safe(_output_buffer));
 		[[maybe_unused]] auto rc = ::write(_fd, _output_buffer.c_str(), _output_buffer.size());
 		_output_buffer.clear();
+
+		const auto t1 = std::chrono::high_resolution_clock::now();
+		fmt::print(g_log, "\x1b[2mbuffer flushed, {} µs\x1b[m\n", std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count());
 	}
 }
 
