@@ -33,7 +33,7 @@ Some C++20 features might be used somewhere, but C++17 is definitely required.
 
 ## Example
 
-```
+```c++
 #include "app.h"
 
 void main()
