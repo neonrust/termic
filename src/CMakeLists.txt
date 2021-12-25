@@ -39,5 +39,5 @@ set(lib_sources
 add_library(termic STATIC ${lib_sources} ${lib_headers})
 
 # everyone need these include directories
-target_include_directories(termic PUBLIC ../extern/TheWhisp-signals)
+target_include_directories(termic PUBLIC ../extern/TheWisp-signals)
 target_include_directories(termic PUBLIC ../include)
