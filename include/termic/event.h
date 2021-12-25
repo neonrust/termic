@@ -30,7 +30,7 @@ struct Input
 {
 	std::uint32_t codepoint;
 
-	std::string to_string() const
+	inline std::string to_string() const
 	{
 		auto cp = codepoint;
 
@@ -106,9 +106,13 @@ struct Resize
 		Size size { 0, 0 };
 	} old {};
 };
+struct Focus
+{
+	bool focused;
+};
 
 
-using Event = std::variant<Key, Input, MouseButton, MouseWheel, MouseMove, Resize>;
+using Event = std::variant<Key, Input, MouseButton, MouseWheel, MouseMove, Resize, Focus>;
 
 } // NS: event
 

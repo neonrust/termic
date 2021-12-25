@@ -11,7 +11,8 @@ enum Options
 	MouseButtonEvents = 1 << 2,
 	MouseMoveEvents   = 1 << 3,
 	MouseEvents       = MouseButtonEvents | MouseMoveEvents,
-	NoSignalDecode    = 1 << 4,
+	FocusEvents       = 1 << 4,
+	NoSignalDecode    = 1 << 16,
 };
 // bitwise OR of multiple 'Options' is still an 'Options'
 inline Options operator | (Options a, Options b)

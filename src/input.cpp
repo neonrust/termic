@@ -28,6 +28,10 @@ static std::string hex(const std::string_view s);
 static constexpr auto mouse_prefix { "\x1b[<"sv };
 static constexpr auto max_mouse_seq_len { 16 }; //  \e[<nn;xxx;yyym -> 14
 
+static constexpr auto focus_in { "\x1b[I"sv };
+static constexpr auto focus_out { "\x1b[O"sv };
+
+
 Input::Input(std::istream &s) :
     _in(s)
 {
@@ -87,6 +91,20 @@ std::vector<event::Event> Input::read()
 		{
 			revert(in.substr(mouse_prefix.size() + eaten));
 			return { std::get<event::Event>(event) };
+		}
+	}
+
+	if(in.size() >= 3)
+	{
+		if(in.starts_with(focus_in))
+		{
+			revert(in.substr(focus_in.size()));
+			return { event::Focus{ .focused = true } };
+		}
+		else if(in.starts_with(focus_out))
+		{
+			revert(in.substr(focus_out.size()));
+			return { event::Focus{ .focused = false } };
 		}
 	}
 

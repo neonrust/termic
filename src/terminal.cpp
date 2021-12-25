@@ -35,6 +35,9 @@ namespace esc
 [[maybe_unused]] const auto mouse_move_on  { "\x1b[?1003h"sv };
 [[maybe_unused]] const auto mouse_move_off { "\x1b[?1003l"sv };
 
+[[maybe_unused]] const auto focus_on  { "\x1b[?1004h"sv };
+[[maybe_unused]] const auto focus_off { "\x1b[?1004l"sv };
+
 // terminal synchronized output markers
 [[maybe_unused]] const auto synch_start { "\x1b[?2026h"sv };
 [[maybe_unused]] const auto synch_end   { "\x1b[?2026l"sv };
@@ -107,6 +110,11 @@ bool init_terminal(Options opts)
 		fmt::print(g_log, "   \x1b[2mterm >> enabling mouse move events...\x1b[m\n");
 		write(esc::mouse_move_on);
 	}
+	if((opts & FocusEvents) > 0)
+	{
+		fmt::print(g_log, "   \x1b[2mterm >> enabling focus events...\x1b[m\n");
+		write(esc::focus_on);
+	}
 
 	return true;
 }
@@ -117,6 +125,7 @@ void restore_terminal()
 
 	::tcsetattr(STDIN_FILENO, TCSANOW, &initial_settings);
 
+	write(esc::focus_off);
 	write(esc::mouse_move_off);
 	write(esc::mouse_buttons_off);
 	write(esc::screen_normal);

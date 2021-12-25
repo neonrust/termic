@@ -134,6 +134,8 @@ bool App::dispatch_event(const event::Event &e)
 		return on_mouse_wheel_event(std::get<event::MouseWheel>(e)), true;
 	else if(std::holds_alternative<event::Resize>(e))
 		return on_resize_event(std::get<event::Resize>(e)), true;
+	else if(std::holds_alternative<event::Focus>(e))
+		return on_focus_event(std::get<event::Focus>(e)), true;
 
 	fmt::print(g_log, "unhandled event type index:{}\n", e.index());
 

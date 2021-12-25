@@ -18,7 +18,7 @@ int main()
 
 	using namespace termic;
 
-	App app(Fullscreen | HideCursor | MouseEvents);
+	App app(Fullscreen | HideCursor | MouseEvents | FocusEvents);
 	if(not app)
 		return 1;
 

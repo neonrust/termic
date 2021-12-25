@@ -31,8 +31,9 @@ struct App
 	fteng::signal<void()> on_app_start;
 	fteng::signal<void(int)> on_app_exit;
 	fteng::signal<void(const event::Resize)> on_resize_event;
+	fteng::signal<void(const event::Focus)> on_focus_event;
 
-	int run();
+	virtual int run();
 
 	void quit();
 
