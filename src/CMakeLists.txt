@@ -10,19 +10,12 @@ set(lib_headers
 	../include/termic/event.h
 	../include/termic/input.h
 	../include/termic/keycodes.h
-	../include/termic/panelapp.h
 	../include/termic/samplers.h
 	../include/termic/screen.h
 	../include/termic/screen-buffer.h
 	../include/termic/size.h
 	../include/termic/style.h
 	../include/termic/terminal.h
-	../include/termic/ui/border.h
-	../include/termic/ui/element.h
-	../include/termic/ui/layout.h
-	../include/termic/ui/panel.h
-	../include/termic/ui/ui.h
-	../include/termic/ui/widget.h
 )
 
 # Seems Qt Creator doesn't heed this?
