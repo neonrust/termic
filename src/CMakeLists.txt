@@ -19,11 +19,11 @@ set(lib_headers
 )
 
 # Seems Qt Creator doesn't heed this?
-source_group(
-  TREE "${termic_SOURCE_DIR}/include"
-  PREFIX "Header Files"
-  FILES ${lib_headers}
-)
+#source_group(
+#  TREE "${termic_SOURCE_DIR}/include"
+#  PREFIX "Header Files"
+#  FILES ${lib_headers}
+#)
 
 set(lib_sources
 	app.cpp
