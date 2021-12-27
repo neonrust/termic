@@ -18,21 +18,21 @@ std::string to_string(Key k, Modifier m)
 	std::string key_name;
 	switch(k)
 	{
-	case BACKSPACE:   key_name = "BACKSPACE"; break;
-	case TAB:         key_name = "TAB"; break;
-	case ENTER:       key_name = "ENTER"; break;
-	case UP:          key_name = "UP"; break;
-	case DOWN:        key_name = "DOWN"; break;
-	case RIGHT:       key_name = "RIGHT"; break;
-	case LEFT:        key_name = "LEFT"; break;
-	case HOME:        key_name = "HOME"; break;
-	case INSERT:      key_name = "INSERT"; break;
-	case DELETE:      key_name = "DELETE"; break;
-	case END:         key_name = "END"; break;
-	case PAGE_UP:     key_name = "PAGE_UP"; break;
-	case PAGE_DOWN:   key_name = "PAGE_DOWN"; break;
-	case ESCAPE:      key_name = "ESCAPE"; break;
-	case NUMPAD_CENTER:    key_name = "NUMPAD_5"; break;
+	case BACKSPACE:     key_name = "BACKSPACE"; break;
+	case TAB:           key_name = "TAB"; break;
+	case ENTER:         key_name = "ENTER"; break;
+	case UP:            key_name = "UP"; break;
+	case DOWN:          key_name = "DOWN"; break;
+	case RIGHT:         key_name = "RIGHT"; break;
+	case LEFT:          key_name = "LEFT"; break;
+	case HOME:          key_name = "HOME"; break;
+	case INSERT:        key_name = "INSERT"; break;
+	case DELETE:        key_name = "DELETE"; break;
+	case END:           key_name = "END"; break;
+	case PAGE_UP:       key_name = "PAGE_UP"; break;
+	case PAGE_DOWN:     key_name = "PAGE_DOWN"; break;
+	case ESCAPE:        key_name = "ESCAPE"; break;
+	case NUMPAD_CENTER: key_name = "NUMPAD_CENTER"; break;
 	default: break;
 	}
 
