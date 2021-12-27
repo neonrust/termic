@@ -35,11 +35,11 @@ enum
 
 static constexpr Color special_mask { 0xff000000 };
 
-inline std::uint8_t red(Color c)   { return (c >> 16) & 0xff; };
-inline std::uint8_t green(Color c) { return (c >>  8) & 0xff; };
-inline std::uint8_t blue(Color c)  { return  c        & 0xff; };
+constexpr std::uint8_t red(Color c)   { return (c >> 16) & 0xff; };
+constexpr std::uint8_t green(Color c) { return (c >>  8) & 0xff; };
+constexpr std::uint8_t blue(Color c)  { return  c        & 0xff; };
 
-inline Color rgb(std::initializer_list<std::uint8_t> components)
+constexpr Color rgb(std::initializer_list<std::uint8_t> components)
 {
 	Color color { 0 };
 
@@ -56,7 +56,7 @@ inline Color rgb(std::initializer_list<std::uint8_t> components)
 	return color;
 }
 
-inline Color rgb(std::uint8_t r, std::uint8_t g, std::uint8_t b)
+constexpr Color rgb(std::uint8_t r, std::uint8_t g, std::uint8_t b)
 {
 	return Color(Color(r) << 16 | Color(g) << 8 | Color(b));
 }

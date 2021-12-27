@@ -30,7 +30,7 @@ enum Bit
 } // NS: style
 
 
-inline Style operator | (style::Bit a, style::Bit b)
+constexpr Style operator | (style::Bit a, style::Bit b)
 {
 	return static_cast<Style>(static_cast<std::uint8_t>(a) | static_cast<std::uint8_t>(b));
 }
