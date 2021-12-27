@@ -90,7 +90,7 @@ std::size_t Screen::print(Pos pos, const std::string_view s, const Color fg, con
 
 void Screen::clear(Color bg, Color fg)
 {
-	_back_buffer.clear(fg, bg);
+	_back_buffer.clear(bg, fg);
 
 	cursor_move({ 0, 0 });
 
@@ -106,10 +106,15 @@ void Screen::clear(Color bg, Color fg)
 
 void Screen::set_size(Size size)
 {
+	const auto curr_size = _back_buffer.size();
+
 	_output_buffer.reserve(std::max(100ul, size.width)*std::max(100ul, size.height)*4);  // an over-estimate in an attempt to avoid re-allocation
 
 	_back_buffer.set_size(size);
 	_front_buffer.set_size(size);
+
+	if(size.width < curr_size.width)
+		_front_buffer.clear(color::Default, color::Default, true);
 }
 
 void Screen::update()

@@ -9,14 +9,17 @@ namespace termic
 {
 extern std::FILE *g_log;
 
-void ScreenBuffer::clear(Color fg, Color bg)
+void ScreenBuffer::clear(Color bg, Color fg, bool content)
 {
 	for(auto &row: _rows)
 	{
 		for(auto &cell: *row)
 		{
-			cell.ch = '\0';
-			cell.width = 1;
+			if(content)
+			{
+				cell.ch = '\0';
+				cell.width = 1;
+			}
 			if(fg != color::Unchanged)
 				cell.fg = fg;
 			if(bg != color::Unchanged)
