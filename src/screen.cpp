@@ -68,7 +68,7 @@ void Screen::print(Pos pos, const std::string_view s, const Color fg, const Colo
 	{
 		if(cx >= size.width)
 		{
-			fmt::print(g_log, "print: off-screen: x  ({})\n", cx);
+			if(g_log) fmt::print(g_log, "print: off-screen: x  ({})\n", cx);
 			break;
 		}
 
@@ -83,7 +83,7 @@ void Screen::print(Pos pos, const std::string_view s, const Color fg, const Colo
 		cx += static_cast<std::size_t>(width);
 	}
 
-//	fmt::print(g_log, "print: updated cells: {}, width: {}\n", num_updated, total_width);
+//	if(g_log) fmt::print(g_log, "print: updated cells: {}, width: {}\n", num_updated, total_width);
 }
 
 void Screen::clear(Color bg, Color fg)
@@ -166,9 +166,9 @@ void Screen::update()
 		// the terminal content is now in synch with back buffer, we can copy back -> front
 		_front_buffer = _back_buffer;
 
-//		fmt::print(g_log, "updated cells: {}\n", num_updated);
+//		if(g_log) fmt::print(g_log, "updated cells: {}\n", num_updated);
 		const auto t1 = std::chrono::high_resolution_clock::now();
-		fmt::print(g_log, "screen updated, {} µs  ({} cells)\n", std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count(), num_updated);
+		if(g_log) fmt::print(g_log, "screen updated, {} µs  ({} cells)\n", std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count(), num_updated);
 	}
 }
 
@@ -193,7 +193,7 @@ Pos Screen::cursor_move(Pos pos)
 
 	if(pos.x != _cursor.position.x or pos.y != _cursor.position.y)
 	{
-//		fmt::print(g_log, "cursor: {},{}  ->  {},{}\n", _cursor.position.x, _cursor.position.y, pos.x, pos.y);
+//		if(g_log) fmt::print(g_log, "cursor: {},{}  ->  {},{}\n", _cursor.position.x, _cursor.position.y, pos.x, pos.y);
 		_cursor.position = pos;
 
 		pos.x++; // 1-based
@@ -294,12 +294,12 @@ void Screen::flush_buffer()
 	if(not _output_buffer.empty())
 	{
 		const auto t0 = std::chrono::high_resolution_clock::now();
-		//fmt::print(g_log, "write: {}\n", safe(_output_buffer));
+		//if(g_log) fmt::print(g_log, "write: {}\n", safe(_output_buffer));
 		[[maybe_unused]] auto rc = ::write(_fd, _output_buffer.c_str(), _output_buffer.size());
 		_output_buffer.clear();
 
 		const auto t1 = std::chrono::high_resolution_clock::now();
-		fmt::print(g_log, "\x1b[2mbuffer flushed, {} µs\x1b[m\n", std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count());
+		if(g_log) fmt::print(g_log, "\x1b[2mbuffer flushed, {} µs\x1b[m\n", std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count());
 	}
 }
 
