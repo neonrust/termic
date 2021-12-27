@@ -32,13 +32,16 @@ std::string to_string(Key k, Modifier m)
 	case PAGE_UP:     key_name = "PAGE_UP"; break;
 	case PAGE_DOWN:   key_name = "PAGE_DOWN"; break;
 	case ESCAPE:      key_name = "ESCAPE"; break;
-	case NUMPAD_5:    key_name = "NUMPAD_5"; break;
+	case NUMPAD_CENTER:    key_name = "NUMPAD_5"; break;
 	default: break;
 	}
+
 	if(k >= F1 and k <= F12)
 		key_name = fmt::format("F{}", k - F1 + 1);
 	if(k >= A and k <= Z)
 		key_name = fmt::format("{:c}", 'A' + k - A);
+	if(k >= _0 and k <= _9)
+		key_name = fmt::format("{:c}", '0' + k - _0);
 
 	std::vector<std::string> mod_names;
 	if((m & SHIFT) > 0)
@@ -93,7 +96,7 @@ Key key_from_string(const std::string_view name)
 	if(name == "PAGE_UP")    return PAGE_UP;
 	if(name == "PAGE_DOWN")  return PAGE_DOWN;
 	if(name == "ESCAPE")     return ESCAPE;
-	if(name == "NUMPAD_5")   return NUMPAD_5;
+	if(name == "NUMPAD_5")   return NUMPAD_CENTER;
 
 	if(g_log) fmt::print(g_log, "unknown key: '{}'\n", name);
 	assert(false);

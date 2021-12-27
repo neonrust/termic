@@ -147,6 +147,12 @@ std::vector<event::Event> Input::read()
 				.key = key::Key(iev.codepoint - 'a' + key::A),
 			});
 		}
+		else if(iev.codepoint >= '0' and iev.codepoint <= '9')
+		{
+			evs.push_back(event::Key{
+				.key = key::Key(iev.codepoint - '0' + key::_0),
+			});
+		}
 
 		return evs;
 	}
