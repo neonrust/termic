@@ -16,8 +16,8 @@ struct Screen
 	inline void clear() { clear(color::Default, color::Default); }
 	void clear(Color bg, Color fg=color::Unchanged);
 
-	inline void print(const std::string_view s, const Color fg, const Color bg, const Style style) { print(_cursor.position, s, fg, bg, style); }
-	void print(Pos pos, const std::string_view s, Color fg=color::Default, Color bg=color::Default, Style style=style::Default);
+	inline size_t print(const std::string_view s, const Color fg, const Color bg, const Style style) { return print(_cursor.position, s, fg, bg, style); }
+	std::size_t print(Pos pos, const std::string_view s, Color fg=color::Default, Color bg=color::Default, Style style=style::Default);
 
 	Pos cursor_move(Pos pos);
 	void set_cell(Pos pos, wchar_t ch, std::size_t width, Color fg=color::Default, Color bg=color::Default, Style style=style::Default);

@@ -45,14 +45,14 @@ Screen::Screen(int fd) :
 	_output_buffer.append(fmt::format(esc::cup, 1, 1)); // go to origin (b/c default _cursor.pos = 0,0)
 }
 
-void Screen::print(Pos pos, const std::string_view s, const Color fg, const Color bg, const Style style)
+std::size_t Screen::print(Pos pos, const std::string_view s, const Color fg, const Color bg, const Style style)
 {
 	auto size = _back_buffer.size();
 
 	if(pos.y >= size.height)
 	{
 		if(g_log) fmt::print(g_log, "print: off-screen: y  ({})\n", pos.y);
-		return;
+		return 0;
 	}
 
 	auto cx = pos.x;
@@ -62,7 +62,7 @@ void Screen::print(Pos pos, const std::string_view s, const Color fg, const Colo
 	//::mbrtoc8(u8s.data(), s.c_str(), s.size(), nullptr);
 
 //	auto num_updated { 0u };
-//	auto total_width { 0ul };
+	auto total_width { 0ul };
 
 	for(const auto ch: s)
 	{
@@ -78,12 +78,14 @@ void Screen::print(Pos pos, const std::string_view s, const Color fg, const Colo
 		_back_buffer.set_cell({ cx, pos.y }, ch, width, fg, bg, style);
 
 //		++num_updated;
-//		total_width += width;
+		total_width += width;
 
 		cx += static_cast<std::size_t>(width);
 	}
 
 //	if(g_log) fmt::print(g_log, "print: updated cells: {}, width: {}\n", num_updated, total_width);
+
+	return total_width;
 }
 
 void Screen::clear(Color bg, Color fg)
