@@ -3,9 +3,6 @@
 
 #include <fmt/core.h>
 
-extern std::FILE *g_log;
-
-
 namespace termic
 {
 

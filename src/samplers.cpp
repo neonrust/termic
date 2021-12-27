@@ -6,10 +6,9 @@
 #include <assert.h>
 
 
-
-
 namespace termic
 {
+extern std::FILE *g_log;
 
 namespace color
 {
@@ -99,7 +98,7 @@ Color LinearGradient::sample(float u, float v, float angle) const
 	const auto b = static_cast<std::uint32_t>(color0b - blend*(color0b - color1b));
 
 	auto res = Color(r << 16 | g << 8 | b);
-//	fmt::print(g_log, "gradient: {:.2f},{:.2f} -> {:.2f}/{:.2f} -> [{}] #{:06x}; [{}] #{:06x} -> #{:06x}\n", u, v, alpha, blend, idx0, color0, idx0 + 1, color1, res);
+//	if(g_log) fmt::print(g_log, "gradient: {:.2f},{:.2f} -> {:.2f}/{:.2f} -> [{}] #{:06x}; [{}] #{:06x} -> #{:06x}\n", u, v, alpha, blend, idx0, color0, idx0 + 1, color1, res);
 
 	return res;
 }

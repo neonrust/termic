@@ -4,11 +4,10 @@
 
 #include <assert.h>
 
-extern std::FILE *g_log;
-
 
 namespace termic
 {
+extern std::FILE *g_log;
 
 void ScreenBuffer::clear(Color fg, Color bg)
 {
@@ -80,7 +79,7 @@ void ScreenBuffer::set_size(Size new_size)
 
 	const bool initial = _width == 0 and _height == 0;
 
-	fmt::print(g_log, "resize: {}x{} -> {}x{}\n", _width, _height, new_width, new_height);
+	if(g_log) fmt::print(g_log, "resize: {}x{} -> {}x{}\n", _width, _height, new_width, new_height);
 
 	_rows.resize(new_height); // if shorter, removed rows will be deallocated by the smart pointer
 
@@ -89,7 +88,7 @@ void ScreenBuffer::set_size(Size new_size)
 		for(auto idx = _height; idx < new_height; ++idx) // if initial (re)size, all rows
 		{
 			auto new_row = std::make_unique<CellRow>(new_width);
-			//fmt::print(g_log, "resize:   adding row {} ({})\n", idx, new_row->size());
+			//if(g_log) fmt::print(g_log, "resize:   adding row {} ({})\n", idx, new_row->size());
 			_rows[idx] = std::move(new_row);
 		}
 	}

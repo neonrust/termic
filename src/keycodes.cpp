@@ -5,11 +5,10 @@
 
 #include <assert.h>
 
-extern std::FILE *g_log;
-
 
 namespace termic
 {
+extern std::FILE *g_log;
 
 namespace key
 {
@@ -96,7 +95,7 @@ Key key_from_string(const std::string_view name)
 	if(name == "ESCAPE")     return ESCAPE;
 	if(name == "NUMPAD_5")   return NUMPAD_5;
 
-	fmt::print(g_log, "unknown key: '{}'\n", name);
+	if(g_log) fmt::print(g_log, "unknown key: '{}'\n", name);
 	assert(false);
 	return None;
 }

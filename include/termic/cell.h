@@ -7,8 +7,6 @@
 #include <fmt/core.h>
 #include <string_view>
 
-extern std::FILE *g_log;
-
 namespace termic
 {
 

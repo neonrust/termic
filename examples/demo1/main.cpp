@@ -7,16 +7,20 @@
 #include <variant>
 #include <cmath>
 
-std::FILE *g_log { nullptr };
+namespace termic
+{
+extern std::FILE *g_log;
+}
 
 int main()
 {
+	using namespace termic;
+
 	g_log = fopen("termic.log", "w");
-	::setbuf(g_log, nullptr);  // disable buffering
+	::setbuf(termic::g_log, nullptr);  // disable buffering
 
 	fmt::print(g_log, "term test app!\n");
 
-	using namespace termic;
 
 	App app(Fullscreen | HideCursor | MouseEvents | FocusEvents);
 	if(not app)

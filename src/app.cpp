@@ -8,6 +8,7 @@
 
 namespace termic
 {
+std::FILE *g_log;
 
 void signal_received(int signum);
 void app_atexit();
@@ -99,7 +100,7 @@ int App::run()
 		}
 	}
 
-	fmt::print(g_log, "\x1b[33;1mApp:loop exiting\x1b[m\n");
+	if(g_log) fmt::print(g_log, "\x1b[33;1mApp:loop exiting\x1b[m\n");
 
 	return 0;
 }
@@ -137,7 +138,7 @@ bool App::dispatch_event(const event::Event &e)
 	else if(std::holds_alternative<event::Focus>(e))
 		return on_focus_event(std::get<event::Focus>(e)), true;
 
-	fmt::print(g_log, "unhandled event type index:{}\n", e.index());
+	if(g_log) fmt::print(g_log, "unhandled event type index:{}\n", e.index());
 
 	return false;
 }
@@ -161,7 +162,7 @@ void signal_received(int signum)
 		return;
 	}
 
-	fmt::print(g_log, "\x1b[33;1msignal: {}\x1b[m\n", signum);
+	if(g_log) fmt::print(g_log, "\x1b[33;1msignal: {}\x1b[m\n", signum);
 
 	if(g_app)
 		g_app->shutdown();

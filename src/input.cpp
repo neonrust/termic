@@ -10,12 +10,12 @@
 #include <poll.h>
 
 
-extern std::FILE *g_log;
 
 using namespace std::literals::string_view_literals;
 
 namespace termic
 {
+extern std::FILE *g_log;
 
 
 static std::variant<event::Event, int> parse_mouse(const std::string_view in, std::size_t &eaten);
@@ -151,7 +151,7 @@ std::vector<event::Event> Input::read()
 		return evs;
 	}
 
-	fmt::print(g_log, "\x1b[33;1mparse failed: {}\x1b[m {}  ({})\n", safe(in), hex(in), in.size());
+	if(g_log) fmt::print(g_log, "\x1b[33;1mparse failed: {}\x1b[m {}  ({})\n", safe(in), hex(in), in.size());
 	return {};
 }
 
@@ -160,7 +160,7 @@ static std::variant<event::Event, int> parse_mouse(const std::string_view in, st
 	// '0;63;16M'  (button | modifiers ; X ; Y ; pressed or motion)
 	// '0;63;16m'  (button | modifiers ; X ; Y ; released)
 
-//	fmt::print(g_log, "mouse: {}\n", safe(std::string(in)));
+//	if(g_log) fmt::print(g_log, "mouse: {}\n", safe(std::string(in)));
 
 	// read until 'M' or 'm' (max 11 chars; 2 + 1 + 3 + 1 + 3 + 1)
 	std::size_t len = 0;
@@ -188,7 +188,7 @@ static std::variant<event::Event, int> parse_mouse(const std::string_view in, st
 	if(parts.size() != 3)
 		return -1;
 
-//	fmt::print(g_log, "  mouse seq: {:02x} {} {} {}\n", std::stoi(parts[0].data()), parts[1], parts[2], tail);
+//	if(g_log) fmt::print(g_log, "  mouse seq: {:02x} {} {} {}\n", std::stoi(parts[0].data()), parts[1], parts[2], tail);
 
 	std::uint64_t buttons_modifiers = std::stoul(parts[0].data());
 	const std::size_t mouse_x = std::stoul(parts[1].data()) - 1;
@@ -333,7 +333,7 @@ bool Input::setup_keys(const std::string &filename)
 
 		const auto seq_str = item["seq"].get<std::string>();
 		if(seen_sequences.find(seq_str) != seen_sequences.end())
-			fmt::print(g_log, "\x1b[41;97;1msequence '{}' already mapped\x1b[m\n", seq_str);
+			if(g_log) fmt::print(g_log, "\x1b[41;97;1msequence '{}' already mapped\x1b[m\n", seq_str);
 		seen_sequences.insert(seq_str);
 
 		std::size_t start { 0 };

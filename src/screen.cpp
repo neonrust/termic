@@ -6,12 +6,12 @@
 
 #include <sys/ioctl.h>
 
-
 using namespace std::literals::string_view_literals;
 
 
 namespace termic
 {
+extern std::FILE *g_log;
 
 namespace esc
 {
@@ -51,7 +51,7 @@ void Screen::print(Pos pos, const std::string_view s, const Color fg, const Colo
 
 	if(pos.y >= size.height)
 	{
-		fmt::print(g_log, "print: off-screen: y  ({})\n", pos.y);
+		if(g_log) fmt::print(g_log, "print: off-screen: y  ({})\n", pos.y);
 		return;
 	}
 
