@@ -1,3 +1,4 @@
+#include <termic/screen.h>
 #include <termic/canvas.h>
 #include <termic/samplers.h>
 
@@ -5,6 +6,16 @@
 
 namespace termic
 {
+
+void Canvas::clear()
+{
+	_scr.clear();
+}
+
+Size Canvas::size() const
+{
+	return _scr.size();
+}
 
 void Canvas::fill(Color c)
 {

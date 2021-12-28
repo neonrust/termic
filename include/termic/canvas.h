@@ -1,9 +1,12 @@
 #pragma once
 
-#include "screen.h"
+#include "color.h"
+#include "size.h"
 
 namespace termic
 {
+
+struct Screen;
 
 namespace color
 {
@@ -19,10 +22,10 @@ struct Rectangle
 
 struct Canvas
 {
-	Canvas(Screen &scr) : _scr(scr) {};
+	inline Canvas(Screen &scr) : _scr(scr) {};
 
-	inline void clear() { _scr.clear(); };
-	inline Size size() const { return _scr.size(); };
+	void clear();
+	Size size() const;
 
 	void fill(Color c);
 	void fill(const color::Sampler *s, float sampler_angle=0);
