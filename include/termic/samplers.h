@@ -40,6 +40,8 @@ private:
 	float _offset { 0 };
 };
 
+Color lerp(Color a, Color b, float blend);
+
 } // NS: color
 
 } // NS: termic

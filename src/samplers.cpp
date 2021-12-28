@@ -85,22 +85,28 @@ Color LinearGradient::sample(float u, float v, float angle) const
 
 	const auto color1 = _colors[idx0 + 1];
 
-	const auto color0r = color::red(color0);
-	const auto color0g = color::green(color0);
-	const auto color0b = color::blue(color0);
+	return lerp(color0, color1, blend);
+}
 
-	const auto color1r = color::red(color1);
-	const auto color1g = color::green(color1);
-	const auto color1b = color::blue(color1);
+Color lerp(Color A, Color B, float blend)
+{
+	// TODO: this can probably be made more succinct... ;)
 
-	const auto r = static_cast<std::uint32_t>(color0r - blend*(color0r - color1r));
-	const auto g = static_cast<std::uint32_t>(color0g - blend*(color0g - color1g));
-	const auto b = static_cast<std::uint32_t>(color0b - blend*(color0b - color1b));
+	assert(blend >= 0 and blend <= 1);
 
-	auto res = Color(r << 16 | g << 8 | b);
-//	if(g_log) fmt::print(g_log, "gradient: {:.2f},{:.2f} -> {:.2f}/{:.2f} -> [{}] #{:06x}; [{}] #{:06x} -> #{:06x}\n", u, v, alpha, blend, idx0, color0, idx0 + 1, color1, res);
+	const auto Ar = color::red(A);
+	const auto Ag = color::green(A);
+	const auto Ab = color::blue(A);
 
-	return res;
+	const auto Br = color::red(B);
+	const auto Bg = color::green(B);
+	const auto Bb = color::blue(B);
+
+	const auto r = static_cast<std::uint32_t>(Ar - blend*(Ar - Br));
+	const auto g = static_cast<std::uint32_t>(Ag - blend*(Ag - Bg));
+	const auto b = static_cast<std::uint32_t>(Ab - blend*(Ab - Bb));
+
+	return Color(r << 16 | g << 8 | b);
 }
 
 } // NS: color
