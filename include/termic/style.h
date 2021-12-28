@@ -24,7 +24,7 @@ enum Bit
 	Overstrike = 1 << 4,
 	// diminishing returns for remaining styles...
 
-	Unchanged  = 0xff,
+	NoChange   = 0xff,
 };
 
 } // NS: style

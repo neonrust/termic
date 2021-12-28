@@ -17,7 +17,7 @@ struct ScreenBuffer
 	inline Size size() const { return { _width, _height }; };
 
 	inline void clear(bool content=true) { clear(color::Default, color::Default, content); }
-	void clear(Color bg, Color fg=color::Unchanged, bool content=true);
+	void clear(Color bg, Color fg=color::NoChange, bool content=true);
 
 	const Cell &cell(std::size_t x, std::size_t y) const;
 	void set_cell(Pos pos, wchar_t ch, std::size_t width, Color fg=color::Default, Color bg=color::Default, Style style=style::Default);

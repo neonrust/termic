@@ -18,8 +18,8 @@ namespace color
 
 enum
 {
-	Default   = 0x01000000,
-	Unchanged = 0x02000000,
+	Default  = 0x01000000,
+	NoChange = 0x02000000,
 
 	Black  = 0x000000,
 	Red    = 0xff0000,

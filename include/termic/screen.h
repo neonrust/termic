@@ -14,7 +14,7 @@ struct Screen
 	Screen(int fd);
 
 	inline void clear() { clear(color::Default, color::Default); }
-	void clear(Color bg, Color fg=color::Unchanged);
+	void clear(Color bg, Color fg=color::NoChange);
 
 	inline size_t print(const std::string_view s, const Color fg, const Color bg, const Style style) { return print(_cursor.position, s, fg, bg, style); }
 	std::size_t print(Pos pos, const std::string_view s, Color fg=color::Default, Color bg=color::Default, Style style=style::Default);

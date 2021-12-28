@@ -20,9 +20,9 @@ void ScreenBuffer::clear(Color bg, Color fg, bool content)
 				cell.ch = '\0';
 				cell.width = 1;
 			}
-			if(fg != color::Unchanged)
+			if(fg != color::NoChange)
 				cell.fg = fg;
-			if(bg != color::Unchanged)
+			if(bg != color::NoChange)
 				cell.bg = bg;
 			cell.style = style::Default;
 		}
@@ -48,13 +48,13 @@ void ScreenBuffer::set_cell(Pos pos, wchar_t ch, std::size_t width, Color fg, Co
 
 	cell.width = static_cast<std::uint_fast8_t>(width);
 
-	if(fg != color::Unchanged)
+	if(fg != color::NoChange)
 		cell.fg = fg;
 
-	if(bg != color::Unchanged)
+	if(bg != color::NoChange)
 		cell.bg = bg;
 
-	if(style != style::Unchanged)
+	if(style != style::NoChange)
 		cell.style = style;
 }
 

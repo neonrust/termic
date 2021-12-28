@@ -43,11 +43,11 @@ int main()
 
 	auto render_demo = [&app, &canvas, &rotation, &gradient, &offset]() {
 		canvas.clear();
-		app.screen().print({ 10, 10 }, "Yeah!", color::Black, color::Unchanged);
+		app.screen().print({ 10, 10 }, "Yeah!", color::Black, color::NoChange);
 		gradient.set_offset(offset);
 		canvas.fill(&gradient, rotation);
-		app.screen().print({ 6, 12 }, "Things and stuff...", color::Red, color::Unchanged);
-		app.screen().print({ 70, 20 }, "TERMIC", color::Green, color::Unchanged);
+		app.screen().print({ 6, 12 }, "Things and stuff...", color::Red, color::NoChange);
+		app.screen().print({ 70, 20 }, "TERMIC", color::Green, color::NoChange);
 	};
 
 	app.on_app_start.connect([&render_demo]() {
@@ -59,6 +59,9 @@ int main()
 
 		if(k.key == key::ESCAPE and k.modifiers == key::NoMod)
 			app.quit();
+
+		auto key_str = key::to_string(k.key, k.modifiers);
+		app.screen().print({ 15, 15 }, fmt::format("Key pressed: {}", key_str), color::Black, color::NoChange);
 
 		if(k.key == key::RIGHT and k.modifiers == key::NoMod)
 		{
