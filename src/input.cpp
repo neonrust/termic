@@ -35,7 +35,7 @@ static constexpr auto focus_out { "\x1b[O"sv };
 Input::Input(std::istream &s) :
     _in(s)
 {
-	setup_keys("keys.json");
+    setup_keys();
 }
 
 std::vector<event::Event> Input::read()
@@ -311,63 +311,284 @@ static std::variant<event::Event, int> parse_utf8(const std::string_view in, std
 	};
 }
 
-bool Input::setup_keys(const std::string &filename)
+bool Input::setup_keys()
 {
-	std::ifstream fp(filename);
-	if(not fp)
-		return false;
+	_key_sequences = {
+		{ .sequence = "\x7f"          , .key = key::key("BACKSPACE") },
+		{ .sequence = "\x1b\x1a"      , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("Z") },
+		{ .sequence = "\x1b\x19"      , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("Y") },
+		{ .sequence = "\x1b\x18"      , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("X") },
+		{ .sequence = "\x1b\x17"      , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("W") },
+		{ .sequence = "\x1b\x16"      , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("V") },
+		{ .sequence = "\x1b\x15"      , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("U") },
+		{ .sequence = "\x1b\x14"      , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("T") },
+		{ .sequence = "\x1b\x13"      , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("S") },
+		{ .sequence = "\x1b\x12"      , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("R") },
+		{ .sequence = "\x1b\x11"      , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("Q") },
+		{ .sequence = "\x1b\x10"      , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("P") },
+		{ .sequence = "\x1b\x0f"      , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("O") },
+		{ .sequence = "\x1b\x0e"      , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("N") },
+		{ .sequence = "\x1b\x0d"      , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("M") },
+		{ .sequence = "\x1b\x0c"      , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("L") },
+		{ .sequence = "\x1b\x0b"      , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("K") },
+		{ .sequence = "\x1b\x0a"      , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("J") },
+		{ .sequence = "\x1b\x09"      , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("I") },
+		{ .sequence = "\x1b\x08"      , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("H") },
+		{ .sequence = "\x1b\x07"      , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("G") },
+		{ .sequence = "\x1b\x06"      , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("F") },
+		{ .sequence = "\x1b\x05"      , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("E") },
+		{ .sequence = "\x1b\x04"      , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("D") },
+		{ .sequence = "\x1b\x03"      , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("C") },
+		{ .sequence = "\x1b\x02"      , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("B") },
+		{ .sequence = "\x1b\x01"      , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("A") },
+		{ .sequence = "\x1bz"         , .mods = key::modifiers({ "ALT" }), .key = key::key("Z") },
+		{ .sequence = "\x1by"         , .mods = key::modifiers({ "ALT" }), .key = key::key("Y") },
+		{ .sequence = "\x1bx"         , .mods = key::modifiers({ "ALT" }), .key = key::key("X") },
+		{ .sequence = "\x1bw"         , .mods = key::modifiers({ "ALT" }), .key = key::key("W") },
+		{ .sequence = "\x1bv"         , .mods = key::modifiers({ "ALT" }), .key = key::key("V") },
+		{ .sequence = "\x1bu"         , .mods = key::modifiers({ "ALT" }), .key = key::key("U") },
+		{ .sequence = "\x1bt"         , .mods = key::modifiers({ "ALT" }), .key = key::key("T") },
+		{ .sequence = "\x1bs"         , .mods = key::modifiers({ "ALT" }), .key = key::key("S") },
+		{ .sequence = "\x1br"         , .mods = key::modifiers({ "ALT" }), .key = key::key("R") },
+		{ .sequence = "\x1bq"         , .mods = key::modifiers({ "ALT" }), .key = key::key("Q") },
+		{ .sequence = "\x1bp"         , .mods = key::modifiers({ "ALT" }), .key = key::key("P") },
+		{ .sequence = "\x1bo"         , .mods = key::modifiers({ "ALT" }), .key = key::key("O") },
+		{ .sequence = "\x1bn"         , .mods = key::modifiers({ "ALT" }), .key = key::key("N") },
+		{ .sequence = "\x1bm"         , .mods = key::modifiers({ "ALT" }), .key = key::key("M") },
+		{ .sequence = "\x1bl"         , .mods = key::modifiers({ "ALT" }), .key = key::key("L") },
+		{ .sequence = "\x1bk"         , .mods = key::modifiers({ "ALT" }), .key = key::key("K") },
+		{ .sequence = "\x1bj"         , .mods = key::modifiers({ "ALT" }), .key = key::key("J") },
+		{ .sequence = "\x1bi"         , .mods = key::modifiers({ "ALT" }), .key = key::key("I") },
+		{ .sequence = "\x1bh"         , .mods = key::modifiers({ "ALT" }), .key = key::key("H") },
+		{ .sequence = "\x1bg"         , .mods = key::modifiers({ "ALT" }), .key = key::key("G") },
+		{ .sequence = "\033f"         , .mods = key::modifiers({ "ALT" }), .key = key::key("F") },
+		{ .sequence = "\033e"         , .mods = key::modifiers({ "ALT" }), .key = key::key("E") },
+		{ .sequence = "\033d"         , .mods = key::modifiers({ "ALT" }), .key = key::key("D") },
+		{ .sequence = "\033c"         , .mods = key::modifiers({ "ALT" }), .key = key::key("C") },
+		{ .sequence = "\033b"         , .mods = key::modifiers({ "ALT" }), .key = key::key("B") },
+		{ .sequence = "\033a"         , .mods = key::modifiers({ "ALT" }), .key = key::key("A") },
+		{ .sequence = "\x1b[H"        , .key = key::key("HOME") },
+		{ .sequence = "\x1b[F"        , .key = key::key("END") },
+		{ .sequence = "\x1b[D"        , .key = key::key("LEFT") },
+		{ .sequence = "\x1b[C"        , .key = key::key("RIGHT") },
+		{ .sequence = "\x1b[B"        , .key = key::key("DOWN") },
+		{ .sequence = "\x1b[A"        , .key = key::key("UP") },
+		{ .sequence = "\x1b[6~"       , .key = key::key("PAGE_DOWN") },
+		{ .sequence = "\x1b[E"        , .key = key::key("NUMPAD_CENTER") },
+		{ .sequence = "\x1b[1;3E"     , .mods = key::modifiers({ "CTRL" }), .key = key::key("NUMPAD_CENTER") },
+		{ .sequence = "\x1b[1;7E"     , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("NUMPAD_CENTER") },
+		{ .sequence = "\x1b[6;7~"	  , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("PAGE_DOWN") },
+		{ .sequence = "\x1b[6;5~"	  , .mods = key::modifiers({ "CTRL" }), .key = key::key("PAGE_DOWN") },
+		{ .sequence = "\x1b[6;3~"	  , .mods = key::modifiers({ "ALT" }), .key = key::key("PAGE_DOWN") },
+		{ .sequence = "\x1b[5~"       , .key = key::key("PAGE_UP") },
+		{ .sequence = "\x1b[5;7~"	  , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("PAGE_UP") },
+		{ .sequence = "\x1b[5;5~"	  , .mods = key::modifiers({ "CTRL" }), .key = key::key("PAGE_UP") },
+		{ .sequence = "\x1b[5;3~"	  , .mods = key::modifiers({ "ALT" }), .key = key::key("PAGE_UP") },
+		{ .sequence = "\x1b[3~"       , .key = key::key("DELETE") },
+		{ .sequence = "\x1b[3;8~"     , .mods = key::modifiers({ "ALT", "CTRL", "SHIFT" }), .key = key::key("DELETE") },
+		{ .sequence = "\x1b[3;7~"     , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("DELETE") },
+		{ .sequence = "\x1b[3;5~"     , .mods = key::modifiers({ "CTRL" }), .key = key::key("DELETE") },
+		{ .sequence = "\x1b[3;3~"	  , .mods = key::modifiers({ "ALT" }), .key = key::key("DELETE") },
+		{ .sequence = "\x1b[2~"       , .key = key::key("INSERT") },
+		{ .sequence = "\x1b[2;5~"     , .mods = key::modifiers({ "CTRL" }), .key = key::key("INSERT") },
+		{ .sequence = "\x1b[2;3~"     , .mods = key::modifiers({ "ALT" }), .key = key::key("INSERT") },
+		{ .sequence = "\x1b[20~"      , .key = key::key("F9") },
+		{ .sequence = "\x1b[20;2~"    , .mods = key::modifiers({ "SHIFT" }), .key = key::key("F9") },
+		{ .sequence = "\x1b[20;3~"    , .mods = key::modifiers({ "ALT" }), .key = key::key("F9") },
+		{ .sequence = "\x1b[20;4~"    , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("F9") },
+		{ .sequence = "\x1b[20;5~"    , .mods = key::modifiers({ "CTRL" }), .key = key::key("F9") },
+		{ .sequence = "\x1b[20;6~"    , .mods = key::modifiers({ "CTRL", "SHIFT" }), .key = key::key("F9") },
+		{ .sequence = "\x1b[20;7~"    , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("F9") },
+		{ .sequence = "\x1b[20;8~"    , .mods = key::modifiers({ "ALT", "CTRL", "SHIFT" }), .key = key::key("F9") },
+		{ .sequence = "\x1b[21~"      , .key = key::key("F10") },
+		{ .sequence = "\x1b[21;2~"    , .mods = key::modifiers({ "SHIFT" }), .key = key::key("F10") },
+		{ .sequence = "\x1b[21;3~"    , .mods = key::modifiers({ "ALT" }), .key = key::key("F10") },
+		{ .sequence = "\x1b[21;4~"    , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("F10") },
+		{ .sequence = "\x1b[21;5~"    , .mods = key::modifiers({ "CTRL" }), .key = key::key("F10") },
+		{ .sequence = "\x1b[21;6~"    , .mods = key::modifiers({ "CTRL", "SHIFT" }), .key = key::key("F10") },
+		{ .sequence = "\x1b[21;7~"    , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("F10") },
+		{ .sequence = "\x1b[21;8~"    , .mods = key::modifiers({ "ALT", "CTRL", "SHIFT" }), .key = key::key("F10") },
+		{ .sequence = "\x1b[23~"      , .key = key::key("F11") },
+		{ .sequence = "\x1b[23;2~"    , .mods = key::modifiers({ "SHIFT" }), .key = key::key("F11") },
+		{ .sequence = "\x1b[23;3~"    , .mods = key::modifiers({ "ALT" }), .key = key::key("F11") },
+		{ .sequence = "\x1b[23;4~"    , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("F11") },
+		{ .sequence = "\x1b[23;5~"    , .mods = key::modifiers({ "CTRL" }), .key = key::key("F11") },
+		{ .sequence = "\x1b[23;6~"    , .mods = key::modifiers({ "CTRL", "SHIFT" }), .key = key::key("F11") },
+		{ .sequence = "\x1b[23;7~"    , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("F11") },
+		{ .sequence = "\x1b[23;8~"    , .mods = key::modifiers({ "ALT", "CTRL", "SHIFT" }), .key = key::key("F11") },
+		{ .sequence = "\x1b[24~"      , .key = key::key("F12") },
+		{ .sequence = "\x1b[24;2~"    , .mods = key::modifiers({ "SHIFT" }), .key = key::key("F12") },
+		{ .sequence = "\x1b[24;3~"    , .mods = key::modifiers({ "ALT" }), .key = key::key("F12") },
+		{ .sequence = "\x1b[24;4~"    , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("F12") },
+		{ .sequence = "\x1b[24;5~"    , .mods = key::modifiers({ "CTRL" }), .key = key::key("F12") },
+		{ .sequence = "\x1b[24;6~"    , .mods = key::modifiers({ "CTRL", "SHIFT" }), .key = key::key("F12") },
+		{ .sequence = "\x1b[24;7~"    , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("F12") },
+		{ .sequence = "\x1b[24;8~"    , .mods = key::modifiers({ "ALT", "CTRL", "SHIFT" }), .key = key::key("F11") },
+		{ .sequence = "\x1b[1;8D"	  , .mods = key::modifiers({ "ALT", "CTRL", "SHIFT" }), .key = key::key("LEFT") },
+		{ .sequence = "\x1b[1;8C"	  , .mods = key::modifiers({ "ALT", "CTRL", "SHIFT" }), .key = key::key("RIGHT") },
+		{ .sequence = "\x1b[1;8B"	  , .mods = key::modifiers({ "ALT", "CTRL", "SHIFT" }), .key = key::key("DOWN") },
+		{ .sequence = "\x1b[1;8A"     , .mods = key::modifiers({ "ALT", "CTRL", "SHIFT" }), .key = key::key("UP") },
+		{ .sequence = "\x1b[1;7H"	  , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("HOME") },
+		{ .sequence = "\x1b[1;7F"	  , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("END") },
+		{ .sequence = "\x1b[1;7D"	  , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("LEFT") },
+		{ .sequence = "\x1b[1;7C"	  , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("RIGHT") },
+		{ .sequence = "\x1b[1;7B"	  , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("DOWN") },
+		{ .sequence = "\x1b[1;7A"     , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("UP") },
+		{ .sequence = "\x1b[1;6D"	  , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("LEFT") },
+		{ .sequence = "\x1b[1;6C"	  , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("RIGHT") },
+		{ .sequence = "\x1b[1;6B"	  , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("DOWN") },
+		{ .sequence = "\x1b[1;6A"     , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("UP") },
+		{ .sequence = "\x1b[1;5H"	  , .mods = key::modifiers({ "CTRL" }), .key = key::key("HOME") },
+		{ .sequence = "\x1b[1;5F"	  , .mods = key::modifiers({ "CTRL" }), .key = key::key("END") },
+		{ .sequence = "\x1b[1;5D"	  , .mods = key::modifiers({ "CTRL" }), .key = key::key("LEFT") },
+		{ .sequence = "\x1b[1;5C"	  , .mods = key::modifiers({ "CTRL" }), .key = key::key("RIGHT") },
+		{ .sequence = "\x1b[1;5B"	  , .mods = key::modifiers({ "CTRL" }), .key = key::key("DOWN") },
+		{ .sequence = "\x1b[1;5A"     , .mods = key::modifiers({ "CTRL" }), .key = key::key("UP") },
+		{ .sequence = "\x1b[1;2D"	  , .mods = key::modifiers({ "SHIFT" }), .key = key::key("LEFT") },
+		{ .sequence = "\x1b[1;2C"	  , .mods = key::modifiers({ "SHIFT" }), .key = key::key("RIGHT") },
+		{ .sequence = "\x1b[1;2B"	  , .mods = key::modifiers({ "SHIFT" }), .key = key::key("DOWN") },
+		{ .sequence = "\x1b[1;2A"     , .mods = key::modifiers({ "SHIFT" }), .key = key::key("UP") },
+		{ .sequence = "\x1b[1;2P"     , .mods = key::modifiers({ "SHIFT" }), .key = key::key("F1") },
+		{ .sequence = "\x1b[1;3P"     , .mods = key::modifiers({ "ALT" }), .key = key::key("F1") },
+		{ .sequence = "\x1b[1;4P"     , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("F1") },
+		{ .sequence = "\x1b[1;5P"     , .mods = key::modifiers({ "CTRL" }), .key = key::key("F1") },
+		{ .sequence = "\x1b[1;6P"     , .mods = key::modifiers({ "CTRL", "SHIFT" }), .key = key::key("F1") },
+		{ .sequence = "\x1b[1;7P"     , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("F1") },
+		{ .sequence = "\x1b[1;8P"     , .mods = key::modifiers({ "ALT", "CTRL", "SHIFT" }), .key = key::key("F1") },
+		{ .sequence = "\x1b[1;2Q"	  , .mods = key::modifiers({ "SHIFT" }), .key = key::key("F2") },
+		{ .sequence = "\x1b[1;3Q"	  , .mods = key::modifiers({ "ALT" }), .key = key::key("F2") },
+		{ .sequence = "\x1b[1;4Q"	  , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("F2") },
+		{ .sequence = "\x1b[1;5Q"	  , .mods = key::modifiers({ "CTRL" }), .key = key::key("F2") },
+		{ .sequence = "\x1b[1;6Q"	  , .mods = key::modifiers({ "CTRL", "SHIFT" }), .key = key::key("F2") },
+		{ .sequence = "\x1b[1;7Q"	  , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("F2") },
+		{ .sequence = "\x1b[1;8Q"	  , .mods = key::modifiers({ "ALT", "CTRL", "SHIFT" }), .key = key::key("F2") },
+		{ .sequence = "\x1b[1;2R"	  , .mods = key::modifiers({ "SHIFT" }), .key = key::key("F3") },
+		{ .sequence = "\x1b[1;3R"	  , .mods = key::modifiers({ "ALT" }), .key = key::key("F3") },
+		{ .sequence = "\x1b[1;4R"	  , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("F3") },
+		{ .sequence = "\x1b[1;5R"	  , .mods = key::modifiers({ "CTRL" }), .key = key::key("F3") },
+		{ .sequence = "\x1b[1;6R"	  , .mods = key::modifiers({ "CTRL", "SHIFT" }), .key = key::key("F3") },
+		{ .sequence = "\x1b[1;7R"	  , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("F3") },
+		{ .sequence = "\x1b[1;8R"	  , .mods = key::modifiers({ "ALT", "CTRL", "SHIFT" }), .key = key::key("F3") },
+		{ .sequence = "\x1b[1;2S"	  , .mods = key::modifiers({ "SHIFT" }), .key = key::key("F4") },
+		{ .sequence = "\x1b[1;3S"	  , .mods = key::modifiers({ "ALT" }), .key = key::key("F4") },
+		{ .sequence = "\x1b[1;4S"	  , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("F4") },
+		{ .sequence = "\x1b[1;5S"	  , .mods = key::modifiers({ "CTRL" }), .key = key::key("F4") },
+		{ .sequence = "\x1b[1;6S"	  , .mods = key::modifiers({ "CTRL", "SHIFT" }), .key = key::key("F4") },
+		{ .sequence = "\x1b[1;7S"	  , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("F4") },
+		{ .sequence = "\x1b[1;8S"	  , .mods = key::modifiers({ "ALT", "CTRL", "SHIFT" }), .key = key::key("F4") },
+		{ .sequence = "\x1b[1;3H"	  , .mods = key::modifiers({ "ALT" }), .key = key::key("HOME") },
+		{ .sequence = "\x1b[1;3F"	  , .mods = key::modifiers({ "ALT" }), .key = key::key("END") },
+		{ .sequence = "\x1b[1;3D"     , .mods = key::modifiers({ "ALT" }), .key = key::key("LEFT") },
+		{ .sequence = "\x1b[1;3C"     , .mods = key::modifiers({ "ALT" }), .key = key::key("RIGHT") },
+		{ .sequence = "\x1b[1;3B"     , .mods = key::modifiers({ "ALT" }), .key = key::key("DOWN") },
+		{ .sequence = "\x1b[1;3A"     , .mods = key::modifiers({ "ALT" }), .key = key::key("UP") },
+		{ .sequence = "\x1b[15~"      , .key = key::key("F5") },
+		{ .sequence = "\x1b[15;2~"    , .mods = key::modifiers({ "SHIFT" }), .key = key::key("F5") },
+		{ .sequence = "\x1b[15;3~"    , .mods = key::modifiers({ "ALT" }), .key = key::key("F5") },
+		{ .sequence = "\x1b[15;4~"    , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("F5") },
+		{ .sequence = "\x1b[15;5~"    , .mods = key::modifiers({ "CTRL" }), .key = key::key("F5") },
+		{ .sequence = "\x1b[15;6~"    , .mods = key::modifiers({ "CTRL", "SHIFT" }), .key = key::key("F5") },
+		{ .sequence = "\x1b[15;7~"    , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("F5") },
+		{ .sequence = "\x1b[15;8~"    , .mods = key::modifiers({ "ALT", "CTRL", "SHIFT" }), .key = key::key("F5") },
+		{ .sequence = "\x1b[17~"      , .key = key::key("F6") },
+		{ .sequence = "\x1b[17;2~"    , .mods = key::modifiers({ "SHIFT" }), .key = key::key("F6") },
+		{ .sequence = "\x1b[17;3~"    , .mods = key::modifiers({ "ALT" }), .key = key::key("F6") },
+		{ .sequence = "\x1b[17;4~"    , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("F6") },
+		{ .sequence = "\x1b[17;5~"    , .mods = key::modifiers({ "CTRL" }), .key = key::key("F6") },
+		{ .sequence = "\x1b[17;6~"    , .mods = key::modifiers({ "CTRL", "SHIFT" }), .key = key::key("F6") },
+		{ .sequence = "\x1b[17;7~"    , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("F6") },
+		{ .sequence = "\x1b[17;8~"    , .mods = key::modifiers({ "ALT", "CTRL", "SHIFT" }), .key = key::key("F6") },
+		{ .sequence = "\x1b[18~"      , .key = key::key("F7") },
+		{ .sequence = "\x1b[18;2~"    , .mods = key::modifiers({ "SHIFT" }), .key = key::key("F7") },
+		{ .sequence = "\x1b[18;3~"    , .mods = key::modifiers({ "ALT" }), .key = key::key("F7") },
+		{ .sequence = "\x1b[18;4~"    , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("F7") },
+		{ .sequence = "\x1b[18;5~"    , .mods = key::modifiers({ "CTRL" }), .key = key::key("F7") },
+		{ .sequence = "\x1b[18;6~"    , .mods = key::modifiers({ "CTRL", "SHIFT" }), .key = key::key("F7") },
+		{ .sequence = "\x1b[18;7~"    , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("F7") },
+		{ .sequence = "\x1b[18;8~"    , .mods = key::modifiers({ "ALT", "CTRL", "SHIFT" }), .key = key::key("F7") },
+		{ .sequence = "\x1b[19~"      , .key = key::key("F8") },
+		{ .sequence = "\x1b[19;2~"    , .mods = key::modifiers({ "SHIFT" }), .key = key::key("F8") },
+		{ .sequence = "\x1b[19;3~"    , .mods = key::modifiers({ "ALT" }), .key = key::key("F8") },
+		{ .sequence = "\x1b[19;4~"    , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("F8") },
+		{ .sequence = "\x1b[19;5~"    , .mods = key::modifiers({ "CTRL" }), .key = key::key("F8") },
+		{ .sequence = "\x1b[19;6~"    , .mods = key::modifiers({ "CTRL", "SHIFT" }), .key = key::key("F8") },
+		{ .sequence = "\x1b[19;7~"    , .mods = key::modifiers({ "ALT", "CTRL" }), .key = key::key("F8") },
+		{ .sequence = "\x1b[19;8~"    , .mods = key::modifiers({ "ALT", "CTRL", "SHIFT" }), .key = key::key("F8") },
+		{ .sequence = "\x1bZ"         , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("Z") },
+		{ .sequence = "\x1bY"         , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("Y") },
+		{ .sequence = "\x1bX"         , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("X") },
+		{ .sequence = "\x1bW"         , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("W") },
+		{ .sequence = "\x1bV"         , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("V") },
+		{ .sequence = "\x1bU"         , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("U") },
+		{ .sequence = "\x1bT"         , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("T") },
+		{ .sequence = "\x1bS"         , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("S") },
+		{ .sequence = "\x1bR"         , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("R") },
+		{ .sequence = "\x1bQ"         , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("Q") },
+		{ .sequence = "\x1bP"         , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("P") },
+		{ .sequence = "\x1bOS"        , .key = key::key("F4") },
+		{ .sequence = "\x1bOR"        , .key = key::key("F3") },
+		{ .sequence = "\x1bOQ"        , .key = key::key("F2") },
+		{ .sequence = "\x1bOP"        , .key = key::key("F1") },
+		{ .sequence = "\033A"         , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("A") },
+		{ .sequence = "\033B"         , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("B") },
+		{ .sequence = "\033C"         , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("C") },
+		{ .sequence = "\033D"         , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("D") },
+		{ .sequence = "\033E"         , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("E") },
+		{ .sequence = "\033F"         , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("F") },
+		{ .sequence = "\x1bG"         , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("G") },
+		{ .sequence = "\x1bH"         , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("H") },
+		{ .sequence = "\x1bI"         , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("I") },
+		{ .sequence = "\x1bJ"         , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("J") },
+		{ .sequence = "\x1bK"         , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("K") },
+		{ .sequence = "\x1bL"         , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("L") },
+		{ .sequence = "\x1bM"         , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("M") },
+		{ .sequence = "\x1bN"         , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("N") },
+		{ .sequence = "\x1bO"         , .mods = key::modifiers({ "ALT", "SHIFT" }), .key = key::key("O") },
+		{ .sequence = "\x1b"          , .key = key::key("ESCAPE") },
+		{ .sequence = "\x01"          , .mods = key::modifiers({ "CTRL" }), .key = key::key("A") },
+		{ .sequence = "\x02"          , .mods = key::modifiers({ "CTRL" }), .key = key::key("B") },
+		{ .sequence = "\x03"          , .mods = key::modifiers({ "CTRL" }), .key = key::key("C") },
+		{ .sequence = "\x04"          , .mods = key::modifiers({ "CTRL" }), .key = key::key("D") },
+		{ .sequence = "\x05"          , .mods = key::modifiers({ "CTRL" }), .key = key::key("E") },
+		{ .sequence = "\x06"          , .mods = key::modifiers({ "CTRL" }), .key = key::key("F") },
+		{ .sequence = "\x07"          , .mods = key::modifiers({ "CTRL" }), .key = key::key("G") },
+		{ .sequence = "\x08"          , .mods = key::modifiers({ "CTRL" }), .key = key::key("H") },
+		{ .sequence = "\x09"          , .mods = key::modifiers({ "CTRL" }), .key = key::key("I") },
+		{ .sequence = "\x0a"          , .mods = key::modifiers({ "CTRL" }), .key = key::key("J") },
+		{ .sequence = "\x0b"          , .mods = key::modifiers({ "CTRL" }), .key = key::key("K") },
+		{ .sequence = "\x0c"          , .mods = key::modifiers({ "CTRL" }), .key = key::key("L") },
+		{ .sequence = "\x0d"          , .mods = key::modifiers({ "CTRL" }), .key = key::key("M") },
+		{ .sequence = "\x0e"          , .mods = key::modifiers({ "CTRL" }), .key = key::key("N") },
+		{ .sequence = "\x0f"          , .mods = key::modifiers({ "CTRL" }), .key = key::key("O") },
+		{ .sequence = "\x10"          , .mods = key::modifiers({ "CTRL" }), .key = key::key("P") },
+		{ .sequence = "\x11"          , .mods = key::modifiers({ "CTRL" }), .key = key::key("Q") },
+		{ .sequence = "\x12"          , .mods = key::modifiers({ "CTRL" }), .key = key::key("R") },
+		{ .sequence = "\x13"          , .mods = key::modifiers({ "CTRL" }), .key = key::key("S") },
+		{ .sequence = "\x14"          , .mods = key::modifiers({ "CTRL" }), .key = key::key("T") },
+		{ .sequence = "\x15"          , .mods = key::modifiers({ "CTRL" }), .key = key::key("U") },
+		{ .sequence = "\x16"          , .mods = key::modifiers({ "CTRL" }), .key = key::key("V") },
+		{ .sequence = "\x17"          , .mods = key::modifiers({ "CTRL" }), .key = key::key("W") },
+		{ .sequence = "\x18"          , .mods = key::modifiers({ "CTRL" }), .key = key::key("X") },
+		{ .sequence = "\x19"          , .mods = key::modifiers({ "CTRL" }), .key = key::key("Y") },
+		{ .sequence = "\x1a"          , .mods = key::modifiers({ "CTRL" }), .key = key::key("Z") },
+	};
 
-	nlohmann::json keys = keys.parse(fp, nullptr, true, true);
+	std::unordered_map<std::string, std::pair<std::size_t, KeySequence>> seen_sequences;
 
-	assert(keys.is_array());
-
-	_key_sequences.reserve(keys.size());
-
-	std::unordered_set<std::string> seen_sequences;
-
-	for(const auto &iter: keys.items())
+	std::size_t idx { 0 };
+	for(const auto &ks: _key_sequences)
 	{
-		const auto &item = iter.value();
-		assert(item.is_object());
-		assert(item.contains("seq"));
-		assert(item.contains("key"));
-
-		key::Modifier mods { key::NoMod };
-		if(item.contains("mods"))
-			mods = key::modifier_from_list(item["mods"].get<std::vector<std::string>>());
-		const auto key = key::key_from_string(item["key"].get<std::string>());
-
-		const auto seq_str = item["seq"].get<std::string>();
-		if(seen_sequences.find(seq_str) != seen_sequences.end())
-			if(g_log) fmt::print(g_log, "\x1b[41;97;1msequence '{}' already mapped\x1b[m\n", seq_str);
-		seen_sequences.insert(seq_str);
-
-		std::size_t start { 0 };
-		std::string seq;
-		while(start < seq_str.size())
+		auto found = seen_sequences.find(ks.sequence);
+		if(found != seen_sequences.end())
 		{
-			auto pos = seq_str.find("|x", start); // e.g.: |x1b
-			if(pos != std::string::npos)
-			{
-				if(pos > start)
-					seq += seq_str.substr(start, pos - start);
-
-				auto value = std::stoi(seq_str.substr(pos + 2, 2), nullptr, 16);
-				seq += char(value);
-				start += 4;
-			}
-			else
-			{
-				seq += seq_str.substr(start);
-				break;
-			}
+			const auto &other = found->second.second;
+			fmt::print(stderr, "Key sequence '{}' has multiple mappings:\n", safe(ks.sequence));
+			fmt::print(stderr, "  index {}: {}\n", found->second.first, key::to_string(other.key, other.mods));
+			fmt::print(stderr, "  index {}: {}\n", idx, key::to_string(ks.key, ks.mods));
+			return false;
 		}
-
-		_key_sequences.push_back({
-		    .sequence = seq,
-		    .mods = mods,
-		    .key = key,
-		});
+		seen_sequences[ks.sequence] = std::make_pair(idx, ks);
+		idx++;
 	}
 
 	// sort, longest sequence first

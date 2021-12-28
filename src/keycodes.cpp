@@ -66,7 +66,7 @@ std::string to_string(Key k, Modifier m)
 	return result;
 }
 
-Key key_from_string(const std::string_view name)
+Key key(const std::string_view name)
 {
 	if(name.empty())
 		return None;
@@ -82,28 +82,28 @@ Key key_from_string(const std::string_view name)
 			return Key(name[2] - '0' + F10);
 	}
 
-	if(name == "BACKSPACE")  return BACKSPACE;
-	if(name == "TAB")        return TAB;
-	if(name == "ENTER")      return ENTER;
-	if(name == "UP")         return UP;
-	if(name == "DOWN")       return DOWN;
-	if(name == "RIGHT")      return RIGHT;
-	if(name == "LEFT")       return LEFT;
-	if(name == "HOME")       return HOME;
-	if(name == "INSERT")     return INSERT;
-	if(name == "DELETE")     return DELETE;
-	if(name == "END")        return END;
-	if(name == "PAGE_UP")    return PAGE_UP;
-	if(name == "PAGE_DOWN")  return PAGE_DOWN;
-	if(name == "ESCAPE")     return ESCAPE;
-	if(name == "NUMPAD_5")   return NUMPAD_CENTER;
+	if(name == "BACKSPACE")     return BACKSPACE;
+	if(name == "TAB")           return TAB;
+	if(name == "ENTER")         return ENTER;
+	if(name == "UP")            return UP;
+	if(name == "DOWN")          return DOWN;
+	if(name == "RIGHT")         return RIGHT;
+	if(name == "LEFT")          return LEFT;
+	if(name == "HOME")          return HOME;
+	if(name == "INSERT")        return INSERT;
+	if(name == "DELETE")        return DELETE;
+	if(name == "END")           return END;
+	if(name == "PAGE_UP")       return PAGE_UP;
+	if(name == "PAGE_DOWN")     return PAGE_DOWN;
+	if(name == "ESCAPE")        return ESCAPE;
+	if(name == "NUMPAD_CENTER") return NUMPAD_CENTER;
 
 	if(g_log) fmt::print(g_log, "unknown key: '{}'\n", name);
 	assert(false);
 	return None;
 }
 
-Modifier modifier_from_list(const std::vector<std::string> &v)
+Modifier modifiers(const std::vector<std::string> &v)
 {
 	key::Modifier mods { key::NoMod };
 

@@ -15,7 +15,7 @@ struct Input
 	std::vector<event::Event> read();
 
 private:
-	bool setup_keys(const std::string &filename);
+	bool setup_keys();
 
 private:
 	std::istream &_in;
@@ -23,7 +23,7 @@ private:
 	struct KeySequence
 	{
 		std::string sequence;
-		key::Modifier mods;
+		key::Modifier mods { key::NoMod };
 		key::Key key;
 	};
 	std::vector<KeySequence> _key_sequences;
