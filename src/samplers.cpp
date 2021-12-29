@@ -65,6 +65,8 @@ Color LinearGradient::sample(float u, float v, float angle) const
 	auto alpha = u*std::cos(-radians) - v*std::sin(-radians);
 
 	if(alpha == 0.f)
+		return _colors.front();
+	else if(alpha == 1.f)
 		return _colors.back();
 
 	// this is definitely not the correct way to do it...
@@ -83,6 +85,7 @@ Color LinearGradient::sample(float u, float v, float angle) const
 	if(idx0 == _colors.size() - 1)
 		return color0;
 
+	assert(idx0 + 1 < _colors.size());
 	const auto color1 = _colors[idx0 + 1];
 
 	return lerp(color0, color1, blend);
