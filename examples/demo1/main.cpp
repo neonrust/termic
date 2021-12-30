@@ -1,26 +1,56 @@
 #include <termic/app.h>
 #include <termic/canvas.h>
 #include <termic/samplers.h>
+#include <termic/utf8.h>
+using namespace termic;
 
 #include <tuple>
 #include <fmt/core.h>
+#include <fmt/format.h>
+using namespace fmt::literals;
 #include <variant>
 #include <cmath>
+
+#include <string>
+using namespace std::literals::string_literals;
+
+#include <mk-wcwidth.h>
 
 namespace termic
 {
 extern std::FILE *g_log;
 }
 
+
 int main()
 {
-	using namespace termic;
+//	const auto u8test { "利Ö治Aミ|"sv };
+//	fmt::print("utf-8 input sequence: {} bytes\n", u8test.size());
+//	auto cpiter = utf8::CodepointIterator(u8test);
+//	for(auto iter = utf8::SequenceIterator(u8test); iter.good(); ++iter)
+//	{
+//		const auto &ch = *iter;
+//		fmt::print("codepoint: \x1b[33;1m{}\x1b[m \\u{:04x} [", ch, *cpiter);
+//		for(const auto &chc: ch)
+//			fmt::print("{:02x} ", static_cast<std::uint8_t>(chc));
+//		fmt::print("]\n");
+//		++cpiter;
+//	}
+//	//fmt::print(u8"{}", std::u8string(u8"\xc3\x85"));
+
+//	fmt::print("width: {}\n", ::mk_wcwidth(0xd6));
+
+
+//	exit(1);
+
+
+
+
+
+
 
 	g_log = fopen("termic.log", "w");
-	::setbuf(termic::g_log, nullptr);  // disable buffering
-
-	fmt::print(g_log, "term test app!\n");
-
+	::setbuf(g_log, nullptr);  // disable buffering
 
 	App app(Fullscreen | HideCursor | MouseEvents | FocusEvents);
 	if(not app)
@@ -49,17 +79,22 @@ int main()
 		canvas.fill(&gradient, rotation);
 		app.screen().print({ 6, 12 }, "Things and stuff...", color::rgb(255, 50, 50), color::NoChange);
 		app.screen().print({ 70, 20 }, "TERMIC", color::Green, color::NoChange);
+		app.screen().print({ 50, 22 }, "Try arrow keys", color::Black, color::NoChange);
+
+		app.screen().print({ 10, 19 }, "0123456789", color::Grey);
+		const auto w = app.screen().print({ 10, 20 }, "利Ö治Aミ|", color::White, color::Black);
+		app.screen().print({ 10, 21 }, "width of above: {}"_format(w), color::Grey, color::Black);
 
 		if(key != key::None)
 		{
 			const auto key_str = key::to_string(key, mods);
-			app.screen().print({ 25, 15 }, fmt::format("Key pressed: {}", key_str), color::White, color::NoChange);
+			app.screen().print({ 25, 15 }, "Key pressed: {}"_format(key_str), color::White, color::NoChange);
 		}
 	};
 
-	app.on_app_start.connect([&render_demo]() {
-		render_demo();
-	});
+//	app.on_app_start.connect([&render_demo]() {
+//		render_demo();
+//	});
 
 	app.on_key_event.connect([&app, &render_demo, &rotation, &offset](const event::Key &k) {
 		fmt::print(g_log, "[main]    key: {}\n", key::to_string(k.key, k.modifiers));

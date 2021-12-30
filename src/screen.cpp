@@ -1,8 +1,13 @@
 #include <termic/screen.h>
+#include <termic/utf8.h>
+
+#include <mk-wcwidth.h>
 
 #include <string_view>
 #include <algorithm>
 #include <chrono>
+#include <fmt/format.h>
+using namespace fmt::literals;
 
 #include <sys/ioctl.h>
 
@@ -66,7 +71,8 @@ std::size_t Screen::print(Pos pos, const std::string_view s, const Color fg, con
 //	auto num_updated { 0u };
 	auto total_width { 0ul };
 
-	for(const auto ch: s)
+	auto seqiter = utf8::SequenceIterator(s);
+	for(auto cpiter = utf8::CodepointIterator(s); cpiter.good();)
 	{
 		if(cx >= size.width)
 		{
@@ -74,15 +80,21 @@ std::size_t Screen::print(Pos pos, const std::string_view s, const Color fg, con
 			break;
 		}
 
-		wchar_t wch = ch;
-		const auto width = wch < 0x20? 0: static_cast<std::size_t>(::wcswidth(&wch, 1));
+		//wchar_t wch = ch;
+		//const auto width = wch < 0x20? 0: static_cast<std::size_t>(::wcwidth(wch));
+		const auto width = static_cast<std::size_t>(std::max(0, ::mk_wcwidth(static_cast<wchar_t>(*cpiter))));
 
-		_back_buffer.set_cell({ cx, pos.y }, ch, width, fg, bg, style);
+		if(g_log) fmt::print(g_log, "ch: {} \\u{:04x} width: {}\n", *seqiter, *cpiter, width);
+
+		_back_buffer.set_cell({ cx, pos.y }, *seqiter, width, fg, bg, style);
 
 //		++num_updated;
 		total_width += width;
 
 		cx += static_cast<std::size_t>(width);
+
+		++seqiter;
+		++cpiter;
 	}
 
 //	if(g_log) fmt::print(g_log, "print: updated cells: {}, width: {}\n", num_updated, total_width);
@@ -153,14 +165,15 @@ void Screen::update()
 				cursor_style(back_cell.style);
 
 				// if we're at the right edge of the screen and current cell is double width, it's not possible to draw it
-				if(back_cell.ch <= 0x20 or (cx == size.width - 1 and back_cell.width > 1))  // <= 0x20 should actually be "non-printable"
+				if((back_cell.ch[1] == '\0' and back_cell.ch[0] <= 0x20) or (cx == size.width - 1 and back_cell.width > 1))  // <= 0x20 should actually be "non-printable"
 				{
 					_output_buffer += ' ';
 					++_cursor.position.x;
 				}
 				else
 				{
-					_out(fmt::format("{:c}"sv, char(back_cell.ch))); // TODO: one unicode codepoint
+//					_out(fmt::format("{:c}"sv, char(back_cell.ch))); // TODO: one unicode codepoint
+					_out(back_cell.ch);
 					_cursor.position.x += back_cell.width;
 				}
 
@@ -300,7 +313,7 @@ void Screen::cursor_style(Style style)
 	}
 }
 
-void Screen::set_cell(Pos pos, wchar_t ch, std::size_t width, Color fg, Color bg, Style style)
+void Screen::set_cell(Pos pos, std::string_view ch, std::size_t width, Color fg, Color bg, Style style)
 {
 	_back_buffer.set_cell(pos, ch, width, fg, bg, style);
 }

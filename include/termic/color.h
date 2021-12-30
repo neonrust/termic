@@ -5,6 +5,8 @@
 #include <string>
 #include <string_view>
 #include <fmt/core.h>
+#include <fmt/format.h>
+using namespace fmt::literals;
 
 using namespace std::literals::string_view_literals;
 
@@ -86,7 +88,7 @@ inline std::string escify(Color c)
 		return "9";
 
 	// TODO: generate 256 or "classic" colors if 24-bit isn't supported
-	return fmt::format("8;2;{};{};{}"sv, color::red(c), color::green(c), color::blue(c));
+	return "8;2;{};{};{}"_format(color::red(c), color::green(c), color::blue(c));
 }
 
 } // NS: termic

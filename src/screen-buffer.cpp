@@ -17,7 +17,7 @@ void ScreenBuffer::clear(Color bg, Color fg, bool content)
 		{
 			if(content)
 			{
-				cell.ch = '\0';
+				cell.ch[0] = '\0';
 				cell.width = 1;
 			}
 			if(fg != color::NoChange)
@@ -36,7 +36,7 @@ const Cell &ScreenBuffer::cell(std::size_t x, std::size_t y) const
 	return _rows[y]->operator[](x);
 }
 
-void ScreenBuffer::set_cell(Pos pos, wchar_t ch, std::size_t width, Color fg, Color bg, Style style)
+void ScreenBuffer::set_cell(Pos pos, std::string_view ch, std::size_t width, Color fg, Color bg, Style style)
 {
 	if(pos.x >= _width or pos.y >= _height)
 		return;
@@ -44,7 +44,7 @@ void ScreenBuffer::set_cell(Pos pos, wchar_t ch, std::size_t width, Color fg, Co
 	auto &cell = _rows[pos.y]->operator[](pos.x);
 
 	if(ch != Cell::Unchanged)
-		cell.ch = ch;
+		std::strncpy(cell.ch, ch.data(), sizeof(cell.ch));
 
 	cell.width = static_cast<std::uint_fast8_t>(width);
 

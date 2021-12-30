@@ -2,6 +2,8 @@
 
 #include <vector>
 #include <fmt/core.h>
+#include <fmt/format.h>
+using namespace fmt::literals;
 
 #include <assert.h>
 
@@ -37,11 +39,11 @@ std::string to_string(Key k, Modifier m)
 	}
 
 	if(k >= F1 and k <= F12)
-		key_name = fmt::format("F{}", k - F1 + 1);
+		key_name = "F{}"_format(k - F1 + 1);
 	if(k >= A and k <= Z)
-		key_name = fmt::format("{:c}", 'A' + k - A);
+		key_name = "{:c}"_format('A' + k - A);
 	if(k >= _0 and k <= _9)
-		key_name = fmt::format("{:c}", '0' + k - _0);
+		key_name = "{:c}"_format('0' + k - _0);
 
 	std::vector<std::string> mod_names;
 	if((m & SHIFT) > 0)

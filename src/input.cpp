@@ -1,9 +1,12 @@
 #include <termic/input.h>
+#include <termic/utf8.h>
 
 #include <string_view>
 #include <unordered_set>
 #include <nlohmann/json.hpp>
 #include <fmt/core.h>
+#include <fmt/format.h>
+using namespace fmt::literals;
 #include <fstream>
 
 #include <signal.h>
@@ -273,38 +276,11 @@ static std::variant<event::Event, int> parse_mouse(const std::string_view in, st
 	return -1;
 }
 
-// this was ruthlessly stolen from termlib (tkbd.c)
-static const std::uint8_t utf8_length[] = {
-    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, // 0x00
-    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, // 0x20
-    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, // 0x40
-    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, // 0x60
-    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, // 0x80
-    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, // 0xa0
-    2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2, // 0xc0
-    3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,5,5,5,5,6,6,1,1  // 0xe0
-};
-static const std::uint8_t utf8_mask[] = {0x7f, 0x1f, 0x0f, 0x07, 0x03, 0x01};
-
 static std::variant<event::Event, int> parse_utf8(const std::string_view in, std::size_t &eaten)
 {
-	if(in.empty())
+	const auto codepoint = utf8::codepoint_from_bytes(in, &eaten);
+	if(eaten == 0)
 		return -1;
-
-	std::size_t len = utf8_length[(uint8_t)in[0]];
-	if (len > in.size())
-		return -1;
-
-	const auto mask = utf8_mask[len - 1];
-	char32_t codepoint = static_cast<char8_t>(in[0] & mask);
-
-	for(std::size_t idx = 1; idx < len; ++idx)
-	{
-		codepoint <<= 6;
-		codepoint |= static_cast<char32_t>(in[idx] & 0x3f);
-	}
-
-	eaten = len;
 
 	return event::Input{
 		.codepoint = codepoint,
@@ -606,7 +582,7 @@ static std::string hex(const std::string_view s)
 {
 	std::string res;
 	for(const auto &c: s)
-		res += fmt::format("\\x{:02x}", (unsigned char)c);
+		res += "\\x{:02x}"_format((unsigned char)c);
 	return res;
 }
 
@@ -622,9 +598,9 @@ static std::string safe(const std::string_view s)
 		else if(c == '\r')
 			res += "\\r";
 		else if(c >= 1 and c <= 26)
-			res += fmt::format("^{:c}", char(c + 'A' - 1));
+			res += "^{:c}"_format(char(c + 'A' - 1));
 		else if(c < 0x20)
-			res += fmt::format("\\x{:02x}", (unsigned char)c);
+			res += "\\x{:02x}"_format((unsigned char)c);
 		else
 			res += c;
 	}

@@ -16,6 +16,8 @@ set(lib_headers
 	../include/termic/size.h
 	../include/termic/style.h
 	../include/termic/terminal.h
+	../include/termic/utf8.h
+	../extern/mk-wcwidth/mk-wcwidth.h
 )
 
 # Seems Qt Creator doesn't heed this?
@@ -34,6 +36,8 @@ set(lib_sources
 	input.cpp
 	canvas.cpp
 	keycodes.cpp
+	utf8.cpp
+	../extern/mk-wcwidth/mk-wcwidth.cpp
 )
 
 add_library(termic STATIC ${lib_sources} ${lib_headers})
@@ -41,3 +45,4 @@ add_library(termic STATIC ${lib_sources} ${lib_headers})
 # everyone need these include directories
 target_include_directories(termic PUBLIC ../extern/TheWisp-signals)
 target_include_directories(termic PUBLIC ../include)
+target_include_directories(termic PUBLIC ../extern/mk-wcwidth)
