@@ -47,6 +47,8 @@ Screen::Screen(int fd) :
 
 std::size_t Screen::print(Pos pos, const std::string_view s, const Color fg, const Color bg, const Style style)
 {
+	go_to(pos);
+
 	auto size = _back_buffer.size();
 
 	if(pos.y >= size.height)
@@ -85,6 +87,8 @@ std::size_t Screen::print(Pos pos, const std::string_view s, const Color fg, con
 
 //	if(g_log) fmt::print(g_log, "print: updated cells: {}, width: {}\n", num_updated, total_width);
 
+	_client_cursor.x += total_width;
+
 	return total_width;
 }
 
@@ -102,6 +106,11 @@ void Screen::clear(Color bg, Color fg)
 	//	_output_buffer.append(fmt::format(esc::fg_bg, escify(fg), escify(bg)));
 
 	//_output_buffer.append(esc::clear_screen);
+}
+
+void Screen::go_to(Pos pos)
+{
+	_client_cursor = pos;
 }
 
 void Screen::set_size(Size size)
