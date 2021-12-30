@@ -2,7 +2,7 @@
 
 ![Output of demo1](screenshots/demo1.png?raw=true "Output of demo1")
 
-TERMinal Interface (using) Cells
+TERMinal Interface (using double-buffered grid of) Cells
 
 Inspiration was actually my own, but I later discovered https://github.com/gdamore/tcell and https://github.com/nsf/termbox.
 
