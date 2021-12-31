@@ -17,8 +17,11 @@ struct Screen
 	void clear(Color bg, Color fg=color::NoChange);
 
 	void go_to(Pos pos);
-	inline size_t print(const std::string_view s, const Color fg, const Color bg, const Style style) { return print(_client_cursor, s, fg, bg, style); }
-	std::size_t print(Pos pos, const std::string_view s, Color fg=color::Default, Color bg=color::Default, Style style=style::Default);
+	inline size_t print(const std::string_view s, const Color fg=color::Default, const Color bg=color::NoChange, const Style style=style::Default)
+	{
+		return print(_client_cursor, s, fg, bg, style);
+	}
+	std::size_t print(Pos pos, const std::string_view s, Color fg=color::Default, Color bg=color::NoChange, Style style=style::Default);
 
 	void set_cell(Pos pos, std::string_view ch, std::size_t width, Color fg=color::Default, Color bg=color::Default, Style style=style::Default);
 
