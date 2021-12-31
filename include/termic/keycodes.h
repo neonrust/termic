@@ -85,6 +85,11 @@ enum Modifier
 	CTRL  = 1 << 2,
 };
 
+constexpr Modifier operator | (Modifier A, Modifier B)
+{
+	return Modifier(int(A) | int(B));
+}
+
 std::string to_string(Key k, Modifier m);
 
 Key key(const std::string_view s);
