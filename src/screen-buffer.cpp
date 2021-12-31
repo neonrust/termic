@@ -43,7 +43,7 @@ void ScreenBuffer::set_cell(Pos pos, std::string_view ch, std::size_t width, Col
 
 	auto &cell = _rows[pos.y]->operator[](pos.x);
 
-	if(ch != Cell::Unchanged)
+	if(ch != Cell::NoChange)
 		std::strncpy(cell.ch, ch.data(), sizeof(cell.ch));
 
 	cell.width = static_cast<std::uint_fast8_t>(width);

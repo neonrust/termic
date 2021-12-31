@@ -88,6 +88,10 @@ std::size_t Screen::print(Pos pos, const std::string_view s, const Color fg, con
 
 		_back_buffer.set_cell({ cx, pos.y }, *seqiter, width, fg, bg, style);
 
+		// set right-neighbour of double width cell to zero width
+		if(width == 2 and cx < size.width - 1)
+			_back_buffer.set_cell({ cx + 1, pos.y }, " "sv, 0, fg, bg, style);
+
 //		++num_updated;
 		total_width += width;
 
@@ -109,15 +113,6 @@ void Screen::clear(Color bg, Color fg)
 	_back_buffer.clear(bg, fg);
 
 	cursor_move({ 0, 0 });
-
-	// these are more an optimization...
-	// clearing only the back buffer will result in the correct screen content.
-	//_front_buffer.clear(fg, bg);
-
-	//if(fg != color::Default and bg != color::Default)
-	//	_output_buffer.append(fmt::format(esc::fg_bg, escify(fg), escify(bg)));
-
-	//_output_buffer.append(esc::clear_screen);
 }
 
 void Screen::go_to(Pos pos)
@@ -173,7 +168,10 @@ void Screen::update()
 				else
 				{
 //					_out(fmt::format("{:c}"sv, char(back_cell.ch))); // TODO: one unicode codepoint
-					_out(back_cell.ch);
+					if(back_cell.ch[0] != '\0')
+						_out(back_cell.ch);
+					else
+						_output_buffer += ' ';
 					_cursor.position.x += back_cell.width;
 				}
 

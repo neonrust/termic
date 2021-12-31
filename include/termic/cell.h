@@ -12,7 +12,7 @@ namespace termic
 
 struct Cell
 {
-	static constexpr std::string_view Unchanged {};
+	static constexpr std::string_view NoChange {};
 
 	inline bool operator == (const Cell &other) const
 	{
