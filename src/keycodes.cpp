@@ -20,6 +20,7 @@ std::string to_string(Key k, Modifier m)
 	std::string key_name;
 	switch(k)
 	{
+	case SPACE:         key_name = "SPACE"; break;
 	case BACKSPACE:     key_name = "BACKSPACE"; break;
 	case TAB:           key_name = "TAB"; break;
 	case ENTER:         key_name = "ENTER"; break;
