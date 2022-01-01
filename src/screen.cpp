@@ -84,7 +84,7 @@ std::size_t Screen::print(Pos pos, const std::string_view s, const Color fg, con
 		//const auto width = wch < 0x20? 0: static_cast<std::size_t>(::wcwidth(wch));
 		const auto width = static_cast<std::size_t>(std::max(0, ::mk_wcwidth(static_cast<wchar_t>(*cpiter))));
 
-		if(g_log) fmt::print(g_log, "ch: {} \\u{:04x} width: {}\n", *seqiter, *cpiter, width);
+//		if(g_log) fmt::print(g_log, "ch: {} \\u{:04x} width: {}\n", *seqiter, *cpiter, width);
 
 		_back_buffer.set_cell({ cx, pos.y }, *seqiter, width, fg, bg, style);
 

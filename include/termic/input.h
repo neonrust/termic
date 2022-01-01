@@ -22,7 +22,7 @@ private:
 
 	struct KeySequence
 	{
-		std::string sequence;
+		std::string_view sequence;
 		key::Modifier mods { key::NoMod };
 		key::Key key;
 	};

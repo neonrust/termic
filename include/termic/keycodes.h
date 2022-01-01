@@ -12,7 +12,8 @@ namespace key
 enum Key
 {
 	None = 0,
-	BACKSPACE = 1000,
+	SPACE,
+	BACKSPACE,
 	TAB,
 	ENTER,
 	UP,
