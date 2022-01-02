@@ -29,6 +29,16 @@ namespace esc
 
 // reporting of mouse buttons (including position)
 // https://invisible-island.net/xterm/ctlseqs/ctlseqs.pdf
+//#define SET_VT200_MOUSE            1000
+//#define SET_VT200_HIGHLIGHT_MOUSE  1001
+//#define SET_BTN_EVENT_MOUSE        1002
+//#define SET_ANY_EVENT_MOUSE        1003
+//#define SET_FOCUS_EVENT_MOUSE      1004
+//#define SET_ALTERNATE_SCROLL       1007
+//#define SET_EXT_MODE_MOUSE         1005
+//#define SET_SGR_EXT_MODE_MOUSE     1006
+//#define SET_URXVT_EXT_MODE_MOUSE   1015
+//#define SET_PIXEL_POSITION_MOUSE   1016
 [[maybe_unused]] const auto mouse_buttons_on  { "\x1b[?1000h\x1b[?1002h\x1b[?1015h\x1b[?1006h"sv };
 [[maybe_unused]] const auto mouse_buttons_off { "\x1b[?1000l\x1b[?1002l\x1b[?1015l\x1b[?1006l"sv };
 // reporting of mouse position

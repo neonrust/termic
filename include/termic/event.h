@@ -14,13 +14,6 @@ namespace termic
 namespace event
 {
 
-enum ButtonAction
-{
-	NoAction       = 0,
-	ButtonPressed  = 1,
-	ButtonReleased = 2,
-};
-
 struct Key
 {
 	key::Key key;
@@ -76,7 +69,9 @@ struct Input
 struct MouseButton
 {
 	int button;
-	bool pressed;  // false: released
+	bool pressed { false };
+	bool released { false };
+	bool double_clicked { false };
 	std::size_t x;
 	std::size_t y;
 	key::Modifier modifiers { key::NoMod };

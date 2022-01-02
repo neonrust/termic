@@ -3,6 +3,7 @@
 
 #include <string_view>
 #include <unordered_set>
+#include <chrono>
 #include <nlohmann/json.hpp>
 #include <fmt/core.h>
 #include <fmt/format.h>
@@ -21,7 +22,6 @@ namespace termic
 extern std::FILE *g_log;
 
 
-static std::variant<event::Event, int> parse_mouse(const std::string_view in, std::size_t &eaten);
 static std::variant<event::Event, int> parse_utf8(const std::string_view in, std::size_t &eaten);
 static std::vector<std::string_view> split(const std::string_view s, const std::string_view sep);
 static std::string safe(const std::string_view s);
@@ -39,6 +39,11 @@ Input::Input(std::istream &s) :
     _in(s)
 {
     setup_keys();
+}
+
+void Input::set_double_click_duration(float duration)
+{
+    _double_click_duration = std::max(0.01f, duration);
 }
 
 std::vector<event::Event> Input::read()
@@ -69,18 +74,7 @@ std::vector<event::Event> Input::read()
 	};
 
 
-	// TODO: parse cursor position report: "\e[n;mR" (between 6 and 10 characters?)
-//	if(in.size() >= 6)
-//	{
-//		static const auto cpr_ptn = std::regex("^\x1b[(\\d+);(\\d+)R");
-//		std::smatch m;
-//		if(std::regex_search(in, m, cpr_ptn))
-//		{
-//			auto cx = m[0];
-//			auto cy = m[1];
-//		}
-//	}
-
+//	if(g_log) fmt::print(g_log, "input seq: {}\n", safe(in));
 
 	if(in.size() >= 9 and in.starts_with(mouse_prefix))
 	{
@@ -170,7 +164,7 @@ std::vector<event::Event> Input::read()
 	return {};
 }
 
-static std::variant<event::Event, int> parse_mouse(const std::string_view in, std::size_t &eaten)
+std::variant<event::Event, int> Input::parse_mouse(const std::string_view in, std::size_t &eaten)
 {
 	// '0;63;16M'  (button | modifiers ; X ; Y ; pressed or motion)
 	// '0;63;16m'  (button | modifiers ; X ; Y ; released)
@@ -202,8 +196,6 @@ static std::variant<event::Event, int> parse_mouse(const std::string_view in, st
 	const auto parts = split(seq, ";");
 	if(parts.size() != 3)
 		return -1;
-
-//	if(g_log) fmt::print(g_log, "  mouse seq: {:02x} {} {} {}\n", std::stoi(parts[0].data()), parts[1], parts[2], tail);
 
 	std::uint64_t buttons_modifiers = std::stoul(parts[0].data());
 	const std::size_t mouse_x = std::stoul(parts[1].data()) - 1;
@@ -250,19 +242,39 @@ static std::variant<event::Event, int> parse_mouse(const std::string_view in, st
 			.modifiers = mods,
 		};
 
+	// TODO: detect dragging  (press then move then release)
 	if(button_pressed)
+	{
+
+		bool pressed { true };
+		bool double_clicked { false };
+
+		if(mouse_button == 0)
+		{
+			// detect double-click (only button 0 at the moment)
+			if(_mouse_button_press.elapsed_s() < _double_click_duration)
+			{
+				pressed = false;
+				double_clicked = true;
+			}
+			else
+				_mouse_button_press.reset();
+		}
+
 		return event::MouseButton{
 			.button = mouse_button,
-			.pressed = true,
+			.pressed = pressed,
+			.double_clicked = double_clicked,
 			.x = mouse_x,
 			.y = mouse_y,
 			.modifiers = mods,
 		};
+	}
 
 	if(button_released)
 		return event::MouseButton{
 			.button = mouse_button,
-			.pressed = false,
+			.released = true,
 			.x = mouse_x,
 			.y = mouse_y,
 			.modifiers = mods,

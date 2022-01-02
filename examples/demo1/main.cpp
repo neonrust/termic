@@ -72,24 +72,42 @@ int main()
 	float rotation { 45 };
 	float offset { 0 };
 
-	auto render_demo = [&app, &canvas, &rotation, &gradient, &offset](key::Key key=key::None, key::Modifier mods=key::NoMod) {
-		canvas.clear();
-		app.screen().print({ 10, 10 }, "Termic rainbow demo!", color::White, color::NoChange);
+	auto render_demo = [&app, &rotation, &gradient, &offset](key::Key key=key::None, key::Modifier mods=key::NoMod, const event::MouseButton *mb=nullptr) {
+
+		auto &screen = app.screen();
+		Canvas canvas(screen);
+
+		screen.clear();
+		screen.print({ 10, 10 }, "Termic rainbow demo!", color::White, color::NoChange);
 		gradient.set_offset(offset);
 		canvas.fill(&gradient, rotation);
-		app.screen().print({ 6, 12 }, "Things and stuff...", color::rgb(255, 50, 50), color::NoChange);
-		app.screen().print({ 70, 20 }, "TERMIC", color::Green, color::NoChange);
-		app.screen().print({ 50, 22 }, "Try arrow keys", color::Black, color::NoChange);
+		screen.print({ 6, 12 }, "Things and stuff...", color::rgb(255, 50, 50), color::NoChange);
+		screen.print({ 70, 20 }, "TERMIC", color::Green, color::NoChange);
+		screen.print({ 50, 22 }, "Try arrow keys", color::Black, color::NoChange);
 
-		app.screen().print({ 10, 19 }, "0123456789", color::Grey);
-		const auto w = app.screen().print({ 10, 20 }, "利Ö治Aミ|", color::White, color::Black);
-		app.screen().print({ 10, 21 }, "width of above: {}"_format(w), color::Grey, color::Black);
+		screen.print({ 10, 19 }, "0123456789", color::Grey);
+		const auto w = screen.print({ 10, 20 }, "利Ö治Aミ|", color::White, color::Black);
+		screen.print({ 10, 21 }, "width of above: {}"_format(w), color::Grey, color::Black);
 
 		if(key != key::None)
 		{
 			const auto key_str = key::to_string(key, mods);
-			app.screen().print({ 25, 15 }, "Key pressed: {}"_format(key_str), color::White, color::NoChange);
+			screen.print({ 25, 15 }, "Key pressed: {}"_format(key_str), color::White, color::NoChange);
 		}
+
+		if(mb)
+			screen.print({ 25, 16 },
+						 "Mouse button {} {} @ {},{} mods: {}"_format(
+							 mb->button,
+							 mb->double_clicked? "double-clicked": (mb->pressed? "pressed": "released"),
+							 mb->x,
+							 mb->y,
+							 key::to_string(key::None, mb->modifiers)
+						 ),
+						 color::White
+						);
+
+		if(g_log) fmt::print(g_log, "render_demo\n");
 	};
 
 //	app.on_app_start.connect([&render_demo]() {
@@ -126,13 +144,14 @@ int main()
 	app.on_mouse_move_event.connect([](const event::MouseMove &mm) {
 		fmt::print(g_log, "[main]  mouse: {},{}\n", mm.x, mm.y);
 	});
-	app.on_mouse_button_event.connect([](const event::MouseButton &mb) {
+	app.on_mouse_button_event.connect([&render_demo](const event::MouseButton &mb) {
 		fmt::print(g_log, "[main] button: {} {} @ {},{}\n",
 				mb.button,
-				mb.pressed? "pressed": "released",
+				mb.double_clicked? "double-click": (mb.pressed? "pressed": "released"),
 				mb.x,
 				mb.y
 		);
+		render_demo(key::None, key::NoMod, &mb);
 	});
 	app.on_mouse_wheel_event.connect([](const event::MouseWheel &mw) {
 		fmt::print(g_log, "[main]  wheel: {}\n", mw.delta);

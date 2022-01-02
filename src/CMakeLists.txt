@@ -17,6 +17,7 @@ set(lib_headers
 	../include/termic/style.h
 	../include/termic/terminal.h
 	../include/termic/utf8.h
+	../include/termic/stopwatch.h
 	../extern/mk-wcwidth/mk-wcwidth.h
 )
 
