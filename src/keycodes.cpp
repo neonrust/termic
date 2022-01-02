@@ -18,33 +18,36 @@ namespace key
 std::string to_string(Key k, Modifier m)
 {
 	std::string key_name;
-	switch(k)
+	if(k != key::None)
 	{
-	case SPACE:         key_name = "SPACE"; break;
-	case BACKSPACE:     key_name = "BACKSPACE"; break;
-	case TAB:           key_name = "TAB"; break;
-	case ENTER:         key_name = "ENTER"; break;
-	case UP:            key_name = "UP"; break;
-	case DOWN:          key_name = "DOWN"; break;
-	case RIGHT:         key_name = "RIGHT"; break;
-	case LEFT:          key_name = "LEFT"; break;
-	case HOME:          key_name = "HOME"; break;
-	case INSERT:        key_name = "INSERT"; break;
-	case DELETE:        key_name = "DELETE"; break;
-	case END:           key_name = "END"; break;
-	case PAGE_UP:       key_name = "PAGE_UP"; break;
-	case PAGE_DOWN:     key_name = "PAGE_DOWN"; break;
-	case ESCAPE:        key_name = "ESCAPE"; break;
-	case NUMPAD_CENTER: key_name = "NUMPAD_CENTER"; break;
-	default: break;
-	}
+		switch(k)
+		{
+		case SPACE:         key_name = "SPACE"; break;
+		case BACKSPACE:     key_name = "BACKSPACE"; break;
+		case TAB:           key_name = "TAB"; break;
+		case ENTER:         key_name = "ENTER"; break;
+		case UP:            key_name = "UP"; break;
+		case DOWN:          key_name = "DOWN"; break;
+		case RIGHT:         key_name = "RIGHT"; break;
+		case LEFT:          key_name = "LEFT"; break;
+		case HOME:          key_name = "HOME"; break;
+		case INSERT:        key_name = "INSERT"; break;
+		case DELETE:        key_name = "DELETE"; break;
+		case END:           key_name = "END"; break;
+		case PAGE_UP:       key_name = "PAGE_UP"; break;
+		case PAGE_DOWN:     key_name = "PAGE_DOWN"; break;
+		case ESCAPE:        key_name = "ESCAPE"; break;
+		case NUMPAD_CENTER: key_name = "NUMPAD_CENTER"; break;
+		default: break;
+		}
 
-	if(k >= F1 and k <= F12)
-		key_name = "F{}"_format(k - F1 + 1);
-	if(k >= A and k <= Z)
-		key_name = "{:c}"_format('A' + k - A);
-	if(k >= _0 and k <= _9)
-		key_name = "{:c}"_format('0' + k - _0);
+		if(k >= F1 and k <= F12)
+			key_name = "F{}"_format(k - F1 + 1);
+		if(k >= A and k <= Z)
+			key_name = "{:c}"_format('A' + k - A);
+		if(k >= _0 and k <= _9)
+			key_name = "{:c}"_format('0' + k - _0);
+	}
 
 	std::vector<std::string> mod_names;
 	if((m & SHIFT) > 0)
@@ -61,10 +64,11 @@ std::string to_string(Key k, Modifier m)
 			result += "+";
 		result += mod;
 	}
-	if(not result.empty())
+	if(not result.empty() and not key_name.empty())
 		result += "+";
 
-	result += key_name;
+	if(not key_name.empty())
+		result += key_name;
 
 	return result;
 }
