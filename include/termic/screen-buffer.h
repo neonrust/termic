@@ -18,6 +18,7 @@ struct ScreenBuffer
 
 	inline void clear(bool content=true) { clear(color::Default, color::Default, content); }
 	void clear(Color bg, Color fg=color::NoChange, bool content=true);
+	void clear(Rectangle rect, Color bg, Color fg=color::NoChange, bool content=true);
 
 	const Cell &cell(std::size_t x, std::size_t y) const;
 	void set_cell(Pos pos, std::string_view ch, std::size_t width, Color fg=color::Default, Color bg=color::Default, Style style=style::Default);

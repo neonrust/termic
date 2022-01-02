@@ -29,6 +29,37 @@ void ScreenBuffer::clear(Color bg, Color fg, bool content)
 	}
 }
 
+void ScreenBuffer::clear(Rectangle rect, Color bg, Color fg, bool content)
+{
+	rect.size.width = std::max(1ul, rect.size.width);
+	rect.size.height = std::max(1ul, rect.size.height);
+
+	const auto &[width, height] = size();
+
+	auto row_iter = _rows.begin() + int(rect.top_left.y);
+
+	for(auto y = rect.top_left.y; y <= rect.top_left.y + rect.size.height - 1 and y < height; ++y, ++row_iter)
+	{
+		auto col_iter = (*row_iter)->begin() + int(rect.top_left.x);
+
+		for(auto x = rect.top_left.x; x <= rect.top_left.x + rect.size.width - 1 and x < width; ++x, ++col_iter)
+		{
+			auto &cell = *col_iter;
+
+			if(content)
+			{
+				cell.ch[0] = '\0';
+				cell.width = 1;
+			}
+			if(fg != color::NoChange)
+				cell.fg = fg;
+			if(bg != color::NoChange)
+				cell.bg = bg;
+			cell.style = style::Default;
+		}
+	}
+}
+
 const Cell &ScreenBuffer::cell(std::size_t x, std::size_t y) const
 {
 	assert(x < _width and y < _height);

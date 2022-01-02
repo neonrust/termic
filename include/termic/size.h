@@ -22,4 +22,11 @@ struct Pos
 	std::size_t y;
 };
 
+struct Rectangle
+{
+	Pos top_left;
+	Size size;
+};
+
+
 } // NS: termic

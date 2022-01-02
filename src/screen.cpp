@@ -115,6 +115,13 @@ void Screen::clear(Color bg, Color fg)
 	cursor_move({ 0, 0 });
 }
 
+void Screen::clear(const Rectangle &rect, Color bg, Color fg)
+{
+	_back_buffer.clear(rect, bg, fg);
+
+	cursor_move({ 0, 0 });
+}
+
 void Screen::go_to(Pos pos)
 {
 	_client_cursor = pos;

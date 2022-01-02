@@ -15,6 +15,7 @@ struct Screen
 
 	inline void clear() { clear(color::Default, color::Default); }
 	void clear(Color bg, Color fg=color::NoChange);
+	void clear(const Rectangle &rect, Color bg, Color fg=color::NoChange);
 
 	void go_to(Pos pos);
 	inline size_t print(const std::string_view s, const Color fg=color::Default, const Color bg=color::NoChange, const Style style=style::Default)

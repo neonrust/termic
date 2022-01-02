@@ -13,13 +13,6 @@ namespace color
 struct Sampler;
 }
 
-struct Rectangle
-{
-	Pos top_left;
-	Size size;
-};
-
-
 struct Canvas
 {
 	inline Canvas(Screen &scr) : _scr(scr) {};
