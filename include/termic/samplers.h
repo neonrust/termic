@@ -36,7 +36,8 @@ struct LinearGradient : public Sampler
 	Color sample(float u, float v, float angle) const override;
 
 private:
-	std::vector<Color> _colors {};
+	Color _colors[16];
+	std::size_t _num_colors;
 	float _offset { 0 };
 };
 
