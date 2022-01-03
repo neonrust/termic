@@ -52,7 +52,7 @@ int main()
 	g_log = fopen("termic.log", "w");
 	::setbuf(g_log, nullptr);  // disable buffering
 
-	App app(Fullscreen | HideCursor | MouseEvents | FocusEvents);
+	App app(HideCursor | MouseEvents | FocusEvents);
 	if(not app)
 		return 1;
 

@@ -94,17 +94,15 @@ bool init_terminal(Options opts)
 	clear_in_flags(LocalEcho | LineBuffering);
 	//modify_io_flags(true, EightBit | CRtoLF);
 
+	if(g_log) fmt::print(g_log, "   \x1b[2mterm >> switching to alternate screen...\x1b[m\n");
+	write(esc::screen_alternate);
+
 	if((opts & NoSignalDecode) > 0)
 	{
 		if(g_log) fmt::print(g_log, "   \x1b[2mterm >> disabling signal sequence decoding...\x1b[m\n");
 		clear_in_flags(SignalDecoding);
 	}
 
-	if((opts & Fullscreen) > 0)
-	{
-		if(g_log) fmt::print(g_log, "   \x1b[2mterm >> enabling alternate screen...\x1b[m\n");
-		write(esc::screen_alternate);
-	}
 	if((opts & HideCursor) > 0)
 	{
 		if(g_log) fmt::print(g_log, "   \x1b[2mterm >> hiding cursor...\x1b[m\n");

@@ -53,7 +53,6 @@ private:
 	bool _emit_resize_event { false };
 	std::vector<event::Event> _internal_events;
 
-	bool _fullscreen { false };
 	bool _initialized { false };
 
 	bool _should_quit { false };

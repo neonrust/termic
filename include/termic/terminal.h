@@ -6,12 +6,11 @@ namespace termic
 enum Options
 {
 	Defaults          = 0,
-	Fullscreen        = 1 << 0,
-	HideCursor        = 1 << 1,
-	MouseButtonEvents = 1 << 2,
-	MouseMoveEvents   = 1 << 3,
+	HideCursor        = 1 << 0,
+	MouseButtonEvents = 1 << 1,
+	MouseMoveEvents   = 1 << 2,
 	MouseEvents       = MouseButtonEvents | MouseMoveEvents,
-	FocusEvents       = 1 << 4,
+	FocusEvents       = 1 << 3,
 	NoSignalDecode    = 1 << 16,
 };
 // bitwise OR of multiple 'Options' is still an 'Options'

@@ -17,8 +17,7 @@ static App *g_app { nullptr };
 
 App::App(Options opts) :
     _input(std::cin),
-    _screen(STDOUT_FILENO),
-    _fullscreen((opts & Fullscreen) > 0)
+    _screen(STDOUT_FILENO)
 {
 	g_app = this;
 
@@ -30,9 +29,7 @@ App::App(Options opts) :
 	std::signal(SIGTERM, signal_received);
 	std::signal(SIGABRT, signal_received);
 	std::signal(SIGFPE, signal_received);
-
-	if((opts & Fullscreen) > 0)
-		std::signal(SIGWINCH, signal_received);
+	std::signal(SIGWINCH, signal_received);
 }
 
 void app_atexit()
