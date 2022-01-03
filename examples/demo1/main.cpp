@@ -12,7 +12,7 @@ using namespace fmt::literals;
 #include <cmath>
 
 #include <string>
-using namespace std::literals::string_literals;
+using namespace std::literals;
 
 #include <mk-wcwidth.h>
 

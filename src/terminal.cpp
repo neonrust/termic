@@ -12,7 +12,7 @@
 #include <termios.h>
 #include <sys/ioctl.h>
 
-using namespace std::literals::string_view_literals;
+using namespace std::literals;
 
 
 namespace termic
