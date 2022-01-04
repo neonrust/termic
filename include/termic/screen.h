@@ -32,6 +32,7 @@ struct Screen
 	inline Size size() const { return _back_buffer.size(); }
 	Size get_terminal_size();
 
+	std::size_t measure(std::string_view s) const;
 
 private:
 	Pos cursor_move(Pos pos);
