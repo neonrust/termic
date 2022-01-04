@@ -216,6 +216,16 @@ Size Screen::get_terminal_size()
 	return { std::size_t(size.ws_col), std::size_t(size.ws_row) };
 }
 
+std::size_t Screen::measure(std::string_view s) const
+{
+	std::size_t width { 0 };
+
+	for(auto cpiter = utf8::CodepointIterator(s); cpiter.good(); ++cpiter)
+		width += static_cast<std::size_t>(std::max(0, ::mk_wcwidth(static_cast<wchar_t>(*cpiter))));
+
+	return width;
+}
+
 void Screen::_out(const std::string_view text)
 {
 	_output_buffer.append(text);
