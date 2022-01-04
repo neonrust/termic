@@ -7,6 +7,9 @@
 namespace termic
 {
 
+namespace color
+{
+
 Color lerp(Color A, Color B, float blend)
 {
 	// TODO: this can probably be made more succinct... ;)
@@ -28,6 +31,6 @@ Color lerp(Color A, Color B, float blend)
 	return color::rgb(r, g, b);
 }
 
-
+} // NS: color
 
 } // NS: termic

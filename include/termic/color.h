@@ -76,6 +76,8 @@ constexpr Color rgb(std::uint8_t r, std::uint8_t g, std::uint8_t b)
 	return Color(Color(r) << 16 | Color(g) << 8 | Color(b));
 }
 
+Color lerp(Color a, Color b, float blend);
+
 } // NS: color
 
 inline std::string escify(Color c)
@@ -86,7 +88,5 @@ inline std::string escify(Color c)
 	// TODO: generate 256 or "classic" colors if 24-bit isn't supported
 	return "8;2;{};{};{}"_format(color::red(c), color::green(c), color::blue(c));
 }
-
-Color lerp(Color a, Color b, float blend);
 
 } // NS: termic
