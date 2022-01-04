@@ -87,4 +87,6 @@ inline std::string escify(Color c)
 	return "8;2;{};{};{}"_format(color::red(c), color::green(c), color::blue(c));
 }
 
+Color lerp(Color a, Color b, float blend);
+
 } // NS: termic

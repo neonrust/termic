@@ -30,13 +30,14 @@ set(lib_headers
 
 set(lib_sources
 	app.cpp
-	terminal.cpp
+	canvas.cpp
+	color.cpp
+	input.cpp
+	keycodes.cpp
 	samplers.cpp
 	screen.cpp
 	screen-buffer.cpp
-	input.cpp
-	canvas.cpp
-	keycodes.cpp
+	terminal.cpp
 	utf8.cpp
 	../extern/mk-wcwidth/mk-wcwidth.cpp
 )
