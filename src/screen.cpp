@@ -50,7 +50,23 @@ Screen::Screen(int fd) :
 	_output_buffer.append(fmt::format(esc::cup, 1, 1)); // go to origin (b/c default _cursor.pos = 0,0)
 }
 
-std::size_t Screen::print(Pos pos, const std::string_view s, const Color fg, const Color bg, const Style style)
+std::size_t Screen::print(Alignment align, Pos anchor_pos, std::string_view s, Color fg, Color bg, Style style)
+{
+	if(align == Left)  // no need to measure the text
+		return print(anchor_pos, s, fg, bg, style);
+
+	const auto text_width = measure(s);
+
+	auto pos = anchor_pos;
+	if(align == Right)
+		pos.x -= text_width - 1;  // anchor is last cell of the text
+	else if(align == Center)
+		pos.x -= text_width/2;    // anchor is center of the text (truncated)
+
+	return print(pos, s, fg, bg, style);
+}
+
+std::size_t Screen::print(Pos pos, std::string_view s, const Color fg, const Color bg, const Style style)
 {
 	go_to(pos);
 

@@ -9,6 +9,14 @@
 namespace termic
 {
 
+enum Alignment
+{
+	Left = 0,
+	Center,
+	Right
+};
+
+
 struct Screen
 {
 	Screen(int fd);
@@ -18,11 +26,12 @@ struct Screen
 	void clear(const Rectangle &rect, Color bg, Color fg=color::NoChange);
 
 	void go_to(Pos pos);
-	inline size_t print(const std::string_view s, const Color fg=color::Default, const Color bg=color::NoChange, const Style style=style::Default)
+	inline std::size_t print(std::string_view s, Color fg=color::Default, Color bg=color::NoChange, Style style=style::Default)
 	{
 		return print(_client_cursor, s, fg, bg, style);
 	}
-	std::size_t print(Pos pos, const std::string_view s, Color fg=color::Default, Color bg=color::NoChange, Style style=style::Default);
+	std::size_t print(Alignment align, Pos anchor_pos, std::string_view s, Color fg=color::Default, Color bg=color::NoChange, Style style=style::Default);
+	std::size_t print(Pos pos, std::string_view s, Color fg=color::Default, Color bg=color::NoChange, Style style=style::Default);
 
 	void set_cell(Pos pos, std::string_view ch, std::size_t width, Color fg=color::Default, Color bg=color::Default, Style style=style::Default);
 

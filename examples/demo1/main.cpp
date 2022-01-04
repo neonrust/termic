@@ -77,6 +77,8 @@ int main()
 		auto &screen = app.screen();
 		Canvas canvas(screen);
 
+		const auto &[width, height] = screen.size();
+
 		screen.clear();
 		screen.print({ 10, 10 }, "Termic rainbow demo!", color::White, color::NoChange);
 		gradient.set_offset(offset);
@@ -108,6 +110,10 @@ int main()
 						);
 
 		if(g_log) fmt::print(g_log, "render_demo\n");
+
+		screen.print(Left, { 0, 2 }, "This text is left-aligned", color::Black);
+		screen.print(Center, { width/2, 2 }, "This text is center-aligned", color::Black);
+		screen.print(Right, { width - 1, 2 }, "This text is right-aligned", color::Black);
 	};
 
 //	app.on_app_start.connect([&render_demo]() {
