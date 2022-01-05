@@ -16,12 +16,27 @@ enum Alignment
 	Right
 };
 
+//struct RegionI
+//{
+//	virtual inline void clear() = 0;
+//	virtual void clear(Color bg, Color fg=color::NoChange) = 0;
+//	virtual void clear(const Rectangle &rect, Color bg, Color fg=color::NoChange) = 0;
 
-struct Screen
+//	virtual void go_to(Pos pos) = 0;
+//	virtual std::size_t print(std::string_view s, Color fg=color::Default, Color bg=color::NoChange, Style style=style::Default) = 0;
+//	virtual std::size_t print(Alignment align, Pos anchor_pos, std::string_view s, Color fg=color::Default, Color bg=color::NoChange, Style style=style::Default) = 0;
+//	virtual std::size_t print(Pos pos, std::string_view s, Color fg=color::Default, Color bg=color::NoChange, Style style=style::Default) = 0;
+//};
+
+//struct Region;
+
+struct Screen //: public RegionI
 {
 	Screen(int fd);
 
-	inline void clear() { clear(color::Default, color::Default); }
+//	Region region(Rectangle rect) const; // TODO: resizing? percentage of parent?
+
+	inline void clear()  { clear(color::Default, color::Default); }
 	void clear(Color bg, Color fg=color::NoChange);
 	void clear(const Rectangle &rect, Color bg, Color fg=color::NoChange);
 
@@ -33,7 +48,6 @@ struct Screen
 	std::size_t print(Alignment align, Pos anchor_pos, std::string_view s, Color fg=color::Default, Color bg=color::NoChange, Style style=style::Default);
 	std::size_t print(Pos pos, std::string_view s, Color fg=color::Default, Color bg=color::NoChange, Style style=style::Default);
 
-	void set_cell(Pos pos, std::string_view ch, std::size_t width, Color fg=color::Default, Color bg=color::Default, Style style=style::Default);
 
 	void update();
 
@@ -44,6 +58,9 @@ struct Screen
 	std::size_t measure(std::string_view s) const;
 
 private:
+	friend struct Canvas;
+
+	void set_cell(Pos pos, std::string_view ch, std::size_t width, Color fg=color::Default, Color bg=color::Default, Style style=style::Default);
 	Pos cursor_move(Pos pos);
 	void cursor_style(Style style);
 	void cursor_color(Color fg, Color bg);
@@ -68,5 +85,24 @@ private:
 
 	std::string _output_buffer;
 };
+
+//struct Region : public RegionI
+//{
+//	void clear() override;
+//	void clear(Color bg, Color fg) override;
+//	void clear(const Rectangle &rect, Color bg, Color fg) override;
+//	void go_to(Pos pos) override;
+//	std::size_t print(std::string_view s, Color fg, Color bg, Style style) override;
+//	std::size_t print(Alignment align, Pos anchor_pos, std::string_view s, Color fg, Color bg, Style style) override;
+//	std::size_t print(Pos pos, std::string_view s, Color fg, Color bg, Style style) override;
+
+//private:
+//	Region(Screen &screen, Rectangle rect);
+
+//private:
+//	Screen &_screen;
+//	Rectangle _rect;
+//};
+
 
 } // NS: termic

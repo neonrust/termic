@@ -4,14 +4,15 @@
 #include <mk-wcwidth.h>
 
 #include <string_view>
+using namespace std::literals;
 #include <algorithm>
 #include <chrono>
 #include <fmt/format.h>
 using namespace fmt::literals;
 
 #include <sys/ioctl.h>
+#include <assert.h>
 
-using namespace std::literals;
 
 
 namespace termic
@@ -59,14 +60,20 @@ std::size_t Screen::print(Alignment align, Pos anchor_pos, std::string_view s, C
 
 	auto pos = anchor_pos;
 	if(align == Right)
+	{
+		assert(pos.x > text_width - 1);
 		pos.x -= text_width - 1;  // anchor is last cell of the text
+	}
 	else if(align == Center)
+	{
+		assert(pos.x > text_width/2);
 		pos.x -= text_width/2;    // anchor is center of the text (truncated)
+	}
 
 	return print(pos, s, fg, bg, style);
 }
 
-std::size_t Screen::print(Pos pos, std::string_view s, const Color fg, const Color bg, const Style style)
+std::size_t Screen::print(Pos pos, std::string_view s, Color fg, Color bg, Style style)
 {
 	go_to(pos);
 
