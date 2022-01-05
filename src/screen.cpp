@@ -51,29 +51,30 @@ Screen::Screen(int fd) :
 	_output_buffer.append(fmt::format(esc::cup, 1, 1)); // go to origin (b/c default _cursor.pos = 0,0)
 }
 
-std::size_t Screen::print(Alignment align, Pos anchor_pos, std::string_view s, Color fg, Color bg, Style style)
+std::size_t Screen::print(Alignment align, Pos anchor_pos, std::string_view s, Color fg, Style style, Color bg)
 {
-	if(align == Left)  // no need to measure the text
-		return print(anchor_pos, s, fg, bg, style);
+	Pos pos { anchor_pos };
 
-	const auto text_width = measure(s);
-
-	auto pos = anchor_pos;
-	if(align == Right)
+	if(align != Left)
 	{
-		assert(pos.x > text_width - 1);
-		pos.x -= text_width - 1;  // anchor is last cell of the text
-	}
-	else if(align == Center)
-	{
-		assert(pos.x > text_width/2);
-		pos.x -= text_width/2;    // anchor is center of the text (truncated)
+		const auto text_width = measure(s);
+
+		if(align == Right)
+		{
+			assert(pos.x > text_width - 1);
+			pos.x -= text_width - 1;  // anchor is last cell of the text
+		}
+		else if(align == Center)
+		{
+			assert(pos.x > text_width/2);
+			pos.x -= text_width/2;    // anchor is center of the text (truncated)
+		}
 	}
 
-	return print(pos, s, fg, bg, style);
+	return print(pos, s, fg, style, bg);
 }
 
-std::size_t Screen::print(Pos pos, std::string_view s, Color fg, Color bg, Style style)
+std::size_t Screen::print(Pos pos, std::string_view s, Color fg, Style style, Color bg)
 {
 	go_to(pos);
 

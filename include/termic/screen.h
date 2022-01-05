@@ -41,12 +41,12 @@ struct Screen //: public RegionI
 	void clear(const Rectangle &rect, Color bg, Color fg=color::NoChange);
 
 	void go_to(Pos pos);
-	inline std::size_t print(std::string_view s, Color fg=color::Default, Color bg=color::NoChange, Style style=style::Default)
+	inline std::size_t print(std::string_view s, Color fg=color::Default, Style style=style::Default, Color bg=color::NoChange)
 	{
-		return print(_client_cursor, s, fg, bg, style);
+		return print(_client_cursor, s, fg, style, bg);
 	}
-	std::size_t print(Alignment align, Pos anchor_pos, std::string_view s, Color fg=color::Default, Color bg=color::NoChange, Style style=style::Default);
-	std::size_t print(Pos pos, std::string_view s, Color fg=color::Default, Color bg=color::NoChange, Style style=style::Default);
+	std::size_t print(Alignment align, Pos anchor_pos, std::string_view s, Color fg=color::Default, Style style=style::Default, Color bg=color::NoChange);
+	std::size_t print(Pos pos, std::string_view s, Color fg=color::Default, Style style=style::Default, Color bg=color::NoChange);
 
 
 	void update();

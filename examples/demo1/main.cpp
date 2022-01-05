@@ -80,21 +80,21 @@ int main()
 		const auto &[width, height] = screen.size();
 
 		screen.clear();
-		screen.print({ 10, 10 }, "Termic rainbow demo!", color::White, color::NoChange);
+		screen.print({ 10, 10 }, "Termic rainbow demo!", color::White);
 		gradient.set_offset(offset);
 		canvas.fill(&gradient, rotation);
-		screen.print({ 6, 12 }, "Things and stuff...", color::rgb(255, 50, 50), color::NoChange);
-		screen.print({ 70, 20 }, "TERMIC", color::Green, color::NoChange);
-		screen.print({ 50, 22 }, "Try arrow keys", color::Black, color::NoChange);
+		screen.print({ 6, 12 }, "Things and stuff...", color::rgb(255, 50, 50));
+		screen.print({ 70, 20 }, "TERMIC", color::Green);
+		screen.print({ 50, 22 }, "Try arrow keys", color::Black);
 
 		screen.print({ 10, 19 }, "0123456789", color::Grey);
-		const auto w = screen.print({ 10, 20 }, "利Ö治Aミ|", color::White, color::Black);
-		screen.print({ 10, 21 }, "width of above: {}"_format(w), color::Grey, color::Black);
+		const auto w = screen.print({ 10, 20 }, "利Ö治Aミ|", color::White, style::Default, color::Black);
+		screen.print({ 10, 21 }, "width of above: {}"_format(w), color::Grey, style::Default, color::Black);
 
 		if(key != key::None)
 		{
 			const auto key_str = key::to_string(key, mods);
-			screen.print({ 25, 15 }, "Key pressed: {}"_format(key_str), color::White, color::NoChange);
+			screen.print({ 25, 15 }, "Key pressed: {}"_format(key_str), color::White);
 		}
 
 		if(mb)
