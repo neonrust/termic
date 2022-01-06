@@ -101,6 +101,8 @@ std::size_t Screen::print(Pos pos, std::size_t wrap_width, std::string_view s, C
 
 	if(wrap_width != std::numeric_limits<std::size_t>::max())
 	{
+		if(pos.x + wrap_width >= size.width)
+			wrap_width -= size.width - pos.x;
 		spaces.reserve(std::max(5ul, s.size() / 5));  // a stab in the dark
 
 		// collect wrap points (i.e. whitespace) in 's'
@@ -128,7 +130,7 @@ std::size_t Screen::print(Pos pos, std::size_t wrap_width, std::string_view s, C
 			break;
 		}
 
-		const auto width = static_cast<std::size_t>(std::max(0, ::mk_wcwidth(static_cast<wchar_t>(iter->codepoint))));
+		const auto width = static_cast<std::size_t>(std::max(0, ::mk_width(iter->codepoint)));
 
 //		if(g_log) fmt::print(g_log, "cx: {}  ch: {} \\u{:04x} @ {} -> width: {}\n", cx, iter->sequence, iter->codepoint, iter->index, width);
 
@@ -262,7 +264,7 @@ std::size_t Screen::measure(std::string_view s) const
 
 	const auto s_end = utf8::end(s);
 	for(auto iter = utf8::begin(s); iter != s_end; ++iter)
-		width += static_cast<std::size_t>(std::max(0, ::mk_wcwidth(static_cast<wchar_t>(iter->codepoint))));
+		width += static_cast<std::size_t>(std::max(0, ::mk_width(iter->codepoint)));
 
 	return width;
 }

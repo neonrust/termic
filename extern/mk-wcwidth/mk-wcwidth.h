@@ -1,6 +1,7 @@
 #pragma once
 
+#include <string_view>
 #include <cstdint>
 
-int mk_wcwidth(wchar_t ucs);
-int mk_wcswidth(const wchar_t *pwcs, std::size_t n);
+int mk_width(char32_t ucs);
+int mk_width(std::u32string_view s);
