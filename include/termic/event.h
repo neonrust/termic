@@ -21,10 +21,11 @@ struct Key
 };
 struct Input
 {
-	std::uint32_t codepoint;
+	char32_t codepoint;
 
 	inline std::string to_string() const
 	{
+		// TODO: move this to utf8.cpp
 		auto cp = codepoint;
 
 		std::size_t len { 0 };

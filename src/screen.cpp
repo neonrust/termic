@@ -109,7 +109,7 @@ std::size_t Screen::print(Pos pos, std::size_t wrap_width, std::string_view s, C
 			const auto cp = iter->codepoint;
 			if(utf8::is_brk_space(cp))
 			{
-				spaces.push_back(iter->index);
+				spaces.push_back(iter->byte_offset);
 
 				// and skip all consecutive spaces
 				while(++iter != s_end and utf8::is_brk_space(iter->codepoint))

@@ -13,24 +13,23 @@ namespace termic
 namespace utf8
 {
 
-// extract the byte sequence worth a single codepoint from the input data (let's see you come up with a better name!)
-std::string_view sequence_from_bytes(std::string_view s, std::size_t *eaten=nullptr);
+// extract a single codepoint from the input data, returning its codepoint and the byte sequence
+std::pair<char32_t, std::string_view> read_one(std::string_view s, std::size_t *eaten);
 
-// get first codepoint from the input data
-uint32_t codepoint_from_bytes(std::string_view s, std::size_t *eaten=nullptr);
-
-struct Character
-{
-	std::uint32_t codepoint { 0 };
-	std::string_view sequence {};
-	std::size_t index { 0 };
-};
 
 struct Iterator
 {
 	friend Iterator end(std::string_view s);
 
 	explicit Iterator(std::string_view s);
+
+	struct Character
+	{
+		std::size_t index { 0 };
+		std::size_t byte_offset { 0 };
+		char32_t    codepoint { 0 };
+		std::string_view sequence {};
+	};
 
 	inline Character operator * () const { return _current; }
 	inline const Character *operator -> () const { return &_current; }
@@ -39,7 +38,7 @@ struct Iterator
 
 	inline bool operator == (const Iterator &other) const
 	{
-		return _s.data() == other._s.data() and _index == other._index and _current.codepoint == other._current.codepoint;
+		return _s.data() == other._s.data() and _head_offset == other._head_offset and _current.codepoint == other._current.codepoint;
 	}
 
 private:
@@ -47,7 +46,7 @@ private:
 
 private:
 	std::string_view _s;
-	std::size_t _index { 0 };
+	std::size_t _head_offset { 0 };
 	Character _current;
 };
 
@@ -59,7 +58,7 @@ inline Iterator begin(std::string_view s)
 inline Iterator end(std::string_view s)
 {
 	auto iter = Iterator(s);
-	iter._index = s.size();
+	iter._head_offset = s.size();
 	iter._current.codepoint = 0;
 	return iter;
 }

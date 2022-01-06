@@ -10,81 +10,73 @@ Iterator::Iterator(std::string_view s) :
 	  _s(s)
 {
 	read_next();
+	_current.index = 0;
 }
 
 void Iterator::read_next()
 {
-	if(_index == _s.size())  // already at the end, can't read more
+	if(_head_offset == _s.size())  // already at the end, can't read more
 		_current.codepoint = 0;
 	else
 	{
 		std::size_t eaten { 0 };
-		_current.sequence = sequence_from_bytes(_s.substr(_index), &eaten);
-		_current.codepoint = codepoint_from_bytes(_current.sequence);
-		_current.index = _index;
 
-		_index += eaten;
+		++_current.index;
+		_current.byte_offset = _head_offset;
+
+		auto ch = read_one(_s.substr(_head_offset), &eaten);
+		_current.codepoint = ch.first;
+		_current.sequence = ch.second;
+
+		_head_offset += eaten;
 	}
 }
 
 
 // this was ruthlessly stolen from termlib (tkbd.c)
-static const std::uint8_t utf8_length[] = {
-	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, // 0x00
-	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, // 0x20
-	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, // 0x40
-	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, // 0x60
-	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, // 0x80
-	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, // 0xa0
-	2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2, // 0xc0
-	3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,5,5,5,5,6,6,1,1  // 0xe0
-};
-static const std::uint8_t utf8_mask[] = { 0x7f, 0x1f, 0x0f, 0x07, 0x03, 0x01 };
 
-std::uint32_t codepoint_from_bytes(std::string_view s, std::size_t *eaten)
+static constexpr std::uint8_t sequence_length[] = {
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 0x00
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 0x20
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 0x40
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 0x60
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 0x80
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, // 0xa0
+	2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, // 0xc0
+	3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 1, 1  // 0xe0
+};
+static constexpr std::uint8_t initial_mask[] = {
+	0x7f, 0x1f, 0x0f, 0x07, 0x03, 0x01
+};
+static constexpr std::uint8_t subsequent_mask { 0x3f };
+
+std::pair<char32_t, std::string_view> read_one(std::string_view s, std::size_t *eaten)
 {
 	if(eaten)
 		*eaten = 0;
 
-	if(s.empty())
-		return 0;
+	const auto first = static_cast<char8_t>(s[0]);
 
-	auto len = utf8_length[uint8_t(s[0])];
+	auto len = sequence_length[first];  // using a char8_t as index :|
 	if(len > s.size())
-		return 0;
+		return { 0, {} };
 
-	const auto mask = utf8_mask[len - 1];
-	std::uint32_t codepoint = static_cast<char8_t>(s[0] & mask);
+	if(eaten)
+		*eaten = len;
 
-	for(std::size_t idx = 1; idx < len; ++idx)
+	s = s.substr(0, len);
+
+	char32_t codepoint = first & initial_mask[len - 1];
+
+	for(auto idx = 1u; idx < len; ++idx)
 	{
 		codepoint <<= 6;
-		codepoint |= static_cast<char32_t>(s[idx] & 0x3f);
+		codepoint |= static_cast<char32_t>(s[idx] & subsequent_mask);
 	}
 
-	if(eaten)
-		*eaten = len;
-
-	return codepoint;
+	return { codepoint, s };
 }
 
-std::string_view sequence_from_bytes(std::string_view s, std::size_t *eaten)
-{
-	if(eaten)
-		*eaten = 0;
-
-	if(s.empty())
-		return {};
-
-	auto len = utf8_length[uint8_t(s[0])];
-	if(len > s.size())
-		return {};
-
-	if(eaten)
-		*eaten = len;
-
-	return s.substr(0, len);
-}
 
 } // NS: utf8
 

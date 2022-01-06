@@ -296,12 +296,12 @@ std::variant<event::Event, int> Input::parse_mouse(const std::string_view in, st
 
 static std::variant<event::Event, int> parse_utf8(const std::string_view in, std::size_t &eaten)
 {
-	const auto codepoint = utf8::codepoint_from_bytes(in, &eaten);
+	const auto ch = utf8::read_one(in, &eaten);
 	if(eaten == 0)
 		return -1;
 
 	return event::Input{
-		.codepoint = codepoint,
+		.codepoint = ch.first,
 	};
 }
 
