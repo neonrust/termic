@@ -6,19 +6,27 @@ namespace termic
 namespace utf8
 {
 
-CodepointIterator::CodepointIterator(std::string_view s) :
-	_s(s)
+Iterator::Iterator(std::string_view s) :
+	  _s(s)
 {
 	read_next();
 }
 
-void CodepointIterator::read_next()
+void Iterator::read_next()
 {
-	std::size_t eaten = 0;
-	_current = codepoint_from_bytes(_s.substr(_index), &eaten);
+	if(_index == _s.size())  // already at the end, can't read more
+		_current.codepoint = 0;
+	else
+	{
+		std::size_t eaten { 0 };
+		_current.sequence = sequence_from_bytes(_s.substr(_index), &eaten);
+		_current.codepoint = codepoint_from_bytes(_current.sequence);
+		_current.index = _index;
 
-	_index += eaten;
+		_index += eaten;
+	}
 }
+
 
 // this was ruthlessly stolen from termlib (tkbd.c)
 static const std::uint8_t utf8_length[] = {
@@ -32,26 +40,6 @@ static const std::uint8_t utf8_length[] = {
 	3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,5,5,5,5,6,6,1,1  // 0xe0
 };
 static const std::uint8_t utf8_mask[] = { 0x7f, 0x1f, 0x0f, 0x07, 0x03, 0x01 };
-
-// ==================================================================
-
-SequenceIterator::SequenceIterator(std::string_view s) :
-	_s(s)
-{
-	read_next();
-}
-
-void SequenceIterator::read_next()
-{
-	std::size_t eaten = 0;
-	_current = sequence_from_bytes(_s.substr(_index), &eaten);
-
-	_index += eaten;
-}
-
-
-
-
 
 std::uint32_t codepoint_from_bytes(std::string_view s, std::size_t *eaten)
 {

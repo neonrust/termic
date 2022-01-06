@@ -47,6 +47,7 @@ struct Screen //: public RegionI
 	}
 	std::size_t print(Alignment align, Pos anchor_pos, std::string_view s, Color fg=color::Default, Style style=style::Default, Color bg=color::NoChange);
 	std::size_t print(Pos pos, std::string_view s, Color fg=color::Default, Style style=style::Default, Color bg=color::NoChange);
+	std::size_t print(Pos pos, std::size_t wrap_width, std::string_view s, Color fg=color::Default, Style style=style::Default, Color bg=color::NoChange);
 
 
 	void update();
