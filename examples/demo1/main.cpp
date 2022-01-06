@@ -76,16 +76,16 @@ int main()
 
 		auto &screen = app.screen();
 		Canvas canvas(screen);
-
 		const auto &[width, height] = screen.size();
 
 		screen.clear();
-		screen.print({ 10, 10 }, "Termic rainbow demo!", color::White);
+
+		screen.print({ 10, 14 }, "Termic rainbow demo!", color::White);
 		gradient.set_offset(offset);
 		canvas.fill(&gradient, rotation);
-		screen.print({ 6, 12 }, "Things and stuff...", color::rgb(255, 50, 50));
-		screen.print({ 70, 20 }, "TERMIC", color::Green);
+		screen.print({ width/2 - 3, 10 }, "TERMIC", color::Green);
 		screen.print({ 50, 22 }, "Try arrow keys", color::Black);
+		screen.print({ 40, 24 }, "Also try resizing the terminal", color::Black);
 
 		screen.print({ 10, 19 }, "0123456789", color::Grey);
 		const auto w = screen.print({ 10, 20 }, "利Ö治Aミ|", color::White, style::Default, color::Black);
@@ -94,11 +94,11 @@ int main()
 		if(key != key::None)
 		{
 			const auto key_str = key::to_string(key, mods);
-			screen.print({ 25, 15 }, "Key pressed: {}"_format(key_str), color::White);
+			screen.print({ 25, 17 }, "Key pressed: {}"_format(key_str), color::White);
 		}
 
 		if(mb)
-			screen.print({ 25, 16 },
+			screen.print({ 25, 18 },
 						 "Mouse button {} {} @ {},{} mods: {}"_format(
 							 mb->button,
 							 mb->double_clicked? "double-clicked": (mb->pressed? "pressed": "released"),
@@ -111,9 +111,9 @@ int main()
 
 		if(g_log) fmt::print(g_log, "render_demo\n");
 
-		screen.print(Left, { 0, 2 }, "This text is left-aligned", color::Black);
+		screen.print(Left, { 0, 1 }, "This text is left-aligned", color::Black);
 		screen.print(Center, { width/2, 2 }, "This text is center-aligned", color::Black);
-		screen.print(Right, { width - 1, 2 }, "This text is right-aligned", color::Black);
+		screen.print(Right, { width - 1, 3 }, "This text is right-aligned", color::Black);
 	};
 
 //	app.on_app_start.connect([&render_demo]() {
