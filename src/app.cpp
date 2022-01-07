@@ -4,6 +4,7 @@
 #include <csignal>
 
 #include <sys/ioctl.h>
+#include <assert.h>
 
 
 namespace termic
@@ -19,6 +20,7 @@ App::App(Options opts) :
     _input(std::cin),
     _screen(STDOUT_FILENO)
 {
+	assert(g_app == nullptr);
 	g_app = this;
 
 	init_terminal(opts);
