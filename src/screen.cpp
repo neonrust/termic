@@ -1,5 +1,6 @@
 #include <termic/screen.h>
 #include <termic/utf8.h>
+#include <termic/text.h>
 
 #include <mk-wcwidth.h>
 
@@ -71,18 +72,34 @@ std::size_t Screen::print(Alignment align, Pos anchor_pos, std::string_view s, C
 		}
 	}
 
-	return print(pos, s, fg, style, bg);
+	return print(pos, 0, s, fg, style, bg);
+}
+
+
+std::size_t Screen::print(Pos pos, std::size_t wrap_width, std::string_view s, Color fg, Style style, Color bg)
+{
+	const auto &[width, height] = size();
+
+	if(wrap_width == 0)
+	    return print(pos, s, fg, style, bg);
+
+
+	// if wrap_width occurs resolves to a position off-screen, cap it to the screen edge
+	if(pos.x + wrap_width >= width)
+	    wrap_width = width - pos.x;
+
+	auto lines = text::wrap(s, wrap_width);
+	auto total_width { 0ul };
+	for(const auto &line: lines)
+	{
+		total_width += print(pos, line, fg, style, bg);
+		++pos.y;
+	}
+	return total_width;
 }
 
 std::size_t Screen::print(Pos pos, std::string_view s, Color fg, Style style, Color bg)
 {
-	return print(pos, std::numeric_limits<std::size_t>::max(), s, fg, style, bg);
-}
-
-std::size_t Screen::print(Pos pos, std::size_t wrap_width, std::string_view s, Color fg, Style style, Color bg)
-{
-	go_to(pos);
-
 	const auto &[width, height] = size();
 
 	if(pos.y >=height)
@@ -90,20 +107,11 @@ std::size_t Screen::print(Pos pos, std::size_t wrap_width, std::string_view s, C
 		if(g_log) fmt::print(g_log, "print: off-screen: y  ({})\n", pos.y);
 		return 0;
 	}
+	go_to(pos);
 
 	auto cx = pos.x;
 
 	auto total_width { 0ul };
-
-	std::vector<utf8::Word> words;
-
-	if(wrap_width != std::numeric_limits<std::size_t>::max())
-	{
-		words = utf8::word_split(s, [](char32_t ch) -> int { return ::mk_width(ch); });
-		// if wrap_width occurs resolves to a position off-screen, cap it to the screen edge
-		if(pos.x + wrap_width >= width)
-			wrap_width = width - pos.x;
-	}
 
 	auto s_end = utf8::end(s);
 	for(auto iter = utf8::begin(s); iter != s_end; ++iter)

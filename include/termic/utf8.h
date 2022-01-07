@@ -3,6 +3,8 @@
 #include <string>
 #include <string_view>
 #include <unordered_set>
+#include <vector>
+#include <functional>
 #include <limits>
 #include <cstdint>
 
@@ -118,15 +120,6 @@ inline bool is_brk_space(char32_t codepoint)
 
 	return false;
 }
-
-struct Word
-{
-	std::size_t start { 0 };
-	std::size_t end   { 0 };
-	std::size_t width { 0 };
-};
-std::vector<Word> word_split(std::string_view s, std::function<int (char32_t)> char_width);
-
 
 } // NS: utf8
 

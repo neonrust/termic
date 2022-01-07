@@ -18,6 +18,7 @@ set(lib_headers
 	../include/termic/terminal.h
 	../include/termic/utf8.h
 	../include/termic/stopwatch.h
+	../include/termic/text.h
 	../extern/mk-wcwidth/mk-wcwidth.h
 )
 
@@ -39,6 +40,7 @@ set(lib_sources
 	screen-buffer.cpp
 	terminal.cpp
 	utf8.cpp
+	text.cpp
 	../extern/mk-wcwidth/mk-wcwidth.cpp
 )
 
