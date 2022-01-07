@@ -80,11 +80,11 @@ std::size_t Screen::print(Pos pos, std::size_t wrap_width, std::string_view s, C
 {
 	const auto &[width, height] = size();
 
-	if(wrap_width == 0)
+	if(wrap_width == 0 or wrap_width >= width)
 	    return print(pos, s, fg, style, bg);
 
 
-	// if wrap_width occurs resolves to a position off-screen, cap it to the screen edge
+	// if wrap_width resolves to a position off-screen, cap it to the screen edge
 	if(pos.x + wrap_width >= width)
 	    wrap_width = width - pos.x;
 
@@ -94,8 +94,11 @@ std::size_t Screen::print(Pos pos, std::size_t wrap_width, std::string_view s, C
 	{
 		total_width += print(pos, line, fg, style, bg);
 		++pos.y;
+		if(pos.y >= height)
+			break;
 	}
-	return total_width;
+
+	return total_width; // TODO: return number of lines as well?
 }
 
 std::size_t Screen::print(Pos pos, std::string_view s, Color fg, Style style, Color bg)
