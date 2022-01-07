@@ -20,6 +20,7 @@ std::vector<std::string_view> wrap(std::string_view s, std::size_t width, BreakM
 	assert(width > 0);
 
 	(void)brmode;
+	(void)width;
 
 	std::vector<text::Word> words = text::words(s, [](char32_t ch) -> int { return ::mk_width(ch); });
 
