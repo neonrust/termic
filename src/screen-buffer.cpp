@@ -76,7 +76,7 @@ void ScreenBuffer::set_cell(Pos pos, std::string_view ch, std::size_t width, Col
 
 	if(ch != Cell::NoChange)
 	{
-		std::strncpy(cell.ch, ch.data(), sizeof(cell.ch));
+		std::strncpy(cell.ch, ch.data(), sizeof(cell.ch) - 1);
 		cell.ch[std::min(sizeof(cell.ch), ch.size())] = '\0';
 	}
 
