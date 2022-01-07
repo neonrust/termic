@@ -63,12 +63,33 @@ inline Iterator end(std::string_view s)
 	return iter;
 }
 
-inline bool is_brk_space(std::uint32_t codepoint)
+bool is_brk_space(char32_t codepoint);
+
+inline bool is_space(char32_t codepoint)
+{
+	// https://jkorpela.fi/chars/spaces.html
+	static constexpr std::uint32_t spacechars[] {
+		0x00A0,
+		0x202F,
+		0xFEFF,
+	};
+
+	for(const auto sc: spacechars)
+	{
+		if(sc > codepoint)  // already passed numerically, we'll never find a match
+			return is_brk_space(codepoint);
+		if(sc == codepoint)
+			return true;
+	}
+
+	return is_brk_space(codepoint);
+}
+
+inline bool is_brk_space(char32_t codepoint)
 {
 	// https://jkorpela.fi/chars/spaces.html
 	static constexpr std::uint32_t breaking_spacechars[] {
 		0x0020,
-		//0x00A0,
 		0x1680,
 		0x180E,
 		0x2000,
@@ -83,10 +104,8 @@ inline bool is_brk_space(std::uint32_t codepoint)
 		0x2009,
 		0x200A,
 		0x200B,
-		//0x202F,
 		0x205F,
 		0x3000,
-		//0xFEFF
 	};
 
 	for(const auto sc: breaking_spacechars)
@@ -99,6 +118,14 @@ inline bool is_brk_space(std::uint32_t codepoint)
 
 	return false;
 }
+
+struct Word
+{
+	std::size_t start { 0 };
+	std::size_t end   { 0 };
+	std::size_t width { 0 };
+};
+std::vector<Word> word_split(std::string_view s, std::function<int (char32_t)> char_width);
 
 
 } // NS: utf8
