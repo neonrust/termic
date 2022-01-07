@@ -52,7 +52,7 @@ int main()
 	g_log = fopen("termic.log", "w");
 	::setbuf(g_log, nullptr);  // disable buffering
 
-	App app(HideCursor | MouseEvents | FocusEvents);
+	App app(HideCursor);// | MouseEvents | FocusEvents);
 	if(not app)
 		return 1;
 
@@ -75,45 +75,51 @@ int main()
 	auto render_demo = [&app, &rotation, &gradient, &offset](key::Key key=key::None, key::Modifier mods=key::NoMod, const event::MouseButton *mb=nullptr) {
 
 		auto &screen = app.screen();
-		Canvas canvas(screen);
-		const auto &[width, height] = screen.size();
-
 		screen.clear();
+		(void)key;
+		(void)mods;
+		(void)mb;
 
-		screen.print({ 10, 14 }, "Termic rainbow demo!", color::White);
-		gradient.set_offset(offset);
-		canvas.fill(&gradient, rotation);
-		screen.print({ width/2 - 3, 10 }, "TERMIC", color::Green);
-		screen.print({ 50, 22 }, "Try arrow keys", color::Black);
-		screen.print({ 40, 24 }, "Also try resizing the terminal", color::Black);
+//		Canvas canvas(screen);
+//		const auto &[width, height] = screen.size();
 
-		screen.print({ 10, 19 }, "0123456789", color::Grey);
-		const auto w = screen.print({ 10, 20 }, "利Ö治Aミ|", color::White, style::Default, color::Black);
-		screen.print({ 10, 21 }, "width of above: {}"_format(w), color::Grey, style::Default, color::Black);
+//		screen.print({ 10, 14 }, "Termic rainbow demo!", color::White);
+//		gradient.set_offset(offset);
+//		canvas.fill(&gradient, rotation);
+//		screen.print({ width/2 - 3, 10 }, "TERMIC", color::Green);
+//		screen.print({ 50, 22 }, "Try arrow keys", color::Black);
+//		screen.print({ 40, 24 }, "Also try resizing the terminal", color::Black);
 
-		if(key != key::None)
-		{
-			const auto key_str = key::to_string(key, mods);
-			screen.print({ 25, 17 }, "Key pressed: {}"_format(key_str), color::White);
-		}
+//		screen.print({ 10, 19 }, "0123456789", color::Grey);
+//		const auto w = screen.print({ 10, 20 }, "利Ö治Aミ|", color::White, style::Default, color::Black);
+//		screen.print({ 10, 21 }, "width of above: {}"_format(w), color::Grey, style::Default, color::Black);
 
-		if(mb)
-			screen.print({ 25, 18 },
-						 "Mouse button {} {} @ {},{} mods: {}"_format(
-							 mb->button,
-							 mb->double_clicked? "double-clicked": (mb->pressed? "pressed": "released"),
-							 mb->x,
-							 mb->y,
-							 key::to_string(key::None, mb->modifiers)
-						 ),
-						 color::White
-						);
+//		if(key != key::None)
+//		{
+//			const auto key_str = key::to_string(key, mods);
+//			screen.print({ 25, 17 }, "Key pressed: {}"_format(key_str), color::White);
+//		}
+
+//		if(mb)
+//			screen.print({ 25, 18 },
+//						 "Mouse button {} {} @ {},{} mods: {}"_format(
+//							 mb->button,
+//							 mb->double_clicked? "double-clicked": (mb->pressed? "pressed": "released"),
+//							 mb->x,
+//							 mb->y,
+//							 key::to_string(key::None, mb->modifiers)
+//						 ),
+//						 color::White
+//						);
+
+
+//		screen.print(Left, { 0, 1 }, "This text is left-aligned", color::Black);
+//		screen.print(Center, { width/2, 2 }, "This text is center-aligned", color::Black);
+//		screen.print(Right, { width - 1, 3 }, "This text is right-aligned", color::Black);
+
+		screen.print({ 0, 1 }, 10, "This text   is testing word-wrapping", color::White);
 
 		if(g_log) fmt::print(g_log, "render_demo\n");
-
-		screen.print(Left, { 0, 1 }, "This text is left-aligned", color::Black);
-		screen.print(Center, { width/2, 2 }, "This text is center-aligned", color::Black);
-		screen.print(Right, { width - 1, 3 }, "This text is right-aligned", color::Black);
 	};
 
 //	app.on_app_start.connect([&render_demo]() {

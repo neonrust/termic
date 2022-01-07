@@ -83,9 +83,9 @@ std::size_t Screen::print(Pos pos, std::size_t wrap_width, std::string_view s, C
 {
 	go_to(pos);
 
-	auto size = _back_buffer.size();
+	const auto &[width, height] = size();
 
-	if(pos.y >= size.height)
+	if(pos.y >=height)
 	{
 		if(g_log) fmt::print(g_log, "print: off-screen: y  ({})\n", pos.y);
 		return 0;
@@ -95,54 +95,41 @@ std::size_t Screen::print(Pos pos, std::size_t wrap_width, std::string_view s, C
 
 	auto total_width { 0ul };
 
-	std::vector<std::size_t> spaces;
-
-	auto s_end = utf8::end(s);
+	std::vector<utf8::Word> words;
 
 	if(wrap_width != std::numeric_limits<std::size_t>::max())
 	{
-		if(pos.x + wrap_width >= size.width)
-			wrap_width -= size.width - pos.x;
-		spaces.reserve(std::max(5ul, s.size() / 5));  // a stab in the dark
-
-		// collect wrap points (i.e. whitespace) in 's'
-		for(auto iter = utf8::begin(s); iter != s_end;)
-		{
-			const auto cp = iter->codepoint;
-			if(utf8::is_brk_space(cp))
-			{
-				spaces.push_back(iter->byte_offset);
-
-				// and skip all consecutive spaces
-				while(++iter != s_end and utf8::is_brk_space(iter->codepoint))
-					;
-			}
-			else
-				++iter;
-		}
+		words = utf8::word_split(s, [](char32_t ch) -> int { return ::mk_width(ch); });
+		// if wrap_width occurs resolves to a position off-screen, cap it to the screen edge
+		if(pos.x + wrap_width >= width)
+			wrap_width = width - pos.x;
 	}
 
+	auto s_end = utf8::end(s);
 	for(auto iter = utf8::begin(s); iter != s_end; ++iter)
 	{
-		if(cx >= size.width)
+		if(cx >= width)
 		{
 			if(g_log) fmt::print(g_log, "print: off-screen: x  ({})\n", cx);
 			break;
 		}
 
-		const auto width = static_cast<std::size_t>(std::max(0, ::mk_width(iter->codepoint)));
+		const auto chwidth = static_cast<std::size_t>(std::max(0, ::mk_width(iter->codepoint)));
 
 //		if(g_log) fmt::print(g_log, "cx: {}  ch: {} \\u{:04x} @ {} -> width: {}\n", cx, iter->sequence, iter->codepoint, iter->index, width);
 
-		_back_buffer.set_cell({ cx, pos.y }, iter->sequence, width, fg, bg, style);
+		_back_buffer.set_cell({ cx, pos.y }, iter->sequence, chwidth, fg, bg, style);
 
-		// set right-neighbour of double width cell to zero width
-		if(width == 2 and cx < size.width - 1)
-			_back_buffer.set_cell({ cx + 1, pos.y }, " "sv, 0, fg, bg, style);
+		if(chwidth == 2 and cx < width - 1)
+		{
+			static const auto space { " "sv };
+			// set right-neighbour of double width cell to zero width
+			_back_buffer.set_cell({ cx + 1, pos.y }, space, 0, fg, bg, style);
+		}
 
-		total_width += width;
+		total_width += chwidth;
 
-		cx += static_cast<std::size_t>(width);
+		cx += static_cast<std::size_t>(chwidth);
 	}
 
 	_client_cursor.x += total_width;
