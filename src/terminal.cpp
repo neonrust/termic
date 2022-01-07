@@ -57,8 +57,6 @@ namespace esc
 
 ssize_t write(const std::string_view s);
 
-extern std::string safe(const std::string &s);
-
 using IOFlag = decltype(termios::c_lflag);
 // NOTE: make sure these flag bits does not overlap if used simultaneously
 [[maybe_unused]] static constexpr IOFlag LocalEcho      = ECHO;
@@ -79,8 +77,6 @@ bool init_terminal(Options opts)
 
 	if(::tcgetattr(STDIN_FILENO, &initial_settings) != 0)
 		return false;
-
-	//const std::string current_tty { ::ttyname(STDIN_FILENO) != NULL ? ::ttyname(STDIN_FILENO) : "unknown" };
 
 	if(g_log) fmt::print(g_log, "   \x1b[2mterm >> turning off stdio synch...\x1b[m\n");
 	std::cin.sync_with_stdio(false);

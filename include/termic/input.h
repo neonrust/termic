@@ -19,7 +19,7 @@ struct Input
 
 private:
 	bool setup_keys();
-	std::variant<event::Event, int> parse_mouse(const std::string_view in, std::size_t &eaten);
+	std::variant<event::Event, int> parse_mouse(std::string_view in, std::size_t &eaten);
 
 private:
 	std::istream &_in;

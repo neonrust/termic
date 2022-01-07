@@ -43,7 +43,7 @@ namespace esc
 
 } // NS: esc
 
-static std::string safe(const std::string_view s);
+static std::string safe(std::string_view s);
 
 
 Screen::Screen(int fd) :
@@ -380,7 +380,7 @@ void Screen::flush_buffer()
 	}
 }
 
-[[maybe_unused]] static std::string safe(const std::string_view s)
+[[maybe_unused]] static std::string safe(std::string_view s)
 {
 	std::string res;
 	for(const auto &c: s)

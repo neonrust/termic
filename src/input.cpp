@@ -22,10 +22,10 @@ namespace termic
 extern std::FILE *g_log;
 
 
-static std::variant<event::Event, int> parse_utf8(const std::string_view in, std::size_t &eaten);
-static std::vector<std::string_view> split(const std::string_view s, const std::string_view sep);
-static std::string safe(const std::string_view s);
-static std::string hex(const std::string_view s);
+static std::variant<event::Event, int> parse_utf8(std::string_view in, std::size_t &eaten);
+static std::vector<std::string_view> split(std::string_view s, std::string_view sep);
+static std::string safe(std::string_view s);
+static std::string hex(std::string_view s);
 
 
 static constexpr auto mouse_prefix { "\x1b[<"sv };
@@ -164,7 +164,7 @@ std::vector<event::Event> Input::read()
 	return {};
 }
 
-std::variant<event::Event, int> Input::parse_mouse(const std::string_view in, std::size_t &eaten)
+std::variant<event::Event, int> Input::parse_mouse(std::string_view in, std::size_t &eaten)
 {
 	// '0;63;16M'  (button | modifiers ; X ; Y ; pressed or motion)
 	// '0;63;16m'  (button | modifiers ; X ; Y ; released)
@@ -294,7 +294,7 @@ std::variant<event::Event, int> Input::parse_mouse(const std::string_view in, st
 	return -1;
 }
 
-static std::variant<event::Event, int> parse_utf8(const std::string_view in, std::size_t &eaten)
+static std::variant<event::Event, int> parse_utf8(std::string_view in, std::size_t &eaten)
 {
 	const auto ch = utf8::read_one(in, &eaten);
 	if(eaten == 0)
@@ -608,7 +608,7 @@ bool Input::setup_keys()
 }
 
 
-static std::string hex(const std::string_view s)
+static std::string hex(std::string_view s)
 {
 	std::string res;
 	for(const auto &c: s)
@@ -616,7 +616,7 @@ static std::string hex(const std::string_view s)
 	return res;
 }
 
-static std::string safe(const std::string_view s)
+static std::string safe(std::string_view s)
 {
 	std::string res;
 	for(const auto &c: s)
@@ -637,7 +637,7 @@ static std::string safe(const std::string_view s)
 	return res;
 }
 
-static std::vector<std::string_view> split(const std::string_view s, const std::string_view sep)
+static std::vector<std::string_view> split(std::string_view s, std::string_view sep)
 {
 	std::vector<std::string_view> parts;
 
