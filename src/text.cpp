@@ -15,20 +15,24 @@ extern std::FILE *g_log;
 namespace text
 {
 
-std::vector<std::string_view> wrap(std::string_view s, std::size_t width)
+std::vector<std::string_view> wrap(std::string_view s, std::size_t width, BreakMode brmode)
 {
 	assert(width > 0);
 
+	(void)brmode;
 
 	std::vector<text::Word> words = text::words(s, [](char32_t ch) -> int { return ::mk_width(ch); });
 
 	// TODO: wrap 's' into lines, maximum 'width' wide
 	// https://unicode.org/reports/tr14
 
+	// summary: western langs: breaks at spaces or hyphens.
+	//          asian langs: essentially anywhere or impossible (crap!).
+
 	return {};
 };
 
-std::vector<Word> words(std::string_view s, std::function<int(char32_t)> char_width)
+std::vector<Word> words(std::string_view s, std::function<int(char32_t)> char_width, BreakMode brmode)
 {
 	std::vector<Word> words;
 	words.reserve(std::max(5ul, s.size() / 5));  // a stab in the dark
@@ -54,13 +58,15 @@ std::vector<Word> words(std::string_view s, std::function<int(char32_t)> char_wi
 	s_end = utf8::end(s);
 
 	Word curr_word;
-	// collect wrap points (i.e. whitespace) in 's'
+
+	// collect locations to break at (e.g. whitespace) in 's'
 	while(iter != s_end)
 	{
 		const auto cp = iter->codepoint;
-		if(utf8::is_brk_space(cp) or cp == '-') // TODO: break at correct dash/hyphen characters: https://unicode.org/reports/tr14/#Hyphen
+		const bool is_space = utf8::is_brk_space(cp);
+		if(is_space or (brmode == WesternBreaks and cp == '-')) // TODO: break at correct hyphen characters
 		{
-			if(cp == '-')
+			if(cp == '-')  // include the hyphen in the word
 				++iter;
 
 			words.push_back({
@@ -77,7 +83,7 @@ std::vector<Word> words(std::string_view s, std::function<int(char32_t)> char_wi
 			               word.width);
 
 
-			if(cp != L'-')
+			if(is_space)
 			{
 				// skip all consecutive spaces
 				while(++iter != s_end and utf8::is_space(iter->codepoint))

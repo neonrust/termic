@@ -11,7 +11,14 @@ namespace termic
 namespace text
 {
 
-std::vector<std::string_view> wrap(std::string_view s, std::size_t width);
+enum BreakMode  // https://unicode.org/reports/tr14/#BreakOpportunities
+{
+	WesternBreaks,
+	EastAsianBreaks,
+	SouthEastAsianBreaks,
+};
+
+std::vector<std::string_view> wrap(std::string_view s, std::size_t width, termic::text::BreakMode brmode=WesternBreaks);
 
 struct Word
 {
@@ -20,7 +27,7 @@ struct Word
 	std::size_t width { 0 };
 };
 
-std::vector<Word> words(std::string_view s, std::function<int (char32_t)> char_width);
+std::vector<Word> words(std::string_view s, std::function<int (char32_t)> char_width, termic::text::BreakMode brmode=WesternBreaks);
 
 } // MS: text
 
