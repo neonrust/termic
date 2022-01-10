@@ -45,14 +45,10 @@ int main()
 
 
 
-
-
-
-
 	g_log = fopen("termic.log", "w");
 	::setbuf(g_log, nullptr);  // disable buffering
 
-	App app(HideCursor);// | MouseEvents | FocusEvents);
+	App app(HideCursor | MouseEvents);// | FocusEvents);
 	if(not app)
 		return 1;
 
@@ -80,7 +76,7 @@ int main()
 		(void)mods;
 		(void)mb;
 
-//		Canvas canvas(screen);
+		Canvas canvas(screen);
 //		const auto &[width, height] = screen.size();
 
 //		screen.print({ 10, 14 }, "Termic rainbow demo!", color::White);
@@ -117,8 +113,6 @@ int main()
 //		screen.print(Center, { width/2, 2 }, "This text is center-aligned", color::Black);
 //		screen.print(Right, { width - 1, 3 }, "This text is right-aligned", color::Black);
 
-		screen.print({ 0, 1 }, 10, "This text   is testing word-wrapping", color::White);
-
 		if(g_log) fmt::print(g_log, "render_demo\n");
 	};
 
@@ -153,8 +147,18 @@ int main()
 		fmt::print(g_log, "[main]  input: '{}' 0x{:08x}\n", c.to_string(), std::uint32_t(c.codepoint));
 		return true;
 	});
-	app.on_mouse_move_event.connect([](const event::MouseMove &mm) {
-		fmt::print(g_log, "[main]  mouse: {},{}\n", mm.x, mm.y);
+	app.on_mouse_move_event.connect([&app](const event::MouseMove &mm) {
+		(void)mm;
+//		fmt::print(g_log, "[main]  mouse: {},{}\n", mm.x, mm.y);
+
+		auto &screen = app.screen();
+		Canvas canvas(screen);
+		screen.clear();
+
+		Rectangle rect { { 0, 0 }, { mm.x, mm.y } };
+		canvas.fill(rect, color::Grey20);
+		screen.print({ 0, 1 }, mm.x, "This text   is testing word-wrapping, yeah.", color::White);
+
 	});
 	app.on_mouse_button_event.connect([&render_demo](const event::MouseButton &mb) {
 		fmt::print(g_log, "[main] button: {} {} @ {},{}\n",
@@ -163,7 +167,8 @@ int main()
 				mb.x,
 				mb.y
 		);
-		render_demo(key::None, key::NoMod, &mb);
+		if(mb.pressed)
+			render_demo(key::None, key::NoMod, &mb);
 	});
 	app.on_mouse_wheel_event.connect([](const event::MouseWheel &mw) {
 		fmt::print(g_log, "[main]  wheel: {}\n", mw.delta);

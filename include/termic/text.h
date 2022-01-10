@@ -18,13 +18,14 @@ enum BreakMode  // https://unicode.org/reports/tr14/#BreakOpportunities
 	SouthEastAsianBreaks,
 };
 
-std::vector<std::string_view> wrap(std::string_view s, std::size_t width, termic::text::BreakMode brmode=WesternBreaks);
+std::vector<std::string> wrap(std::string_view s, std::size_t limit, termic::text::BreakMode brmode=WesternBreaks);
 
 struct Word
 {
 	std::size_t start { 0 };
 	std::size_t end   { 0 };
 	std::size_t width { 0 };
+	bool hyphenated { false };
 };
 
 std::vector<Word> words(std::string_view s, std::function<int (char32_t)> char_width, termic::text::BreakMode brmode=WesternBreaks);
