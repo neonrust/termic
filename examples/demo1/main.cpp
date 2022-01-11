@@ -163,7 +163,8 @@ int main()
 		const auto wrap_width = mmx + 1;
 		Rectangle rect { { 0, 0 }, { wrap_width, height } };
 		canvas.fill(rect, &shade);
-		screen.print({ 0, 0 }, wrap_width, "This text   is testing word-wrapping, yeah.", color::White);
+//		screen.print({ 0, 0 }, wrap_width, "This text   is testing word-wrapping, yeah.", color::White);
+		screen.print({ 0, 0 }, wrap_width, "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.", color::White);
 //		screen.print({ 0, 0 }, wrap_width, "word-wrapping,", color::White);
 
 		screen.print(Right, { width - 1, 0 }, "width: {}  ({}, {})"_format(wrap_width, mmx, mm.y));

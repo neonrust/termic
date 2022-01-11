@@ -20,15 +20,17 @@ std::pair<std::string_view, std::size_t> part_upto_width(std::string_view s, std
 
 std::vector<std::string> wrap(std::string_view s, std::size_t limit, BreakMode brmode)
 {
-	if(g_log) fmt::print(g_log, "wrapping '{}'  inside: {}\n", s, limit);
+//	if(g_log) fmt::print(g_log, "wrapping '{}'  inside: {}\n", s, limit);
 
-	if(limit <= 2)
+	if(limit <= 2)  // simply too narrow; nothing useful can come of this
 		return { "…" };
+
+//	StopWatch T;
 
 	auto words = text::words(s, [](char32_t ch) -> int { return ::mk_width(ch); }, brmode);
 
 
-	// TODO: there MUST be a simpler way to do this!
+	// TODO: there MUST be a simpler way to do this!?
 
 
 	std::vector<std::string> lines;
@@ -39,7 +41,6 @@ std::vector<std::string> wrap(std::string_view s, std::size_t limit, BreakMode b
 	std::size_t line_width { 0 };
 	// wrap 's' into lines, maximum 'width' wide,  https://unicode.org/reports/tr14
 	std::size_t word_idx { 0 };
-//	bool prev_hyphen { false };
 
 	for(auto word: words)
 	{
@@ -55,7 +56,7 @@ std::vector<std::string> wrap(std::string_view s, std::size_t limit, BreakMode b
 				line += ' ';
 				++line_width;
 			}
-			if(g_log) fmt::print(g_log, "[{}] word {} fit on current line -> {}\n", lines.size(), word_idx, line_width);
+//			if(g_log) fmt::print(g_log, "[{}] word {} fit on current line -> {}\n", lines.size(), word_idx, line_width);
 		}
 		else if(ww <= limit) // word doesn't fit on current line but will fit next line (next loop)
 		{
@@ -69,13 +70,13 @@ std::vector<std::string> wrap(std::string_view s, std::size_t limit, BreakMode b
 				line += ' ';
 				++line_width;
 			}
-			if(g_log) fmt::print(g_log, "[{}] word {} fit on a new line -> {}\n", lines.size(), word_idx, line_width);
+//			if(g_log) fmt::print(g_log, "[{}] word {} fit on a new line -> {}\n", lines.size(), word_idx, line_width);
 		}
 		else
 		{
 			if(word.width > limit)  // word doesn't fit on a whole line, we must cut it
 			{
-				if(g_log) fmt::print(g_log, "[{}] word {} doesn't fit current or new, width {} > {}\n", lines.size(), word_idx, word.width, limit - line_width);
+//				if(g_log) fmt::print(g_log, "[{}] word {} doesn't fit current or new, width {} > {}\n", lines.size(), word_idx, word.width, limit - line_width);
 
 				while(word.width > 0)
 				{
@@ -85,7 +86,7 @@ std::vector<std::string> wrap(std::string_view s, std::size_t limit, BreakMode b
 						const auto use_hyphen { word.width > line_remainder };
 
 						const auto upto_width { line_remainder - (use_hyphen? 1: 0) };
-						if(g_log) fmt::print(g_log, "[{}]     line rem: {}  use hyphen: {}  upto width: {}\n", lines.size(), line_remainder, use_hyphen, upto_width);
+//						if(g_log) fmt::print(g_log, "[{}]     line rem: {}  use hyphen: {}  upto width: {}\n", lines.size(), line_remainder, use_hyphen, upto_width);
 						const auto &[part, part_width] = part_upto_width(s.substr(word.start, word.end - word.start), upto_width);
 						word.width -= part_width;
 						word.start += part.size();
@@ -98,10 +99,9 @@ std::vector<std::string> wrap(std::string_view s, std::size_t limit, BreakMode b
 							line += '-';
 							++line_width;
 						}
-						if(g_log) fmt::print(g_log, "[{}] {}-part word {} fit on current -> {} {}\n", lines.size(), part_width, word_idx, limit - line_width, use_hyphen?"hyphen":"");
+//						if(g_log) fmt::print(g_log, "[{}] {}-part word {} fit on current -> {} {}\n", lines.size(), part_width, word_idx, limit - line_width, use_hyphen?"hyphen":"");
 					}
 
-					// TODO: only push line if there's "no more space" on the line
 					assert(not line.empty());
 					lines.push_back(line);
 					line_width = 0;
@@ -113,13 +113,15 @@ std::vector<std::string> wrap(std::string_view s, std::size_t limit, BreakMode b
 				lines.push_back(line);
 				line = s.substr(word.start, word.end - word.start);
 				line_width = word.width;
-				if(g_log) fmt::print(g_log, "[{}] word {} fits on the next line -> {}\n", lines.size(), word_idx, line_width);
+//				if(g_log) fmt::print(g_log, "[{}] word {} fits on the next line -> {}\n", lines.size(), word_idx, line_width);
 			}
 		}
 		++word_idx;
 	}
 	if(not line.empty())
 		lines.push_back(line);
+
+//	if(g_log) fmt::print(g_log, "wrapped in {} µs\n", T.elapsed_us());
 
 	return lines;
 };

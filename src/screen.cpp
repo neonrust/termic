@@ -171,7 +171,7 @@ void Screen::set_size(Size size)
 {
 	const auto curr_size = _back_buffer.size();
 
-	_output_buffer.reserve(std::max(100ul, size.width)*std::max(100ul, size.height)*4);  // an over-estimate in an attempt to avoid re-allocation
+	_output_buffer.reserve(std::max(150ul, size.width)*std::max(100ul, size.height)*8);  // an over-estimate in an attempt to avoid re-allocation
 
 	_back_buffer.set_size(size);
 	_front_buffer.set_size(size);
