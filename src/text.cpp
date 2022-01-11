@@ -25,8 +25,6 @@ std::vector<std::string> wrap(std::string_view s, std::size_t limit, BreakMode b
 	if(limit <= 2)  // simply too narrow; nothing useful can come of this
 		return { "…" };
 
-//	StopWatch T;
-
 	auto words = text::words(s, [](char32_t ch) -> int { return ::mk_width(ch); }, brmode);
 
 
@@ -121,8 +119,6 @@ std::vector<std::string> wrap(std::string_view s, std::size_t limit, BreakMode b
 	if(not line.empty())
 		lines.push_back(line);
 
-//	if(g_log) fmt::print(g_log, "wrapped in {} µs\n", T.elapsed_us());
-
 	return lines;
 };
 
@@ -178,7 +174,7 @@ std::vector<Word> words(std::string_view s, std::function<int(char32_t)> char_wi
 		const auto cp = iter->codepoint;
 		const bool is_space = utf8::is_brk_space(cp);
 
-		if(is_space or (brmode == WesternBreaks and cp == '-')) // TODO: break at correct hyphen characters
+		if(is_space or (brmode == WesternBreaks and cp == '-')) // TODO: does unicode have several hyphen characters?
 		{
 			if(cp == '-')  // include the hyphen in the word
 			{
@@ -192,17 +188,6 @@ std::vector<Word> words(std::string_view s, std::function<int(char32_t)> char_wi
 				.width = curr_word.width,
 				.hyphenated = cp == '-',
 			});
-
-//			const auto &word = words.back();
-//			if(g_log) fmt::print(g_log, "word {} ({}-{}): '{}'  width {}  hyph: {}\n",
-//						   words.size() - 1,
-//						   word.start,
-//						   word.end,
-//						   s.substr(word.start, word.end - word.start),
-//						   word.width,
-//						   word.hyphenated?'y':'n'
-//						   );
-
 
 			if(is_space)
 			{
@@ -229,12 +214,6 @@ std::vector<Word> words(std::string_view s, std::function<int(char32_t)> char_wi
 		    .end = s.size(),
 		    .width = curr_word.width
 		});
-//		if(g_log) fmt::print(g_log, "word {} ({}-{}): '{}'  width {}\n",
-//					   words.size() - 1,
-//					   curr_word.start,
-//					   curr_word.end,
-//					   s.substr(curr_word.start, curr_word.end - curr_word.start),
-//					   curr_word.width);
 	}
 
 	return words;
