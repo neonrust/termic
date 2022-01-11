@@ -148,17 +148,25 @@ int main()
 		return true;
 	});
 	app.on_mouse_move_event.connect([&app](const event::MouseMove &mm) {
-		(void)mm;
 //		fmt::print(g_log, "[main]  mouse: {},{}\n", mm.x, mm.y);
 
 		auto &screen = app.screen();
 		Canvas canvas(screen);
 		screen.clear();
 
-		Rectangle rect { { 0, 0 }, { mm.x, mm.y } };
-		canvas.fill(rect, color::Grey20);
-		screen.print({ 0, 1 }, mm.x, "This text   is testing word-wrapping, yeah.", color::White);
+		const auto mmx = mm.x;
 
+		const auto &[width, height] = screen.size();
+
+		static const color::LinearGradient shade { color::rgb(20, 20, 20), color::rgb(64, 64, 64) };
+
+		const auto wrap_width = mmx + 1;
+		Rectangle rect { { 0, 0 }, { wrap_width, height } };
+		canvas.fill(rect, &shade);
+		screen.print({ 0, 0 }, wrap_width, "This text   is testing word-wrapping, yeah.", color::White);
+//		screen.print({ 0, 0 }, wrap_width, "word-wrapping,", color::White);
+
+		screen.print(Right, { width - 1, 0 }, "width: {}  ({}, {})"_format(wrap_width, mmx, mm.y));
 	});
 	app.on_mouse_button_event.connect([&render_demo](const event::MouseButton &mb) {
 		fmt::print(g_log, "[main] button: {} {} @ {},{}\n",
