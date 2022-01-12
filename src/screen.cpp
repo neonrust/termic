@@ -88,17 +88,17 @@ std::size_t Screen::print(Pos pos, std::size_t wrap_width, std::string_view s, C
 	if(pos.x + wrap_width >= width)
 	    wrap_width = width - pos.x;
 
-	auto lines = text::wrap(s, wrap_width);
-	auto total_width { 0ul };
+	const auto lines = text::wrap(s, wrap_width);
+
 	for(const auto &line: lines)
 	{
-		total_width += print(pos, line, fg, style, bg);
+		print(pos, line, fg, style, bg);
 		++pos.y;
 		if(pos.y >= height)
 			break;
 	}
 
-	return total_width; // TODO: return number of lines as well?
+	return lines.size();
 }
 
 std::size_t Screen::print(Pos pos, std::string_view s, Color fg, Style style, Color bg)
