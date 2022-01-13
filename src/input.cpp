@@ -316,7 +316,7 @@ bool Input::setup_keys()
 	static constexpr auto CTRL_SHIFT     { key::CTRL | key::SHIFT };
 
 	_key_sequences = {
-		//{ .sequence = "\x7f"          , .key = key::BACKSPACE },
+		{ .sequence = "\x7f"          , .key = key::BACKSPACE },
 		{ .sequence = "\x00"sv        , .mods = CTRL,     .key = key::SPACE },
 		{ .sequence = "\x1b\x00"sv    , .mods = ALT_CTRL, .key = key::SPACE },
 		{ .sequence = "\x1b\x1a"sv    , .mods = ALT_CTRL, .key = key::Z },
