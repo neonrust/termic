@@ -7,6 +7,6 @@ set(sources
 )
 
 add_executable(test_text ${sources})
-target_link_libraries(test_text PRIVATE termic fmt pthread dl)
+target_link_libraries(test_text PRIVATE Catch2WithMain termic fmt pthread dl)
 
 add_test(NAME text COMMAND test_text)
