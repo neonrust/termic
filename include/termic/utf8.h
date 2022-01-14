@@ -15,16 +15,21 @@ namespace termic
 namespace utf8
 {
 
+// Q: is it overkill to implement a custom utf8 string?
+//   probably modelled as a std::vector<Iterator::Character>
+// A: definitely! ;)
+// a better way is something like https://github.com/DuffsDevice/tiny-utf8
+
+
+using string = std::string;           // TODO: use instead of std::string
+using string_view = std::string_view; // TODO: use instead of std::string_view
+
 // extract a single codepoint from the input data, returning its codepoint and the byte sequence
 std::pair<char32_t, std::string_view> read_one(std::string_view s, std::size_t *eaten);
 
 
 struct Iterator
 {
-	friend Iterator end(std::string_view s);
-
-	explicit Iterator(std::string_view s);
-
 	struct Character
 	{
 		std::size_t index { 0 };
@@ -32,6 +37,16 @@ struct Iterator
 		char32_t    codepoint { 0 };
 		std::string_view sequence {};
 	};
+
+	using iterator_category = std::forward_iterator_tag;
+	using difference_type   = Character;
+	using value_type        = Character;
+	using pointer           = value_type*;
+	using reference         = value_type&;
+
+	friend Iterator end(std::string_view s);
+
+	explicit Iterator(std::string_view s);
 
 	inline Character operator * () const { return _current; }
 	inline const Character *operator -> () const { return &_current; }

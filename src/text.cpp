@@ -219,6 +219,54 @@ std::vector<Word> words(std::string_view s, std::function<int(char32_t)> char_wi
 	return words;
 }
 
+// TODO: should use something established instead, e.g. https://github.com/DuffsDevice/tiny-utf8
+//   these functions are very slow, they always perform iteration from the beginning of the string
+
+std::size_t find_byte_offset(utf8::string_view s, std::size_t at)
+{
+	decltype(at) idx { 0 };
+	const auto s_end = utf8::end(s);
+	auto iter = utf8::begin(s);
+
+	std::size_t byte_offset { 0 };
+	while(iter != s_end and idx < at)
+	{
+		++idx;
+		++iter;
+		byte_offset = iter->byte_offset;
+	}
+	return byte_offset;
+}
+
+void insert(utf8::string &s, utf8::string_view insert, std::size_t at)
+{
+	auto byte_offset = find_byte_offset(s, at);
+	s.insert(byte_offset, insert);
+}
+
+void erase(utf8::string &s, std::size_t start, std::size_t end)
+{
+	assert(start < end);
+	auto start_byte_offset = find_byte_offset(s, start);
+	auto byte_offset_len = find_byte_offset(s.substr(start), end - start);
+
+	s.erase(start_byte_offset, byte_offset_len);
+}
+
+std::size_t size(utf8::string_view s)
+{
+	const auto s_end = utf8::end(s);
+	auto iter = utf8::begin(s);
+
+	std::size_t size { 0 };
+	while(iter != s_end)
+	{
+		++size;
+		++iter;
+	}
+	return size;
+}
+
 
 } // NS: text
 
