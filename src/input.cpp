@@ -307,6 +307,8 @@ static std::variant<event::Event, int> parse_utf8(std::string_view in, std::size
 
 bool Input::setup_keys()
 {
+	// TODO: shouldn't all this be possible to do in compile-time?  (i.e. constexpr)
+
 	static constexpr auto ALT            { key::ALT };
 	static constexpr auto CTRL           { key::CTRL };
 	static constexpr auto SHIFT          { key::SHIFT };
@@ -337,7 +339,7 @@ bool Input::setup_keys()
 		{ .sequence = "\x1b\x0b"sv    , .mods = ALT_CTRL, .key = key::K },
 		{ .sequence = "\x1b\x0a"sv    , .mods = ALT_CTRL, .key = key::J },
 		{ .sequence = "\x1b\x09"sv    , .mods = ALT, .key = key::TAB },  // ALT_CTRL TAB also the same
-		{ .sequence = "\x1b\x08"sv    , .mods = ALT_CTRL, .key = key::H },
+		{ .sequence = "\x1b\x08"sv    , .mods = ALT_CTRL, .key = key::BACKSPACE },
 		{ .sequence = "\x1b\x07"sv    , .mods = ALT_CTRL, .key = key::G },
 		{ .sequence = "\x1b\x06"sv    , .mods = ALT_CTRL, .key = key::F },
 		{ .sequence = "\x1b\x05"sv    , .mods = ALT_CTRL, .key = key::E },
@@ -558,7 +560,7 @@ bool Input::setup_keys()
 		{ .sequence = "\x05"sv        , .mods = CTRL, .key = key::E },
 		{ .sequence = "\x06"sv        , .mods = CTRL, .key = key::F },
 		{ .sequence = "\x07"sv        , .mods = CTRL, .key = key::G },
-		{ .sequence = "\x08"sv        , .mods = CTRL, .key = key::H },
+		{ .sequence = "\x08"sv        , .mods = CTRL, .key = key::BACKSPACE },
 		{ .sequence = "\x09"sv        , .key = key::TAB },
 		{ .sequence = "\x0a"sv        , .key = key::ENTER },
 		{ .sequence = "\x0b"sv        , .mods = CTRL, .key = key::K },
