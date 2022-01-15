@@ -235,22 +235,26 @@ std::size_t find_byte_offset(utf8::string_view s, std::size_t at)
 		++iter;
 		byte_offset = iter->byte_offset;
 	}
+	if(iter == s_end)
+		byte_offset = s.size();
+
 	return byte_offset;
 }
 
-void insert(utf8::string &s, utf8::string_view insert, std::size_t at)
+utf8::string &insert(utf8::string &s, utf8::string_view insert, std::size_t at)
 {
 	auto byte_offset = find_byte_offset(s, at);
-	s.insert(byte_offset, insert);
+	return s.insert(byte_offset, insert);
 }
 
-void erase(utf8::string &s, std::size_t start, std::size_t end)
+utf8::string &erase(utf8::string &s, std::size_t start, std::size_t len)
 {
-	assert(start < end);
-	auto start_byte_offset = find_byte_offset(s, start);
-	auto byte_offset_len = find_byte_offset(s.substr(start), end - start);
+	assert(len > 0);
 
-	s.erase(start_byte_offset, byte_offset_len);
+	auto start_byte_offset = find_byte_offset(s, start);
+	auto byte_len = find_byte_offset(s.substr(start_byte_offset), len);
+
+	return s.erase(start_byte_offset, byte_len);
 }
 
 std::size_t size(utf8::string_view s)

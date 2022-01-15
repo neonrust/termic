@@ -34,8 +34,8 @@ std::vector<Word> words(std::string_view s, std::function<int (char32_t)> char_w
 // TODO: should use something established instead, e.g. https://github.com/DuffsDevice/tiny-utf8
 //   these functions are very slow, they always perform iteration from the beginning
 
-void insert(utf8::string &s, utf8::string_view insert, std::size_t at);
-void erase(utf8::string &s, std::size_t start, std::size_t end);
+utf8::string &insert(utf8::string &s, utf8::string_view insert, std::size_t at);
+utf8::string &erase(utf8::string &s, std::size_t start, std::size_t len);
 std::size_t size(utf8::string_view s);
 
 
