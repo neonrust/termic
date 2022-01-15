@@ -249,7 +249,8 @@ utf8::string &insert(utf8::string &s, utf8::string_view insert, std::size_t at)
 
 utf8::string &erase(utf8::string &s, std::size_t start, std::size_t len)
 {
-	assert(len > 0);
+	if(not len)
+		return s;
 
 	auto start_byte_offset = find_byte_offset(s, start);
 	auto byte_len = find_byte_offset(s.substr(start_byte_offset), len);
@@ -269,6 +270,17 @@ std::size_t size(utf8::string_view s)
 		++iter;
 	}
 	return size;
+}
+
+utf8::string_view substr(utf8::string_view s, std::size_t start, std::size_t len)
+{
+	if(not len)
+		return s;
+
+	auto start_byte_offset = find_byte_offset(s, start);
+	auto byte_len = len == utf8::string::npos? s.size(): find_byte_offset(s.substr(start_byte_offset), len);
+
+	return s.substr(start_byte_offset, byte_len);
 }
 
 

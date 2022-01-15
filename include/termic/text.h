@@ -37,6 +37,7 @@ std::vector<Word> words(std::string_view s, std::function<int (char32_t)> char_w
 utf8::string &insert(utf8::string &s, utf8::string_view insert, std::size_t at);
 utf8::string &erase(utf8::string &s, std::size_t start, std::size_t len);
 std::size_t size(utf8::string_view s);
+utf8::string_view substr(utf8::string_view s, std::size_t start, std::size_t len=utf8::string::npos);
 
 
 } // MS: text

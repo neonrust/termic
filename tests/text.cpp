@@ -63,3 +63,30 @@ TEST_CASE("Erase from UTF-8 strings", "text::erase") {
 		REQUIRE(text::erase(s, 1, 2) == "隊レね");
 	}
 }
+
+TEST_CASE("Substring of UTF-8 strings", "text::substr") {
+	{
+		utf8::string s { "" };
+		REQUIRE(text::substr(s, 0, 10) == "" );
+	}
+	{
+		utf8::string s { "hello" };
+		REQUIRE(text::substr(s, 0, 2) == "he" );
+	}
+	{
+		utf8::string s { "hello" };
+		REQUIRE(text::substr(s, 3, 2) == "lo" );
+	}
+	{
+		utf8::string s { "hello" };
+		REQUIRE(text::substr(s, 3) == "lo" );
+	}
+	{
+		utf8::string s { "héllo" };
+		REQUIRE(text::substr(s, 2, 1) == "l" );
+	}
+	{
+		utf8::string s { "隊ぎやレね" };
+		REQUIRE(text::substr(s, 1, 2) == "ぎや");
+	}
+}
