@@ -327,7 +327,7 @@ void Screen::cursor_style(Style style)
 		auto curr = [this]  (style::Bit sb) -> bool { return (_cursor.style & sb) > 0; };
 		auto to =   [&style](style::Bit sb) -> bool { return (style         & sb) > 0; };
 
-		// TODO: would ideally like to avoid heap allocation here...
+		// TODO: avoid heap allocation
 		std::string seq;
 		seq.reserve(13);
 
@@ -358,6 +358,11 @@ void Screen::cursor_style(Style style)
 			seq += '9';     // set overstrike
 		if(not to(style::Overstrike) and curr(style::Overstrike))
 			seq += "29"sv;  // clear overstrike
+
+		if(to(style::Inverse) and not curr(style::Inverse))
+			seq += '7';     // set inverse
+		if(not to(style::Inverse) and curr(style::Inverse))
+			seq += "27"sv;  // clear inverse
 
 		// remove final trailing semicolon
 		if(not seq.empty() and seq[seq.size() - 1] == ';')

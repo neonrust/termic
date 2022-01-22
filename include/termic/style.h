@@ -22,6 +22,8 @@ enum Bit
 	Italic     = 1 << 2,
 	Underline  = 1 << 3,
 	Overstrike = 1 << 4,
+	Inverse    = 1 << 5,
+	Reverse    = Inverse,
 	// diminishing returns for remaining styles...
 
 	NoChange   = 0xff,
@@ -37,6 +39,7 @@ constexpr Style operator | (style::Bit a, style::Bit b)
 
 inline std::string escify(Style s)
 {
+	// TODO: avoid heap allocation
 	std::string seq;
 
 	if((s & style::Intense) > 0)
@@ -49,6 +52,8 @@ inline std::string escify(Style s)
 		seq += "4;";
 	if((s & style::Overstrike) > 0)
 		seq += "9;";
+	if((s & style::Inverse) > 0)
+		seq += "7;";
 
 	if(seq.empty())
 		return "0";
