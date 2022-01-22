@@ -26,6 +26,11 @@ struct Rectangle
 {
 	Pos top_left;
 	Size size;
+
+	inline bool contains(Pos pos) const
+	{
+		return pos.x >= top_left.x and pos.x < (top_left.x + size.width) and pos.y >= top_left.y and pos.y < (top_left.y + size.height);
+	}
 };
 
 
