@@ -1,6 +1,6 @@
 #pragma once
 
-#include "color.h"
+#include "look.h"
 #include "size.h"
 
 namespace termic

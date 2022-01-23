@@ -52,7 +52,7 @@ Screen::Screen(int fd) :
 	_output_buffer.append(fmt::format(esc::cup, 1, 1)); // go to origin (b/c default _cursor.pos = 0,0)
 }
 
-std::size_t Screen::print(Alignment align, Pos anchor_pos, std::string_view s, Color fg, Style style, Color bg)
+std::size_t Screen::print(Alignment align, Pos anchor_pos, std::string_view s, Look lk)
 {
 	Pos pos { anchor_pos };
 
@@ -72,16 +72,16 @@ std::size_t Screen::print(Alignment align, Pos anchor_pos, std::string_view s, C
 		}
 	}
 
-	return print(pos, 0, s, fg, style, bg);
+	return print(pos, 0, s, lk);
 }
 
 
-std::size_t Screen::print(Pos pos, std::size_t wrap_width, std::string_view s, Color fg, Style style, Color bg)
+std::size_t Screen::print(Pos pos, std::size_t wrap_width, std::string_view s, Look lk)
 {
 	const auto &[width, height] = size();
 
 	if(wrap_width == 0 or wrap_width >= width)
-	    return print(pos, s, fg, style, bg);
+		return print(pos, s, lk);
 
 
 	// if wrap_width resolves to a position off-screen, cap it to the screen edge
@@ -92,7 +92,7 @@ std::size_t Screen::print(Pos pos, std::size_t wrap_width, std::string_view s, C
 
 	for(const auto &line: lines)
 	{
-		print(pos, line, fg, style, bg);
+		print(pos, line, lk);
 		++pos.y;
 		if(pos.y >= height)
 			break;
@@ -101,7 +101,7 @@ std::size_t Screen::print(Pos pos, std::size_t wrap_width, std::string_view s, C
 	return lines.size();
 }
 
-std::size_t Screen::print(Pos pos, std::string_view s, Color fg, Style style, Color bg)
+std::size_t Screen::print(Pos pos, std::string_view s, Look lk)
 {
 	const auto &[width, height] = size();
 
@@ -129,13 +129,13 @@ std::size_t Screen::print(Pos pos, std::string_view s, Color fg, Style style, Co
 
 //		if(g_log) fmt::print(g_log, "cx: {}  ch: {} \\u{:04x} @ {} -> width: {}\n", cx, iter->sequence, iter->codepoint, iter->index, width);
 
-		_back_buffer.set_cell({ cx, pos.y }, iter->sequence, chwidth, fg, bg, style);
+		_back_buffer.set_cell({ cx, pos.y }, iter->sequence, chwidth, lk);
 
 		if(chwidth == 2 and cx < width - 1)
 		{
 			static const auto space { " "sv };
 			// set right-neighbour of double width cell to zero width
-			_back_buffer.set_cell({ cx + 1, pos.y }, space, 0, fg, bg, style);
+			_back_buffer.set_cell({ cx + 1, pos.y }, space, 0, lk);
 		}
 
 		total_width += chwidth;
@@ -374,9 +374,9 @@ void Screen::cursor_style(Style style)
 	}
 }
 
-void Screen::set_cell(Pos pos, std::string_view ch, std::size_t width, Color fg, Color bg, Style style)
+void Screen::set_cell(Pos pos, std::string_view ch, std::size_t width, Look lk)
 {
-	_back_buffer.set_cell(pos, ch, width, fg, bg, style);
+	_back_buffer.set_cell(pos, ch, width, lk);
 }
 
 void Screen::flush_buffer()

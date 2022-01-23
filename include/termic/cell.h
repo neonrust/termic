@@ -1,7 +1,6 @@
 #pragma once
 
-#include <termic/color.h>
-#include <termic/style.h>
+#include <termic/look.h>
 
 #include <cstdint>
 #include <fmt/core.h>

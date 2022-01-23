@@ -6,7 +6,6 @@ set(lib_headers
 	../include/termic/app.h
 	../include/termic/canvas.h
 	../include/termic/cell.h
-	../include/termic/color.h
 	../include/termic/event.h
 	../include/termic/input.h
 	../include/termic/keycodes.h
@@ -14,11 +13,11 @@ set(lib_headers
 	../include/termic/screen.h
 	../include/termic/screen-buffer.h
 	../include/termic/size.h
-	../include/termic/style.h
 	../include/termic/terminal.h
 	../include/termic/utf8.h
 	../include/termic/stopwatch.h
 	../include/termic/text.h
+	../include/termic/look.h
 	../extern/mk-wcwidth/mk-wcwidth.h
 )
 
@@ -32,7 +31,7 @@ set(lib_headers
 set(lib_sources
 	app.cpp
 	canvas.cpp
-	color.cpp
+	look.cpp
 	input.cpp
 	keycodes.cpp
 	samplers.cpp

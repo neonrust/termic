@@ -67,7 +67,7 @@ const Cell &ScreenBuffer::cell(std::size_t x, std::size_t y) const
 	return _rows[y]->operator[](x);
 }
 
-void ScreenBuffer::set_cell(Pos pos, std::string_view ch, std::size_t width, Color fg, Color bg, Style style)
+void ScreenBuffer::set_cell(Pos pos, std::string_view ch, std::size_t width, Look lk)
 {
 	if(pos.x >= _width or pos.y >= _height)
 		return;
@@ -82,14 +82,14 @@ void ScreenBuffer::set_cell(Pos pos, std::string_view ch, std::size_t width, Col
 
 	cell.width = static_cast<std::uint_fast8_t>(width);
 
-	if(fg != color::NoChange)
-		cell.fg = fg;
+	if(lk.fg != color::NoChange)
+		cell.fg = lk.fg;
 
-	if(bg != color::NoChange)
-		cell.bg = bg;
+	if(lk.bg != color::NoChange)
+		cell.bg = lk.bg;
 
-	if(style != style::NoChange)
-		cell.style = style;
+	if(lk.style != style::NoChange)
+		cell.style = lk.style;
 }
 
 ScreenBuffer &ScreenBuffer::operator = (const ScreenBuffer &src)

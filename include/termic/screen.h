@@ -41,14 +41,13 @@ struct Screen //: public RegionI
 	void clear(const Rectangle &rect, Color bg, Color fg=color::NoChange);
 
 	void go_to(Pos pos);
-	inline std::size_t print(std::string_view s, Color fg=color::Default, Style style=style::Default, Color bg=color::NoChange)
+	inline std::size_t print(std::string_view s, Look lk=look::Default)
 	{
-		return print(_client_cursor, s, fg, style, bg);
+		return print(_client_cursor, s, lk);
 	}
-	std::size_t print(Alignment align, Pos anchor_pos, std::string_view s, Color fg=color::Default, Style style=style::Default, Color bg=color::NoChange);
-	std::size_t print(Pos pos, std::string_view s, Color fg=color::Default, Style style=style::Default, Color bg=color::NoChange);
-	std::size_t print(Pos pos, std::size_t wrap_width, std::string_view s, Color fg=color::Default, Style style=style::Default, Color bg=color::NoChange);
-
+	std::size_t print(Alignment align, Pos anchor_pos, std::string_view s, Look lk=look::Default);
+	std::size_t print(Pos pos, std::string_view s, Look lk=look::Default);
+	std::size_t print(Pos pos, std::size_t wrap_width, std::string_view s, Look lk=look::Default);
 
 	void update();
 
@@ -61,7 +60,7 @@ struct Screen //: public RegionI
 private:
 	friend struct Canvas;
 
-	void set_cell(Pos pos, std::string_view ch, std::size_t width, Color fg=color::Default, Color bg=color::Default, Style style=style::Default);
+	void set_cell(Pos pos, std::string_view ch, std::size_t width, Look lk=look::Default);
 	Pos cursor_move(Pos pos);
 	void cursor_style(Style style);
 	void cursor_color(Color fg, Color bg);

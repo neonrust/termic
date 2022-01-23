@@ -51,7 +51,7 @@ void Canvas::fill(Rectangle rect, const color::Sampler *s, float sampler_angle)
 			const float u = static_cast<float>(x - rect.top_left.x + 1) / float(rect.size.width);
 			const float v = static_cast<float>(y - rect.top_left.y + 1) / float(rect.size.height);
 
-			_scr.set_cell({ x, y }, Cell::NoChange, 1, color::NoChange, s->sample(u, v, sampler_angle));
+			_scr.set_cell({ x, y }, Cell::NoChange, 1, look::bg(s->sample(u, v, sampler_angle)));
 		}
 	}
 }
