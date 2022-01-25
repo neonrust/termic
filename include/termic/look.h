@@ -79,31 +79,22 @@ using Style = std::uint16_t;
 namespace style
 {
 
-using Bit = Style;
-
-//enum Bit
-//{
-constexpr static Bit Normal     { 0 };
-constexpr static Bit Default    { Normal };
-constexpr static Bit Intense    { 1 << 0 };   // can't be combined with Faint/Dim
-constexpr static Bit Bold       { Intense };
-constexpr static Bit Faint      { 1 << 1 };   // can't be combined with Intense/Bold
-constexpr static Bit Dim        { Faint };
-constexpr static Bit Italic     { 1 << 2 };
-constexpr static Bit Underline  { 1 << 3 };
-constexpr static Bit Overstrike { 1 << 4 };
-constexpr static Bit Inverse    { 1 << 5 };
-constexpr static Bit Reverse    { Inverse };
-constexpr static Bit NoChange   { 0xff };
+constexpr static Style NoChange   { 0xff };
+constexpr static Style Normal     { 0 };
+constexpr static Style Default    { Normal };
+constexpr static Style Intense    { 1 << 0 };   // can't be combined with Faint/Dim
+constexpr static Style Bold       { Intense };
+constexpr static Style Faint      { 1 << 1 };   // can't be combined with Intense/Bold
+constexpr static Style Dim        { Faint };
+constexpr static Style Italic     { 1 << 2 };
+constexpr static Style Underline  { 1 << 3 };
+constexpr static Style Overstrike { 1 << 4 };
+constexpr static Style Inverse    { 1 << 5 };
+constexpr static Style Reverse    { Inverse };
 // diminishing returns for remaining styles...
-//};
 
 } // NS: style
 
-//constexpr Style operator | (style::Bit a, style::Bit b)
-//{
-//	return static_cast<Style>(static_cast<std::uint8_t>(a) | static_cast<std::uint8_t>(b));
-//}
 
 inline std::string escify(Style s)
 {

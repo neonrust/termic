@@ -324,8 +324,8 @@ void Screen::cursor_style(Style style)
 {
 	if(style != _cursor.style)
 	{
-		auto curr = [this]  (style::Bit sb) -> bool { return (_cursor.style & sb) > 0; };
-		auto to =   [&style](style::Bit sb) -> bool { return (style         & sb) > 0; };
+		auto curr = [this]  (auto sb) -> bool { return (_cursor.style & sb) > 0; };
+		auto to =   [&style](auto sb) -> bool { return (style         & sb) > 0; };
 
 		// TODO: avoid heap allocation
 		std::string seq;
