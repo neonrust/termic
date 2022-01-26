@@ -127,7 +127,8 @@ inline std::string escify(Style s)
 
 struct Look
 {
-	inline Look(Color fg, Style style=style::Default, Color bg=color::NoChange) : fg(fg), style(style), bg(bg) {};
+	inline Look() : fg(color::Default), style(style::Default), bg(color::Default) {}
+	inline Look(Color fg, Style style=style::Default, Color bg=color::NoChange) : fg(fg), style(style), bg(bg) {}
 
 	Color fg    { color::Default };
 	Style style { style::Default };
