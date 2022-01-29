@@ -109,9 +109,9 @@ void App::quit()
 	_should_quit = true;
 }
 
-void App::shutdown()
+void App::shutdown(int rc)
 {
-	on_app_exit(0);
+	on_app_exit(rc);
 
 	if(_initialized)
 	{
@@ -164,7 +164,7 @@ void signal_received(int signum)
 	if(g_log) fmt::print(g_log, "\x1b[33;1msignal: {}\x1b[m\n", signum);
 
 	if(g_app)
-		g_app->shutdown();
+		g_app->shutdown(128 + signum);
 	g_app = nullptr;
 
 	std::signal(signum, SIG_DFL);

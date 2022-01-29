@@ -120,6 +120,10 @@ int main()
 //		render_demo();
 //	});
 
+	app.on_app_exit.connect([](int rc) {
+		fmt::print("termic::App exit ({})\n", rc);
+	});
+
 	app.on_key_event.connect([&app, &render_demo, &rotation, &offset](const event::Key &k) {
 		fmt::print(g_log, "[main]    key: {}\n", key::to_string(k.key, k.modifiers));
 
@@ -186,7 +190,11 @@ int main()
 		render_demo();
 	});
 
-	return app.run();
+	int rc { app.run() };
+
+	fmt::print("demo1 main exit\n");
+
+	return rc;
 }
 
 

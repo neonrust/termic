@@ -40,7 +40,7 @@ struct App
 	Screen &screen() { return _screen; }
 
 private:
-	void shutdown();
+	void shutdown(int rc=0);
 
 	bool dispatch_event(const event::Event &e);
 
