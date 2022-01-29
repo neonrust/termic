@@ -18,7 +18,7 @@ struct App
 	friend void app_atexit();
 
 	App(Options opts=Defaults);
-	~App();
+	virtual ~App();
 
 	operator bool() const;
 
