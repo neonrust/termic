@@ -14,6 +14,7 @@ namespace color
 {
 struct Sampler;
 }
+struct UV;
 
 struct Canvas
 {
@@ -27,8 +28,8 @@ struct Canvas
 	void fill(Rectangle rect, Color c);
 	void fill(Rectangle rect, const color::Sampler *s, float sampler_angle=0);
 
-	void filter(std::function<void(Look &)> f);
-	void filter(Rectangle rect, std::function<void(Look &)> f);
+	void filter(std::function<void (Look &, UV)> f);
+	void filter(Rectangle rect, std::function<void(Look &, UV)> f);
 	void fade(float blend=0.5f);
 	void fade(Color fg=color::Black, Color bg=color::Black, float blend=0.5f);
 	void fade(Rectangle rect, float blend=0.5f);

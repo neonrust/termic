@@ -27,9 +27,9 @@ void LinearGradient::set_offset(float offset)
 	_offset = offset;
 }
 
-Color LinearGradient::sample(float u, float v, float angle) const
+Color LinearGradient::sample(UV uv, float angle) const
 {
-	assert(u >= 0.f and u <= 1.f and v >= 0.f and v <= 1.f);
+	assert(uv.u >= 0.f and uv.u <= 1.f and uv.v >= 0.f and uv.v <= 1.f);
 
 	if(_num_colors == 1)
 		return _colors[0];
@@ -42,23 +42,23 @@ Color LinearGradient::sample(float u, float v, float angle) const
 	if(degrees >= 270)
 	{
 		degrees = 360 - degrees;
-		v = 1.f - v;
+		uv.v = 1.f - uv.v;
 	}
 	else if(degrees >= 180)
 	{
 		degrees = degrees - 180;
-		u = 1.f - u;
-		v = 1.f - v;
+		uv.u = 1.f - uv.u;
+		uv.v = 1.f - uv.v;
 	}
 	else if(degrees >= 90)
 	{
 		degrees = 180 - degrees;
-		u = 1.f - u;
+		uv.u = 1.f - uv.u;
 	}
 
 	auto radians = degrees*deg2rad;
 
-	auto alpha = u*std::cos(-radians) - v*std::sin(-radians);
+	auto alpha = uv.u*std::cos(-radians) - uv.v*std::sin(-radians);
 
 	if(alpha == 0.f)
 		return _colors[0];

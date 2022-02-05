@@ -114,7 +114,6 @@ int main()
 		screen.print(Right, { width - 1, 3 }, "This text is right-aligned", color::Black);
 
 		canvas.fade({ { 10, 5 }, { 20, 10 } });
-
 		canvas.fade({ { 35, 13 }, { 15, 8 } }, color::Green, color::Red);
 
 		if(g_log) fmt::print(g_log, "render_demo\n");

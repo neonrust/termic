@@ -9,19 +9,24 @@
 namespace termic
 {
 
+struct UV
+{
+	float u;
+	float v;
+};
+
 namespace color
 {
-
 struct Sampler
 {
-	virtual Color sample(float u, float v, float angle=0) const = 0;
+	virtual Color sample(UV uv, float angle=0) const = 0;
 };
 
 struct Constant : public Sampler
 {
 	inline Constant(Color c) : _c(c) {};
 
-	inline Color sample(float, float, float) const override { return _c; }
+	inline Color sample(UV, float) const override { return _c; }
 
 private:
 	Color _c;
@@ -33,7 +38,7 @@ struct LinearGradient : public Sampler
 
 	void set_offset(float offset);
 
-	Color sample(float u, float v, float angle) const override;
+	Color sample(UV uv, float angle) const override;
 
 private:
 	Color _colors[16];
