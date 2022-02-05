@@ -30,7 +30,7 @@ struct Canvas
 
 	void filter(std::function<void (Look &, UV)> f);
 	void filter(Rectangle rect, std::function<void(Look &, UV)> f);
-	void fade(float blend=0.5f);
+	void fade(float blend);
 	void fade(Color fg=color::Black, Color bg=color::Black, float blend=0.5f);
 	void fade(Rectangle rect, float blend=0.5f);
 	void fade(Rectangle rect, Color fg, Color bg, float blend=0.5f);
