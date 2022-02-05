@@ -23,7 +23,7 @@ App::App(Options opts) :
 	assert(g_app == nullptr);
 	g_app = this;
 
-	init_terminal(opts);
+	term::init(STDIN_FILENO, STDOUT_FILENO, opts);
 	_initialized = true;
 
 	::atexit(app_atexit);
@@ -116,7 +116,7 @@ void App::shutdown(int rc)
 	if(_initialized)
 	{
 		_initialized = false;
-		restore_terminal();
+		term::restore(STDIN_FILENO, STDOUT_FILENO);
 	}
 }
 

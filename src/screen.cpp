@@ -1,6 +1,7 @@
 #include <termic/screen.h>
 #include <termic/utf8.h>
 #include <termic/text.h>
+#include <termic/terminal.h>
 
 #include <mk-wcwidth.h>
 
@@ -248,12 +249,7 @@ void Screen::update()
 
 Size Screen::get_terminal_size()
 {
-	::winsize size { 0, 0, 0, 0 };
-
-	if(::ioctl(_fd, TIOCGWINSZ, &size) < 0)
-		return { 0, 0 };
-
-	return { std::size_t(size.ws_col), std::size_t(size.ws_row) };
+	return term::get_size(_fd);
 }
 
 std::size_t Screen::measure(std::string_view s) const

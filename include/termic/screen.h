@@ -53,14 +53,15 @@ struct Screen //: public RegionI
 
 	void set_size(Size size);
 	inline Size size() const { return _back_buffer.size(); }
-	Size get_terminal_size();
 	inline Rectangle rect() const { return { { 0, 0 }, size() }; }
 
 	std::size_t measure(std::string_view s) const;
 
 private:
-	friend struct Canvas;
+	friend struct Canvas;  // direct access to internals
+	friend struct App;     // for get_terminal_size()  :(
 
+	Size get_terminal_size();
 	Cell &cell(Pos pos);
 	void set_cell(Pos pos, std::string_view ch, std::size_t width, Look lk=look::Default);
 	Pos cursor_move(Pos pos);

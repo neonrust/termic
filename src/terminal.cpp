@@ -55,7 +55,7 @@ namespace esc
 } // NS: esc
 
 
-ssize_t write(const std::string_view s);
+ssize_t write(int fd, const std::string_view s);
 
 using IOFlag = decltype(termios::c_lflag);
 // NOTE: make sure these flag bits does not overlap if used simultaneously
@@ -67,15 +67,18 @@ using IOFlag = decltype(termios::c_lflag);
 
 ::termios initial_settings; // this is here instead of .h to avoid extra includes (and only one app is supported anyway)
 
-bool modify_io_flags(bool set, IOFlag flags);
-bool clear_in_flags(IOFlag flags);
+bool modify_io_flags(int fd, bool set, IOFlag flags);
+bool clear_in_flags(int fd, IOFlag flags);
 
-bool init_terminal(Options opts)
+namespace term
 {
-	if(not isatty(STDIN_FILENO))
+
+bool init(int in_fd, int out_fd, Options opts)
+{
+	if(not isatty(in_fd))
 		return false;
 
-	if(::tcgetattr(STDIN_FILENO, &initial_settings) != 0)
+	if(::tcgetattr(in_fd, &initial_settings) != 0)
 		return false;
 
 	if(g_log) fmt::print(g_log, "   \x1b[2mterm >> turning off stdio synch...\x1b[m\n");
@@ -87,70 +90,82 @@ bool init_terminal(Options opts)
 	std::cout.tie(nullptr);
 
 	if(g_log) fmt::print(g_log, "   \x1b[2mterm >> clear termios flags..\x1b[m\n");
-	clear_in_flags(LocalEcho | LineBuffering);
+	clear_in_flags(in_fd, LocalEcho | LineBuffering);
 	//modify_io_flags(true, EightBit | CRtoLF);
 
 	if(g_log) fmt::print(g_log, "   \x1b[2mterm >> switching to alternate screen...\x1b[m\n");
-	write(esc::screen_alternate);
+	write(out_fd, esc::screen_alternate);
 
 	if((opts & NoSignalDecode) > 0)
 	{
 		if(g_log) fmt::print(g_log, "   \x1b[2mterm >> disabling signal sequence decoding...\x1b[m\n");
-		clear_in_flags(SignalDecoding);
+		clear_in_flags(in_fd, SignalDecoding);
 	}
 
 	if((opts & HideCursor) > 0)
 	{
 		if(g_log) fmt::print(g_log, "   \x1b[2mterm >> hiding cursor...\x1b[m\n");
-		write(esc::cursor_hide);
+		write(out_fd, esc::cursor_hide);
 	}
 	if((opts & MouseButtonEvents) > 0)
 	{
 		if(g_log) fmt::print(g_log, "   \x1b[2mterm >> enabling mouse button events...\x1b[m\n");
-		write(esc::mouse_buttons_on);
+		write(out_fd, esc::mouse_buttons_on);
 	}
 	if((opts & MouseMoveEvents) > 0)
 	{
 		if(g_log) fmt::print(g_log, "   \x1b[2mterm >> enabling mouse move events...\x1b[m\n");
-		write(esc::mouse_move_on);
+		write(out_fd, esc::mouse_move_on);
 	}
 	if((opts & FocusEvents) > 0)
 	{
 		if(g_log) fmt::print(g_log, "   \x1b[2mterm >> enabling focus events...\x1b[m\n");
-		write(esc::focus_on);
+		write(out_fd, esc::focus_on);
 	}
 
 	return true;
 }
 
-void restore_terminal()
+void restore(int in_fd, int out_fd)
 {
 	if(g_log) fmt::print(g_log, "\x1b[31;1mshutdown()\x1b[m\n");
 
-	::tcsetattr(STDIN_FILENO, TCSANOW, &initial_settings);
+	::tcsetattr(in_fd, TCSANOW, &initial_settings);
 
-	write(esc::focus_off);
-	write(esc::mouse_move_off);
-	write(esc::mouse_buttons_off);
-	write(esc::screen_normal);
-	write(esc::cursor_show);
+	write(out_fd, esc::focus_off);
+	write(out_fd, esc::mouse_move_off);
+	write(out_fd, esc::mouse_buttons_off);
+	write(out_fd, esc::screen_normal);
+	write(out_fd, esc::cursor_show);
 }
 
-ssize_t write(const std::string_view s)
+Size get_size(int fd)
 {
-	return ::write(STDOUT_FILENO, s.data(), s.size());
+	::winsize size { 0, 0, 0, 0 };
+
+	if(::ioctl(fd, TIOCGWINSZ, &size) < 0)
+		return { 0, 0 };
+
+	return { std::size_t(size.ws_col), std::size_t(size.ws_row) };
 }
 
-bool clear_in_flags(IOFlag flags)
+} // NS: term
+
+ssize_t write(int fd, const std::string_view s)
 {
-	return modify_io_flags(false, flags);
+	return ::write(fd, s.data(), s.size());
 }
 
-bool modify_io_flags(bool set, IOFlag flags)
+bool clear_in_flags(int fd, IOFlag flags)
+{
+	return modify_io_flags(fd, false, flags);
+}
+
+bool modify_io_flags(int fd, bool set, IOFlag flags)
 {
 	::termios settings;
 
-	if(::tcgetattr(STDIN_FILENO, &settings))
+	if(::tcgetattr(fd, &settings))
 		return false;
 
 	// NOTE: this only works if none of the flag bits overlap between lflags, cflags and iflags
@@ -180,7 +195,7 @@ bool modify_io_flags(bool set, IOFlag flags)
 			settings.c_lflag &= ~lflags;
 	}
 
-	if(::tcsetattr(STDIN_FILENO, TCSANOW, &settings))
+	if(::tcsetattr(fd, TCSANOW, &settings))
 		return false;
 
 	if(flags & LineBuffering)

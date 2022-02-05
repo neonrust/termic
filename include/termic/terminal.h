@@ -1,5 +1,7 @@
 #pragma once
 
+#include <termic/size.h>
+
 namespace termic
 {
 
@@ -13,13 +15,21 @@ enum Options
 	FocusEvents       = 1 << 3,
 	NoSignalDecode    = 1 << 16,
 };
+
 // bitwise OR of multiple 'Options' is still an 'Options'
 inline Options operator | (Options a, Options b)
 {
 	return static_cast<Options>(static_cast<int>(a) | static_cast<int>(b));
 }
 
-bool init_terminal(Options opts);
-void restore_terminal();
+namespace term
+{
+
+bool init(int in_fd, int out_fd, Options opts);
+void restore(int in_fd, int out_fd);
+
+Size get_size(int fd);
+
+} // NS: term
 
 } // NS: termicic
