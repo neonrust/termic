@@ -60,7 +60,7 @@ void ScreenBuffer::clear(Rectangle rect, Color bg, Color fg, bool content)
 	}
 }
 
-const Cell &ScreenBuffer::cell(std::size_t x, std::size_t y) const
+Cell &ScreenBuffer::cell(std::size_t x, std::size_t y)
 {
 	assert(x < _width and y < _height);
 

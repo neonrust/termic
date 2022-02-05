@@ -374,6 +374,11 @@ void Screen::cursor_style(Style style)
 	}
 }
 
+Cell &Screen::cell(Pos pos)
+{
+	return _back_buffer.cell(pos.x, pos.y);
+}
+
 void Screen::set_cell(Pos pos, std::string_view ch, std::size_t width, Look lk)
 {
 	_back_buffer.set_cell(pos, ch, width, lk);
