@@ -151,7 +151,11 @@ int main()
 		else if(k.key == key::UP and k.modifiers == key::NoMod)
 			offset += 0.02f;
 		else if(k.key == key::DOWN and k.modifiers == key::NoMod)
+		{
 			offset -= 0.02f;
+			if(offset < 0)
+				offset += 1.f;
+		}
 
 		render_demo(k.key, k.modifiers);
 	});
