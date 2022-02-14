@@ -15,6 +15,7 @@ using namespace fmt::literals;
 #include <sys/ioctl.h>
 #include <assert.h>
 
+static const std::size_t g_tab_width { 8 };
 
 
 namespace termic
@@ -115,11 +116,39 @@ std::size_t Screen::print(Pos pos, std::string_view s, Look lk)
 
 	auto cx = pos.x;
 
-	auto total_width { 0ul };
+	auto max_width { 0ul };
+	auto curr_width { 0ul };
 
 	auto s_end = utf8::end(s);
 	for(auto iter = utf8::begin(s); iter != s_end; ++iter)
 	{
+		if(iter->codepoint == '\n')
+		{
+			max_width = std::max(max_width, curr_width);
+			curr_width = 0;
+			cx = pos.x;
+			++pos.y;
+			go_to(pos);
+			continue;
+		}
+		if(iter->codepoint == '\t')
+		{
+			// advance 'pos' to next tab stop
+			const auto tab_skip = ((cx / g_tab_width) + 1) * g_tab_width - cx;
+			curr_width += tab_skip;
+//			if(g_log) fmt::print(g_log, "tab: {}  cx: {} -> {}\n", tab_skip, cx, pos.x + curr_width);
+			cx = pos.x + curr_width;
+
+			go_to(pos);
+			continue;
+		}
+		if(iter->codepoint == '\v')  // vertical tab (next line w/o carriage return)
+		{
+			++pos.y;
+			go_to(pos);
+			continue;
+		}
+
 		if(cx >= width)
 		{
 			if(g_log) fmt::print(g_log, "print: off-screen: x  ({})\n", cx);
@@ -128,7 +157,6 @@ std::size_t Screen::print(Pos pos, std::string_view s, Look lk)
 
 		const auto chwidth = static_cast<std::size_t>(std::max(0, ::mk_width(iter->codepoint)));
 
-//		if(g_log) fmt::print(g_log, "cx: {}  ch: {} \\u{:04x} @ {} -> width: {}\n", cx, iter->sequence, iter->codepoint, iter->index, width);
 
 		_back_buffer.set_cell({ cx, pos.y }, iter->sequence, chwidth, lk);
 
@@ -139,14 +167,18 @@ std::size_t Screen::print(Pos pos, std::string_view s, Look lk)
 			_back_buffer.set_cell({ cx + 1, pos.y }, space, 0, lk);
 		}
 
-		total_width += chwidth;
+		curr_width += chwidth;
 
 		cx += static_cast<std::size_t>(chwidth);
+
+		if(g_log) fmt::print(g_log, "{} width: {} -> cx: {}\n", iter->index, chwidth, cx);
 	}
 
-	_client_cursor.x += total_width;
+	_client_cursor.x += curr_width;
 
-	return total_width;
+	max_width = std::max(max_width, curr_width);
+
+	return max_width;
 }
 
 void Screen::clear(Color bg, Color fg)

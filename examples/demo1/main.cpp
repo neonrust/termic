@@ -80,6 +80,7 @@ int main()
 		const auto &[width, height] = screen.size();
 
 		screen.print({ 10, 14 }, "Termic rainbow demo!", color::White);
+
 		gradient.set_offset(offset);
 		canvas.fill(&gradient, rotation);
 		screen.print({ width/2 - 3, 10 }, "TERMIC", color::Green);
@@ -108,6 +109,8 @@ int main()
 						 color::White
 						);
 
+		screen.print({0, 23}, "┏━━━━━━━┳━━━━━━━┳━━━━━━━┳┅", color::Black);
+		screen.print({ 0, 24 }, "First line\nSecond line\ttabbed\n3rd\ttabbed\ttab2\vvtab", { color::Pink, color::Purple });
 
 		screen.print(Left, { 0, 1 }, "This text is left-aligned", color::Black);
 		screen.print(Center, { width/2, 2 }, "This text is center-aligned", color::Black);
