@@ -129,6 +129,7 @@ struct Look
 {
 	inline Look() : fg(color::Default), style(style::Default), bg(color::Default) {}
 	inline Look(Color fg, Style style=style::Default, Color bg=color::NoChange) : fg(fg), style(style), bg(bg) {}
+	inline Look(Color fg, Color bg, Style style=style::Default) : fg(fg), style(style), bg(bg) {}
 
 	Color fg    { color::Default };
 	Style style { style::Default };
