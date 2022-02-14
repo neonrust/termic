@@ -107,7 +107,7 @@ std::size_t Screen::print(Pos pos, std::string_view s, Look lk)
 {
 	const auto &[width, height] = size();
 
-	if(pos.y >=height)
+	if(pos.y >= height)
 	{
 		if(g_log) fmt::print(g_log, "print: off-screen: y  ({})\n", pos.y);
 		return 0;
@@ -128,23 +128,24 @@ std::size_t Screen::print(Pos pos, std::string_view s, Look lk)
 			curr_width = 0;
 			cx = pos.x;
 			++pos.y;
+			if(pos.y >= height)
+				break;
 			go_to(pos);
 			continue;
 		}
-		if(iter->codepoint == '\t')
+		if(iter->codepoint == '\t')  // jump to next tab stop
 		{
-			// advance 'pos' to next tab stop
 			const auto tab_skip = ((cx / g_tab_width) + 1) * g_tab_width - cx;
 			curr_width += tab_skip;
-//			if(g_log) fmt::print(g_log, "tab: {}  cx: {} -> {}\n", tab_skip, cx, pos.x + curr_width);
 			cx = pos.x + curr_width;
-
 			go_to(pos);
 			continue;
 		}
 		if(iter->codepoint == '\v')  // vertical tab (next line w/o carriage return)
 		{
 			++pos.y;
+			if(pos.y >= height)
+				break;
 			go_to(pos);
 			continue;
 		}
