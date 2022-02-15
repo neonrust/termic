@@ -92,15 +92,17 @@ std::size_t Screen::print(Pos pos, std::size_t wrap_width, std::string_view s, L
 
 	const auto lines = text::wrap(s, wrap_width);
 
+	auto start_y = pos.y;
+
 	for(const auto &line: lines)
 	{
 		print(pos, line, lk);
-		++pos.y;
+		pos.y = _client_cursor.y + 1;
 		if(pos.y >= height)
 			break;
 	}
 
-	return lines.size();
+	return _client_cursor.y - start_y + 1;
 }
 
 std::size_t Screen::print(Pos pos, std::string_view s, Look lk)
@@ -146,7 +148,7 @@ std::size_t Screen::print(Pos pos, std::string_view s, Look lk)
 			++pos.y;
 			if(pos.y >= height)
 				break;
-			go_to(pos);
+			go_to({ pos.x, pos.y });
 			continue;
 		}
 
