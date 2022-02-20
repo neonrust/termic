@@ -4,8 +4,8 @@
 #include <csignal>
 
 #include <sys/ioctl.h>
+#include <sys/timerfd.h>
 #include <assert.h>
-
 
 namespace termic
 {
@@ -32,6 +32,8 @@ App::App(Options opts) :
 	std::signal(SIGABRT, signal_received);
 	std::signal(SIGFPE, signal_received);
 	std::signal(SIGWINCH, signal_received);
+
+	_input.timer.connect(on_timer);
 }
 
 void app_atexit()
@@ -49,6 +51,47 @@ App::~App()
 App::operator bool() const
 {
 	return _initialized;
+}
+
+void App::set_timer_interval(std::chrono::duration<std::uint64_t> duration)
+{
+	if(duration.count() == 0)
+	{
+		clear_timer();
+		return;
+	}
+
+	if(_timer_fd == 0)
+		_timer_fd = ::timerfd_create(CLOCK_MONOTONIC, 0);
+
+	const auto seconds = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
+	const auto nano_seconds = std::chrono::duration_cast<std::chrono::seconds>(duration - std::chrono::seconds(seconds)).count();
+
+	::itimerspec timer_interval {
+			.it_interval = {
+			.tv_sec = seconds,
+			.tv_nsec = nano_seconds,
+		},
+		.it_value = {
+			.tv_sec = seconds,
+			.tv_nsec = nano_seconds,
+		}
+	};
+
+	_input.set_timer_fd(_timer_fd);
+
+		int rc = ::timerfd_settime(_timer_fd, 0, &timer_interval, nullptr);
+	assert(rc == 0);
+}
+
+void App::clear_timer()
+{
+	if(_timer_fd)
+		::close(_timer_fd);
+
+	_timer_fd = 0;
+
+	_input.set_timer_fd(0);
 }
 
 int App::run()

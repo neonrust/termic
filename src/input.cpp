@@ -35,7 +35,7 @@ static constexpr auto focus_in { "\x1b[I"sv };
 static constexpr auto focus_out { "\x1b[O"sv };
 
 
-Input::Input(std::istream &s) :
+Input::Input(std::istream &s) : // TODO: use file descriptor instead
     _in(s)
 {
     setup_keys();
@@ -48,29 +48,68 @@ void Input::set_double_click_duration(float duration)
 
 std::vector<event::Event> Input::read()
 {
-	if(_in.rdbuf()->in_avail() == 0)
+	// TODO: use file descriptor instead
+	//std::size_t avail { 0 };
+	//::ioctl(_in, FIONREAD, &avail);
+	if(_in.rdbuf()->in_avail() == 0) // TODO: use file descriptor instead
 	{
-		// no data yet, wait for data to arrive, but allow interruptions
-		static pollfd pollfds = {
-		    .fd = STDIN_FILENO,
-		    .events = POLLIN,
-		    .revents = 0,
+		// no data yet, wait for data to arrive
+
+		static pollfd pollfds[2] = {
+			{
+				.fd = STDIN_FILENO,  // TODO: '_in' when it's a file descriptor
+				.events = POLLIN,
+				.revents = 0,
+			},
 		};
+
+		const auto timer_enabled = _timer_fd > 0;
+
+		if(timer_enabled)
+		{
+			// timer is enabled, check that fd as well
+			pollfds[1] = {
+				.fd = _timer_fd,
+				.events = POLLIN,
+				.revents = 0,
+			};
+		}
+
 		sigset_t sigs;
 		sigemptyset(&sigs);
-		int rc = ::ppoll(&pollfds, 1, nullptr, &sigs);
-		if(rc == -1 and errno == EINTR)  // something more urgent came up
-			return {};
+
+		while(true)
+		{
+			pollfds[0].revents = 0;
+			pollfds[1].revents = 0;
+
+			int rc = ::ppoll(pollfds, 1 + (timer_enabled? 1: 0), nullptr, &sigs);
+			if(rc == -1 and errno == EINTR)  // something more urgent came up
+				return {};
+
+			if(timer_enabled and pollfds[1].revents > 0)
+			{
+				timer();
+				// reset timer event
+				static std::uint64_t count { 0 };
+				::read(_timer_fd, &count, sizeof(count)); // reads the number of times it has triggered, but we don't care
+			}
+			else
+			{
+				if(g_log) fmt::print(g_log, "[0]revents: {} timer_enabled: {} \n", pollfds[0].revents, timer_enabled);
+				break; // stdin FD was triggered
+			}
+		}
 	}
 
 	std::string in;
-	in.resize(std::size_t(_in.rdbuf()->in_avail()));
+	in.resize(std::size_t(_in.rdbuf()->in_avail()));  // TODO: use file descriptor instead
 
-	_in.read(in.data(), int(in.size()));
+	_in.read(in.data(), int(in.size()));  // TODO: use file descriptor instead
 
 	auto revert = [this](const std::string_view chars) {
 		for(auto iter = chars.rbegin(); iter != chars.rend(); iter++)
-			_in.putback(*iter);
+			_in.putback(*iter);  // TODO: use file descriptor instead
 	};
 
 

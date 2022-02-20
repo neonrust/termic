@@ -9,6 +9,8 @@
 
 #include <signals.hpp>
 
+#include <chrono>
+
 namespace termic
 {
 
@@ -19,6 +21,9 @@ struct App
 
 	App(Options opts=Defaults);
 	virtual ~App();
+
+	void set_timer_interval(std::chrono::duration<std::uint64_t> duration);
+	void clear_timer();
 
 	operator bool() const;
 
@@ -33,11 +38,14 @@ struct App
 	fteng::signal<void(const event::Resize)> on_resize_event;
 	fteng::signal<void(const event::Focus)> on_focus_event;
 
+	fteng::signal<void()> on_timer;
+
 	virtual int run();
 
 	void quit();
 
 	Screen &screen() { return _screen; }
+
 
 private:
 	void shutdown(int rc=0);
@@ -49,6 +57,8 @@ private:
 private:
 	Input _input;
 	Screen _screen;
+
+	int _timer_fd { 0 };
 
 	bool _emit_resize_event { false };
 	std::vector<event::Event> _internal_events;

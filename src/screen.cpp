@@ -174,7 +174,7 @@ std::size_t Screen::print(Pos pos, std::string_view s, Look lk)
 
 		cx += static_cast<std::size_t>(chwidth);
 
-		if(g_log) fmt::print(g_log, "{} width: {} -> cx: {}\n", iter->index, chwidth, cx);
+//		if(g_log) fmt::print(g_log, "{} width: {} -> cx: {}\n", iter->index, chwidth, cx);
 	}
 
 	_client_cursor.x += curr_width;
