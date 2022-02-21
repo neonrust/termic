@@ -92,13 +92,11 @@ std::vector<event::Event> Input::read()
 				timer();
 				// reset timer event
 				static std::uint64_t count { 0 };
-				::read(_timer_fd, &count, sizeof(count)); // reads the number of times it has triggered, but we don't care
+				[[maybe_unused]] auto n = ::read(_timer_fd, &count, sizeof(count)); // reads the number of times it has triggered, which we don't care about
+				assert(n == 8);
 			}
 			else
-			{
-				if(g_log) fmt::print(g_log, "[0]revents: {} timer_enabled: {} \n", pollfds[0].revents, timer_enabled);
 				break; // stdin FD was triggered
-			}
 		}
 	}
 
@@ -108,6 +106,7 @@ std::vector<event::Event> Input::read()
 	_in.read(in.data(), int(in.size()));  // TODO: use file descriptor instead
 
 	auto revert = [this](const std::string_view chars) {
+		// put the read bytes back into the buffer (we'll read them next time)
 		for(auto iter = chars.rbegin(); iter != chars.rend(); iter++)
 			_in.putback(*iter);  // TODO: use file descriptor instead
 	};

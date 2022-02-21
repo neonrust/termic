@@ -22,7 +22,7 @@ struct App
 	App(Options opts=Defaults);
 	virtual ~App();
 
-	void set_timer_interval(std::chrono::duration<std::uint64_t> duration);
+	void set_timer_interval(std::chrono::nanoseconds duration);
 	void clear_timer();
 
 	operator bool() const;

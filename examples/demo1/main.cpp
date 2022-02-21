@@ -4,15 +4,19 @@
 #include <termic/utf8.h>
 using namespace termic;
 
-#include <tuple>
 #include <fmt/core.h>
 #include <fmt/format.h>
 using namespace fmt::literals;
 #include <variant>
-#include <cmath>
 
+#include <cmath>
+#include <numbers>
+
+#include <tuple>
+#include <chrono>
 #include <string>
 using namespace std::literals;
+using namespace std::literals::chrono_literals;
 
 #include <mk-wcwidth.h>
 
@@ -52,7 +56,11 @@ int main()
 	if(not app)
 		return 1;
 
-	Canvas canvas(app.screen());
+	app.set_timer_interval(100ms);
+
+	Screen &screen { app.screen() };
+
+	Canvas canvas { screen };
 	color::LinearGradient gradient({
 		color::Black,
 		color::rgb(180, 180, 20),
@@ -65,16 +73,14 @@ int main()
 		color::Black,
 	});
 
-	float rotation { 45 };
+	float rotation { 46 };
 	float offset { 0 };
 
-	auto render_demo = [&app, &rotation, &gradient, &offset](key::Key key=key::None, key::Modifier mods=key::NoMod, const event::MouseButton *mb=nullptr) {
+	const auto start_time = std::chrono::high_resolution_clock::now();
 
-		auto &screen = app.screen();
+	auto render_demo = [&screen, &rotation, &gradient, &offset, & start_time](key::Key key=key::None, key::Modifier mods=key::NoMod, const event::MouseButton *mb=nullptr) {
+
 		screen.clear();
-		(void)key;
-		(void)mods;
-		(void)mb;
 
 		Canvas canvas(screen);
 		const auto &[width, height] = screen.size();
@@ -116,16 +122,24 @@ int main()
 		screen.print(Center, { width/2, 2 }, "This text is center-aligned", color::Black);
 		screen.print(Right, { width - 1, 3 }, "This text is right-aligned", color::Black);
 
-		canvas.fade({ { 10, 5 }, { 20, 10 } });
-		canvas.filter({ { 35, 8 }, { 30, 15 } }, [](Look &lk, UV uv) {
+		const auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start_time).count();
+		const float angle =  float(std::numbers::pi*float(elapsed)/2000.f);
+		const Pos blob_pos {
+			25 + std::size_t(std::sin(angle*1.35f)*15),
+			10 + std::size_t(std::sin(angle + 0.3f)*7),
+		};
+		canvas.filter({ blob_pos, { 50, 25 } }, [](Look &lk, UV uv) {
 			// center uv around origin
 			uv.u = (uv.u - 0.5f)*2.0f;
 			uv.v = (uv.v - 0.5f)*2.0f;
 			lk.bg = color::lerp(lk.bg, color::Green, 1 - std::sqrt(uv.u*uv.u + uv.v*uv.v));
 		});
+		canvas.fade({ { 10, 5 }, { 20, 10 } });
 
-		if(g_log) fmt::print(g_log, "render_demo\n");
+		//if(g_log) fmt::print(g_log, "render_demo\n");
 	};
+
+	app.on_timer.connect(render_demo);
 
 //	app.on_app_start.connect([&render_demo]() {
 //		render_demo();
@@ -168,25 +182,25 @@ int main()
 	});
 	app.on_mouse_move_event.connect([&app](const event::MouseMove &mm) {
 //		fmt::print(g_log, "[main]  mouse: {},{}\n", mm.x, mm.y);
+		if(false)
+		{
+			auto &screen = app.screen();
+			Canvas canvas(screen);
+			screen.clear();
 
-		auto &screen = app.screen();
-		Canvas canvas(screen);
-		screen.clear();
+			const auto mmx = mm.x;
 
-		const auto mmx = mm.x;
+			const auto &[width, height] = screen.size();
 
-		const auto &[width, height] = screen.size();
+			static const color::LinearGradient shade { color::rgb(20, 20, 20), color::rgb(64, 64, 64) };
 
-		static const color::LinearGradient shade { color::rgb(20, 20, 20), color::rgb(64, 64, 64) };
+			const auto wrap_width = mmx + 1;
+			Rectangle rect { { 0, 0 }, { wrap_width, height } };
+			canvas.fill(rect, &shade);
+			screen.print({ 0, 0 }, wrap_width, "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.", color::White);
 
-		const auto wrap_width = mmx + 1;
-		Rectangle rect { { 0, 0 }, { wrap_width, height } };
-		canvas.fill(rect, &shade);
-//		screen.print({ 0, 0 }, wrap_width, "This text   is testing word-wrapping, yeah.", color::White);
-		screen.print({ 0, 0 }, wrap_width, "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.", color::White);
-//		screen.print({ 0, 0 }, wrap_width, "word-wrapping,", color::White);
-
-		screen.print(Right, { width - 1, 0 }, "width: {}  ({}, {})"_format(wrap_width, mmx, mm.y));
+			screen.print(Right, { width - 1, 0 }, "width: {}  ({}, {})"_format(wrap_width, mmx, mm.y));
+		}
 	});
 	app.on_mouse_button_event.connect([&render_demo](const event::MouseButton &mb) {
 		fmt::print(g_log, "[main] button: {} {} @ {},{}\n",

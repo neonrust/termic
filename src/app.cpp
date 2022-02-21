@@ -2,6 +2,8 @@
 #include <termic/terminal.h>
 
 #include <csignal>
+#include <chrono>
+using namespace std::literals::chrono_literals;
 
 #include <sys/ioctl.h>
 #include <sys/timerfd.h>
@@ -33,7 +35,10 @@ App::App(Options opts) :
 	std::signal(SIGFPE, signal_received);
 	std::signal(SIGWINCH, signal_received);
 
-	_input.timer.connect(on_timer);
+	_input.timer.connect([this]() {
+		on_timer();
+		_screen.update();
+	});
 }
 
 void app_atexit()
@@ -53,9 +58,11 @@ App::operator bool() const
 	return _initialized;
 }
 
-void App::set_timer_interval(std::chrono::duration<std::uint64_t> duration)
+using std::chrono::duration_cast;
+
+void App::set_timer_interval(std::chrono::nanoseconds ns)
 {
-	if(duration.count() == 0)
+	if(ns.count() == 0)
 	{
 		clear_timer();
 		return;
@@ -64,23 +71,22 @@ void App::set_timer_interval(std::chrono::duration<std::uint64_t> duration)
 	if(_timer_fd == 0)
 		_timer_fd = ::timerfd_create(CLOCK_MONOTONIC, 0);
 
-	const auto seconds = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
-	const auto nano_seconds = std::chrono::duration_cast<std::chrono::seconds>(duration - std::chrono::seconds(seconds)).count();
+	const auto seconds = duration_cast<std::chrono::seconds>(ns);
+	const auto nano_seconds = duration_cast<std::chrono::nanoseconds>(ns - seconds);
 
-	::itimerspec timer_interval {
-			.it_interval = {
-			.tv_sec = seconds,
-			.tv_nsec = nano_seconds,
-		},
-		.it_value = {
-			.tv_sec = seconds,
-			.tv_nsec = nano_seconds,
-		}
+	const ::timespec ts {
+		.tv_sec = seconds.count(),
+		.tv_nsec = nano_seconds.count(),
+	};
+
+	const ::itimerspec timer_interval {
+		.it_interval = ts,
+		.it_value = ts,
 	};
 
 	_input.set_timer_fd(_timer_fd);
 
-		int rc = ::timerfd_settime(_timer_fd, 0, &timer_interval, nullptr);
+	[[maybe_unused]] int rc = ::timerfd_settime(_timer_fd, 0, &timer_interval, nullptr);
 	assert(rc == 0);
 }
 
@@ -149,6 +155,7 @@ int App::run()
 
 void App::quit()
 {
+	set_timer_interval(0ms);
 	_should_quit = true;
 }
 
