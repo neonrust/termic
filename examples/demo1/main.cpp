@@ -136,6 +136,9 @@ int main()
 		});
 		canvas.fade({ { 10, 5 }, { 20, 10 } });
 
+
+		screen.clear({ { 60, 10 }, { 6, 3 } }, color::Default);
+
 		//if(g_log) fmt::print(g_log, "render_demo\n");
 	};
 

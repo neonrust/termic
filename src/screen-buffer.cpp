@@ -35,7 +35,7 @@ void ScreenBuffer::clear(Rectangle rect, Color bg, Color fg, bool content)
 
 	auto row_iter = _buffer.begin() + int(rect.top_left.y * _width);
 
-	for(auto y = rect.top_left.y; y <= rect.top_left.y + rect.size.height - 1 and y < height; ++y, ++row_iter)
+	for(auto y = rect.top_left.y; y <= rect.top_left.y + rect.size.height - 1 and y < height; ++y, std::advance(row_iter, _width))
 	{
 		auto col_iter = row_iter + int(rect.top_left.x);
 
