@@ -21,16 +21,16 @@ struct ScreenBuffer
 	void clear(Color bg, Color fg=color::NoChange, bool content=true);
 	void clear(Rectangle rect, Color bg, Color fg=color::NoChange, bool content=true);
 
-	Cell &cell(std::size_t x, std::size_t y);
+	Cell &cell(Pos pos);
 	void set_cell(Pos pos, std::string_view ch, std::size_t width, Look lk=look::Default);
 
 	ScreenBuffer &operator = (const ScreenBuffer &that);
 
-private:
-	using CellRow = std::vector<Cell>;
-	using CellRowRef = std::unique_ptr<CellRow>;
+	// if true, set_size() attempts to preserve existing content
+	bool preserve_content { false };
 
-	std::vector<CellRowRef> _rows;
+private:
+	std::vector<Cell> _buffer;
 
 	std::size_t _width { 0 };
 	std::size_t _height { 0 };

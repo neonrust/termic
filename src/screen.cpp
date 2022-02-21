@@ -51,6 +51,9 @@ static std::string safe(std::string_view s);
 Screen::Screen(int fd) :
 	_fd(fd)
 {
+	// try to preserve front buffer on resize (don't care about back buffer, though)
+	_front_buffer.preserve_content = true;
+
 	_output_buffer.append(fmt::format(esc::cup, 1, 1)); // go to origin (b/c default _cursor.pos = 0,0)
 }
 
@@ -233,8 +236,8 @@ void Screen::update()
 	{
 		for(std::size_t cx = 0; cx < size.width;)
 		{
-			auto &back_cell = _back_buffer.cell(cx, cy);
-			auto &front_cell = _front_buffer.cell(cx, cy);
+			auto &back_cell = _back_buffer.cell({ cx, cy });
+			auto &front_cell = _front_buffer.cell({ cx, cy });
 
 			if(back_cell != front_cell)
 			{
@@ -407,7 +410,7 @@ void Screen::cursor_style(Style style)
 
 Cell &Screen::cell(Pos pos)
 {
-	return _back_buffer.cell(pos.x, pos.y);
+	return _back_buffer.cell({ pos.x, pos.y });
 }
 
 void Screen::set_cell(Pos pos, std::string_view ch, std::size_t width, Look lk)

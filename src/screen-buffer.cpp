@@ -11,21 +11,18 @@ extern std::FILE *g_log;
 
 void ScreenBuffer::clear(Color bg, Color fg, bool content)
 {
-	for(auto &row: _rows)
+	for(auto &cell: _buffer)
 	{
-		for(auto &cell: *row)
+		if(content)
 		{
-			if(content)
-			{
-				cell.ch[0] = '\0';
-				cell.width = 1;
-			}
-			if(fg != color::NoChange)
-				cell.fg = fg;
-			if(bg != color::NoChange)
-				cell.bg = bg;
-			cell.style = style::Default;
+			cell.ch[0] = '\0';
+			cell.width = 1;
 		}
+		if(fg != color::NoChange)
+			cell.fg = fg;
+		if(bg != color::NoChange)
+			cell.bg = bg;
+		cell.style = style::Default;
 	}
 }
 
@@ -36,11 +33,11 @@ void ScreenBuffer::clear(Rectangle rect, Color bg, Color fg, bool content)
 
 	const auto &[width, height] = size();
 
-	auto row_iter = _rows.begin() + int(rect.top_left.y);
+	auto row_iter = _buffer.begin() + int(rect.top_left.y * _width);
 
 	for(auto y = rect.top_left.y; y <= rect.top_left.y + rect.size.height - 1 and y < height; ++y, ++row_iter)
 	{
-		auto col_iter = (*row_iter)->begin() + int(rect.top_left.x);
+		auto col_iter = row_iter + int(rect.top_left.x);
 
 		for(auto x = rect.top_left.x; x <= rect.top_left.x + rect.size.width - 1 and x < width; ++x, ++col_iter)
 		{
@@ -60,11 +57,9 @@ void ScreenBuffer::clear(Rectangle rect, Color bg, Color fg, bool content)
 	}
 }
 
-Cell &ScreenBuffer::cell(std::size_t x, std::size_t y)
+Cell &ScreenBuffer::cell(Pos pos)
 {
-	assert(x < _width and y < _height);
-
-	return _rows[y]->operator[](x);
+	return _buffer[pos.y*_width + pos.x];
 }
 
 void ScreenBuffer::set_cell(Pos pos, std::string_view ch, std::size_t width, Look lk)
@@ -72,7 +67,7 @@ void ScreenBuffer::set_cell(Pos pos, std::string_view ch, std::size_t width, Loo
 	if(pos.x >= _width or pos.y >= _height)
 		return;
 
-	auto &cell = _rows[pos.y]->operator[](pos.x);
+	auto &cell = this->cell(pos);
 
 	if(ch != Cell::NoChange)
 	{
@@ -94,15 +89,9 @@ void ScreenBuffer::set_cell(Pos pos, std::string_view ch, std::size_t width, Loo
 
 ScreenBuffer &ScreenBuffer::operator = (const ScreenBuffer &src)
 {
-	// since the rows are pointers, we need to copy row by row
-
 	assert(src.size().operator == (size()));
 
-	auto iter = _rows.begin();
-	auto src_iter = src._rows.begin();
-
-	while(iter != _rows.end())
-		*(*iter++) = *(*src_iter++);
+	_buffer = src._buffer;
 
 	return *this;
 }
@@ -114,29 +103,62 @@ void ScreenBuffer::set_size(Size new_size)
 	if(new_width == _width and new_height == _height)
 		return;
 
-	const bool initial = _width == 0 and _height == 0;
+	auto resized { false };
 
-	if(g_log) fmt::print(g_log, "resize: {}x{} -> {}x{}\n", _width, _height, new_width, new_height);
-
-	_rows.resize(new_height); // if shorter, removed rows will be deallocated by the smart pointer
-
-	if(new_height > _height)
+	if(preserve_content)
 	{
-		for(auto idx = _height; idx < new_height; ++idx) // if initial (re)size, all rows
+		const bool initial = _width == 0 and _height == 0;
+
+		if(g_log) fmt::print(g_log, "resize: {}x{} -> {}x{}\n", _width, _height, new_width, new_height);
+
+
+		if(not initial and new_width != _width)
 		{
-			auto new_row = std::make_unique<CellRow>(new_width);
-			//if(g_log) fmt::print(g_log, "resize:   adding row {} ({})\n", idx, new_row->size());
-			_rows[idx] = std::move(new_row);
+			// width changed (i.e. row stride changed),
+			//   we need to copy each row from the original to the new size
+			const auto copy = _buffer;
+
+			// resize to 0 and then to new size, to force all cells to default  (is there a better way?)
+			_buffer.resize(0);
+			_buffer.resize(new_height*new_width);
+			resized = true;
+
+			const auto copy_len = int(std::min(_width, new_width));
+
+			auto src_iter = copy.cbegin();
+			auto dst_iter = _buffer.begin();
+			for (auto y = 0u; y < std::min(new_height, _height); ++y, std::advance(dst_iter, new_width), std::advance(src_iter, _width))
+				std::copy(src_iter, src_iter + copy_len, dst_iter);
+		}
+
+		// set added rows to defaults
+		if(initial or new_height > _height)
+		{
+			_buffer.resize(new_height*new_width);
+			resized = true;
+
+			auto row_iter = _buffer.begin() + int(_height*_width);
+			for (auto y = _height; y < new_height; ++y, std::advance(row_iter, _width))
+			{
+				for(auto iter = row_iter; iter != row_iter + int(_width); ++iter)
+				{
+					auto &cell = *iter;
+
+					cell.ch[0] = '\0';
+					cell.width = 0;
+					cell.fg = color::Default;
+					cell.bg = color::Default;
+					cell.style = style::Default;
+				};
+			}
 		}
 	}
 
-	if(not initial and new_width != _width)  // if initial (re)size, we already did the required work above
+	if(not resized)
 	{
-		auto row_iter = _rows.begin();
-		// if taller: resize only the "old" rows; new rows are sized upon creation, above. if not, all rows
-		const auto num_rows = new_height > _height? _height: new_height;
-		for(std::size_t row = 0; row < num_rows; ++row)
-			(*row_iter++)->resize(new_width);
+		// resize to 0 and then to new size, to force all cells to default  (is there a better way?)
+		_buffer.resize(0);
+		_buffer.resize(new_height*new_width);
 	}
 
 	_width = new_width;
