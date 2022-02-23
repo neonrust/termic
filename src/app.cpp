@@ -53,6 +53,12 @@ App::~App()
 	this->shutdown();
 }
 
+App &App::the()
+{
+	assert(g_app != nullptr);
+	return *g_app;
+}
+
 App::operator bool() const
 {
 	return _initialized;

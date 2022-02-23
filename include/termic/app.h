@@ -22,6 +22,8 @@ struct App
 	App(Options opts=Defaults);
 	virtual ~App();
 
+	static App &the();
+
 	void set_timer_interval(std::chrono::nanoseconds duration);
 	void clear_timer();
 
