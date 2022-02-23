@@ -7,6 +7,8 @@
 #include <tuple>
 #include <variant>
 
+#include <fmt/format.h>
+using namespace fmt::literals;
 
 namespace termic
 {
@@ -18,6 +20,11 @@ struct Key
 {
 	key::Key key;
 	key::Modifier modifiers { key::NoMod };
+
+	inline std::string to_string() const
+	{
+		return key::to_string(key, modifiers);
+	}
 };
 struct Input
 {
@@ -76,6 +83,20 @@ struct MouseButton
 	std::size_t x;
 	std::size_t y;
 	key::Modifier modifiers { key::NoMod };
+
+	inline std::string to_string() const
+	{
+		std::string s;
+		s.reserve(15);
+
+		s.append(key::to_string(key::None, modifiers));
+
+		if(not s.empty())
+			s += '+';
+
+		return s.append("MouseButton{}{}"_format(released? "Up": (double_clicked? "Dbl": "Down"), button));
+	}
+
 };
 struct MouseWheel
 {
@@ -83,12 +104,43 @@ struct MouseWheel
 	std::size_t x;
 	std::size_t y;
 	key::Modifier modifiers { key::NoMod };
+
+	inline std::string to_string() const
+	{
+		std::string s;
+		s.reserve(15);
+
+		s.append(key::to_string(key::None, modifiers));
+
+		if(not s.empty())
+			s += '+';
+
+		return s.append("MouseWheel{}"_format(delta > 1? "Up": "Down"));
+	}
 };
 struct MouseMove
 {
 	std::size_t x;
 	std::size_t y;
 	key::Modifier modifiers { key::NoMod };
+
+	inline std::string to_string() const
+	{
+		std::string s;
+		s.reserve(15);
+
+		s.append(key::to_string(key::None, modifiers));
+
+		if(not s.empty())
+			s += '+';
+
+		// this is kind of useless
+		// TODO: what we might want is movement in any of the orthogonal directions
+		//   but that requires knowledge of where the mouse was before and its "general direction" (over a time window?)
+		//   something we obviously don't have here (yet).
+		//   the event encoder might included that information in the event...
+		return s.append("MouseMove{}-{}"_format(x, y));
+	}
 };
 struct Resize
 {
