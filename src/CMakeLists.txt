@@ -1,6 +1,5 @@
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-add_compile_options(-Wextra -Wall -Wpedantic -Wconversion -Werror -Wno-padded)
 
 set(lib_headers
 	../include/termic/app.h
@@ -44,6 +43,19 @@ set(lib_sources
 )
 
 add_library(termic STATIC ${lib_sources} ${lib_headers})
+
+target_compile_options(termic
+	PRIVATE
+	-Wextra
+	-Wall
+	-Wpedantic
+	-Werror
+	--pedantic-errors
+	-Wconversion
+	-Wmissing-declarations
+	-Wold-style-cast
+	-Wno-padded
+)
 
 # everyone need these include directories
 target_include_directories(termic PUBLIC ../extern/TheWisp-signals)

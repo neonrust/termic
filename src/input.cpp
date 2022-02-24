@@ -652,7 +652,7 @@ static std::string hex(std::string_view s)
 {
 	std::string res;
 	for(const auto &c: s)
-		res += "\\x{:02x}"_format((unsigned char)c);
+		res += "\\x{:02x}"_format(static_cast<unsigned char>(c));
 	return res;
 }
 
@@ -668,9 +668,9 @@ static std::string safe(std::string_view s)
 		else if(c == '\r')
 			res += "\\r";
 		else if(c >= 1 and c <= 26)
-			res += "^{:c}"_format(char(c + 'A' - 1));
+			res += "^{:c}"_format(static_cast<char>(c + 'A' - 1));
 		else if(c < 0x20)
-			res += "\\x{:02x}"_format((unsigned char)c);
+			res += "\\x{:02x}"_format(static_cast<unsigned char>(c));
 		else
 			res += c;
 	}

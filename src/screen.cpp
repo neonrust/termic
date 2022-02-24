@@ -441,7 +441,7 @@ void Screen::flush_buffer()
 		else if(c >= 1 and c <= 26)
 			res += fmt::format("\x1b[1m^{:c}\x1b[m", char(c + 'A' - 1));
 		else if(c < 0x20)
-			res += fmt::format("\x1b[1m\\x{:02x}\x1b[m", (unsigned char)c);
+			res += fmt::format("\x1b[1m\\x{:02x}\x1b[m", static_cast<unsigned char>(c));
 		else
 			res += c;
 	}

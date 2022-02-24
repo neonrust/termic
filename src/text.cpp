@@ -222,7 +222,7 @@ std::vector<Word> words(std::string_view s, std::function<int(char32_t)> char_wi
 // TODO: should use something established instead, e.g. https://github.com/DuffsDevice/tiny-utf8
 //   these functions are very slow, they always perform iteration from the beginning of the string
 
-std::size_t find_byte_offset(utf8::string_view s, std::size_t at)
+static std::size_t find_byte_offset(utf8::string_view s, std::size_t at)
 {
 	decltype(at) idx { 0 };
 	const auto s_end = utf8::end(s);
