@@ -1,3 +1,0 @@
-[submodule "extern/TheWisp-signals"]
-	path = extern/TheWisp-signals
-	url = git@github.com:TheWisp/signals.git

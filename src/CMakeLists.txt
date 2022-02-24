@@ -1,3 +1,5 @@
+include(FetchContent)
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -57,7 +59,20 @@ target_compile_options(termic
 	-Wno-padded
 )
 
+FetchContent_Declare(fmt GIT_REPOSITORY https://github.com/fmtlib/fmt.git GIT_TAG 8.1.1)
+FetchContent_MakeAvailable(fmt)
+
+FetchContent_Declare(signals GIT_REPOSITORY https://github.com/TheWisp/signals GIT_TAG 7ff59d1bc6387337ef34856a450be34cfa2c9e51)
+FetchContent_MakeAvailable(signals)
+
 # everyone need these include directories
-target_include_directories(termic PUBLIC ../extern/TheWisp-signals)
-target_include_directories(termic PUBLIC ../include)
+#target_include_directories(termic PUBLIC ../extern/TheWisp-signals)
+#target_include_directories(termic PUBLIC ../include)
 target_include_directories(termic PUBLIC ../extern/mk-wcwidth)
+
+target_include_directories(termic
+	PUBLIC
+	../include/
+	${fmt_SOURCE_DIR}/include
+	${signals_SOURCE_DIR}
+)

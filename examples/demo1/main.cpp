@@ -95,17 +95,17 @@ int main()
 
 		screen.print({ 10, 19 }, "0123456789", color::Grey);
 		const auto w = screen.print({ 10, 20 }, "利Ö治Aミ|", { color::White, style::Default, color::Black });
-		screen.print({ 10, 21 }, "width of above: {}"_format(w), { color::Grey, style::Default, color::Black });
+		screen.print({ 10, 21 }, fmt::format("width of above: {}", w), { color::Grey, style::Default, color::Black });
 
 		if(key != key::None)
 		{
 			const auto key_str = key::to_string(key, mods);
-			screen.print({ 25, 17 }, "Key pressed: {}"_format(key_str), color::White);
+			screen.print({ 25, 17 }, fmt::format("Key pressed: {}", key_str), color::White);
 		}
 
 		if(mb)
 			screen.print({ 25, 18 },
-						 "Mouse button {} {} @ {},{} mods: {}"_format(
+						 fmt::format("Mouse button {} {} @ {},{} mods: {}",
 							 mb->button,
 							 mb->double_clicked? "double-clicked": (mb->pressed? "pressed": "released"),
 							 mb->x,
@@ -202,7 +202,7 @@ int main()
 			canvas.fill(rect, &shade);
 			screen.print({ 0, 0 }, wrap_width, "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.", color::White);
 
-			screen.print(Right, { width - 1, 0 }, "width: {}  ({}, {})"_format(wrap_width, mmx, mm.y));
+			screen.print(Right, { width - 1, 0 }, fmt::format("width: {}  ({}, {})", wrap_width, mmx, mm.y));
 		}
 	});
 	app.on_mouse_button_event.connect([&render_demo](const event::MouseButton &mb) {

@@ -94,7 +94,7 @@ struct MouseButton
 		if(not s.empty())
 			s += '+';
 
-		return s.append("MouseButton{}{}"_format(released? "Up": (double_clicked? "Dbl": "Down"), button));
+		return s.append(fmt::format("MouseButton{}{}", released? "Up": (double_clicked? "Dbl": "Down"), button));
 	}
 
 };
@@ -115,7 +115,7 @@ struct MouseWheel
 		if(not s.empty())
 			s += '+';
 
-		return s.append("MouseWheel{}"_format(delta > 1? "Up": "Down"));
+		return s.append(fmt::format("MouseWheel{}", delta > 1? "Up": "Down"));
 	}
 };
 struct MouseMove
@@ -139,7 +139,7 @@ struct MouseMove
 		//   but that requires knowledge of where the mouse was before and its "general direction" (over a time window?)
 		//   something we obviously don't have here (yet).
 		//   the event encoder might included that information in the event...
-		return s.append("MouseMove{}-{}"_format(x, y));
+		return s.append(fmt::format("MouseMove{}-{}", x, y));
 	}
 };
 struct Resize

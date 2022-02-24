@@ -4,7 +4,7 @@
 #include <string_view>
 #include <unordered_set>
 #include <chrono>
-#include <nlohmann/json.hpp>
+
 #include <fmt/core.h>
 #include <fmt/format.h>
 using namespace fmt::literals;
@@ -12,6 +12,7 @@ using namespace fmt::literals;
 
 #include <signal.h>
 #include <poll.h>
+#include <assert.h>
 
 
 
@@ -652,7 +653,7 @@ static std::string hex(std::string_view s)
 {
 	std::string res;
 	for(const auto &c: s)
-		res += "\\x{:02x}"_format(static_cast<unsigned char>(c));
+		res += fmt::format("\\x{:02x}", static_cast<unsigned char>(c));
 	return res;
 }
 
@@ -668,9 +669,9 @@ static std::string safe(std::string_view s)
 		else if(c == '\r')
 			res += "\\r";
 		else if(c >= 1 and c <= 26)
-			res += "^{:c}"_format(static_cast<char>(c + 'A' - 1));
+			res += fmt::format("^{:c}", static_cast<char>(c + 'A' - 1));
 		else if(c < 0x20)
-			res += "\\x{:02x}"_format(static_cast<unsigned char>(c));
+			res += fmt::format("\\x{:02x}", static_cast<unsigned char>(c));
 		else
 			res += c;
 	}

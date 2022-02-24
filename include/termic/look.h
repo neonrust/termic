@@ -70,7 +70,7 @@ inline std::string escify(Color c)
 		return "9";
 
 	// TODO: generate 256 or "classic" colors if 24-bit isn't supported
-	return "8;2;{};{};{}"_format(color::red(c), color::green(c), color::blue(c));
+	return fmt::format("8;2;{};{};{}", color::red(c), color::green(c), color::blue(c));
 }
 
 
