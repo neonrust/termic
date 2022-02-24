@@ -18,20 +18,22 @@ for support).  This might change later, but I don't have a need for
 it, personally.
 
 termic also assumes that the terminal supports "standard" escape
-sequences. It does not use the terminfo
-database. https://en.wikipedia.org/wiki/ANSI_escape_code was used as
-reference.
+sequences (it does not use terminfo):
+
+https://en.wikipedia.org/wiki/ANSI_escape_code
 
 
 ## Dependencies
 
 Some C++20 features might be used somewhere, but C++17 is definitely required.
 
-* libfmt  (actually not, but currently used for debug logging)
-* TheWhisp signals  (vendored, header-only)
+* libfmt    (actually not, but currently used for debug logging)
+* TheWisp signals       (header-only)
 
 
 ## Example
+
+A minuimal example of a simple application:
 
 ```c++
 #include <termic/app.h>
@@ -40,7 +42,7 @@ void main()
 {
   using namespace termic;
 
-  App app(Fullscreen | HideCursor | MouseEvents);
+  App app(HideCursor);
   if(not app)
     return 1;
 
@@ -49,14 +51,11 @@ void main()
     app.screen().clear();
     app.screen().print(
       { 10, 10 },              // x, y position (zero-based)
-      fmt::format("Hello, world!  key: {}", key::to_string(k.key, k.modifiers)),
-      color::White,            // foreground color (default: default terminal text color)
-      color::rgb(30, 120, 20), // background color (default: default terminal color)
-      style::Bold,             // style (default: normal)
+      fmt::format("Hello, world!  key: {}", k.to_string())
 	);
 
     // exit the app if escape is pressed
-    if(k.key == key::ESCAPE and k.modifiers == key::NoMod)
+    if(k.key == key::ESCAPE and not k.modifiers)
       app.quit();
   });
 
