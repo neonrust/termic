@@ -1,6 +1,6 @@
 # https://gitlab.com/CLIUtils/modern-cmake/-/tree/master/examples/extended-project
 
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.11)
 
 project(termic
 	VERSION 0.1
