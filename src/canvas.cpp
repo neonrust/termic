@@ -77,13 +77,11 @@ void Canvas::filter(Rectangle rect, std::function<void (Look &, UV)> f)
 			const float v = static_cast<float>(y - rect.top_left.y + 1) / float(rect.size.height);
 
 			auto &cell = _scr.cell({ x, y });
-			Look lk { cell.fg, cell.style, cell.bg };
+			Look lk { cell.look };
 
 			f(lk, UV{ u, v });
 
-			cell.fg = lk.fg;
-			cell.style = lk.style;
-			cell.bg = lk.bg;
+			cell.look = lk;
 		}
 	}
 }

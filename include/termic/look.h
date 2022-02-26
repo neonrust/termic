@@ -131,6 +131,11 @@ struct Look
 	inline Look(Color fg, Style style=style::Default, Color bg=color::NoChange) : fg(fg), style(style), bg(bg) {}
 	inline Look(Color fg, Color bg, Style style=style::Default) : fg(fg), style(style), bg(bg) {}
 
+	inline bool operator == (const Look &other) const
+	{
+		return fg == other.fg and style == other.style and bg == other.bg;
+	}
+
 	Color fg    { color::Default };
 	Style style { style::Default };
 	Color bg    { color::NoChange };

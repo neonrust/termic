@@ -18,6 +18,7 @@ enum Alignment
 
 //struct RegionI
 //{
+//  virtual Rectangle rect() const = 0;
 //	virtual inline void clear() = 0;
 //	virtual void clear(Color bg, Color fg=color::NoChange) = 0;
 //	virtual void clear(const Rectangle &rect, Color bg, Color fg=color::NoChange) = 0;
@@ -34,7 +35,7 @@ struct Screen //: public RegionI
 {
 	Screen(int fd);
 
-//	Region region(Rectangle rect) const; // TODO: resizing? percentage of parent?
+//	Region region(Rectangle rect) const; // TODO: what about resizing? need to be able to define position/size as fixed or percentage of parent
 
 	inline void clear()  { clear(color::Default, color::Default); }
 	void clear(Color bg, Color fg=color::NoChange);
@@ -66,7 +67,7 @@ private:
 	void set_cell(Pos pos, std::string_view ch, std::size_t width, Look lk=look::Default);
 	Pos cursor_move(Pos pos);
 	void cursor_style(Style style);
-	void cursor_color(Color fg, Color bg);
+	void cursor_set_look(Look lk);
 
 	void _out(const std::string_view text);
 	void flush_buffer();
@@ -74,19 +75,17 @@ private:
 private:
 	Pos _client_cursor { 0, 0 };
 
-	int _fd { 0 };
 	ScreenBuffer _back_buffer;
-	ScreenBuffer _front_buffer;
+	ScreenBuffer _front_buffer; // are multiple layers needed also here?
 
 	struct Cursor
 	{
 		Pos position { 0, 0 };
-		Color fg { color::Default };
-		Color bg { color::Default };
-		Style style { style::Default };
+		Look look;
 	} _cursor;
 
 	std::string _output_buffer;
+	const int _fd { 0 };
 };
 
 //struct Region : public RegionI

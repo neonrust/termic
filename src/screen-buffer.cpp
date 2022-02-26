@@ -19,10 +19,10 @@ void ScreenBuffer::clear(Color bg, Color fg, bool content)
 			cell.width = 1;
 		}
 		if(fg != color::NoChange)
-			cell.fg = fg;
+			cell.look.fg = fg;
+		cell.look.style = style::Default;
 		if(bg != color::NoChange)
-			cell.bg = bg;
-		cell.style = style::Default;
+			cell.look.bg = bg;
 	}
 }
 
@@ -49,17 +49,12 @@ void ScreenBuffer::clear(Rectangle rect, Color bg, Color fg, bool content)
 				cell.width = 1;
 			}
 			if(fg != color::NoChange)
-				cell.fg = fg;
+				cell.look.fg = fg;
+			cell.look.style = style::Default;
 			if(bg != color::NoChange)
-				cell.bg = bg;
-			cell.style = style::Default;
+				cell.look.bg = bg;
 		}
 	}
-}
-
-Cell &ScreenBuffer::cell(Pos pos)
-{
-	return _buffer[pos.y*_width + pos.x];
 }
 
 void ScreenBuffer::set_cell(Pos pos, std::string_view ch, std::size_t width, Look lk)
@@ -78,13 +73,14 @@ void ScreenBuffer::set_cell(Pos pos, std::string_view ch, std::size_t width, Loo
 	cell.width = static_cast<std::uint_fast8_t>(width);
 
 	if(lk.fg != color::NoChange)
-		cell.fg = lk.fg;
-
-	if(lk.bg != color::NoChange)
-		cell.bg = lk.bg;
+		cell.look.fg = lk.fg;
 
 	if(lk.style != style::NoChange)
-		cell.style = lk.style;
+		cell.look.style = lk.style;
+
+	if(lk.bg != color::NoChange)
+		cell.look.bg = lk.bg;
+
 }
 
 ScreenBuffer &ScreenBuffer::operator = (const ScreenBuffer &src)
@@ -146,9 +142,7 @@ void ScreenBuffer::set_size(Size new_size)
 
 					cell.ch[0] = '\0';
 					cell.width = 0;
-					cell.fg = color::Default;
-					cell.bg = color::Default;
-					cell.style = style::Default;
+					cell.look = Look();
 				};
 			}
 		}

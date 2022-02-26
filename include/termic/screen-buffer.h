@@ -12,8 +12,6 @@ namespace termic
 
 struct ScreenBuffer
 {
-	friend struct Screen;
-
 	void set_size(Size size);
 	inline Size size() const { return { _width, _height }; };
 
@@ -21,7 +19,10 @@ struct ScreenBuffer
 	void clear(Color bg, Color fg=color::NoChange, bool content=true);
 	void clear(Rectangle rect, Color bg, Color fg=color::NoChange, bool content=true);
 
-	Cell &cell(Pos pos);
+	inline Cell &cell(Pos pos)
+	{
+		return _buffer[pos.y*_width + pos.x];
+	}
 	void set_cell(Pos pos, std::string_view ch, std::size_t width, Look lk=look::Default);
 
 	ScreenBuffer &operator = (const ScreenBuffer &that);

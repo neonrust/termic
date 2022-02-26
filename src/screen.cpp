@@ -242,8 +242,7 @@ void Screen::update()
 			if(back_cell != front_cell)
 			{
 				cursor_move({ cx, cy });
-				cursor_color(back_cell.fg, back_cell.bg);
-				cursor_style(back_cell.style);
+				cursor_set_look(back_cell.look);
 
 				// if we're at the right edge of the screen and current cell is double width, it's not possible to draw it
 				if((back_cell.ch[1] == '\0' and back_cell.ch[0] <= 0x20) or (cx == size.width - 1 and back_cell.width > 1))  // <= 0x20 should actually be "non-printable"
@@ -340,26 +339,23 @@ Pos Screen::cursor_move(Pos pos)
 	return prev_pos;
 }
 
-void Screen::cursor_color(Color fg, Color bg)
+void Screen::cursor_set_look(Look lk)
 {
-	if(fg != _cursor.fg)
+	if(lk.fg != _cursor.look.fg)
 	{
-		_out(fmt::format(esc::fg, escify(fg)));
-		_cursor.fg = fg;
+		_out(fmt::format(esc::fg, escify(lk.fg)));
+		_cursor.look.fg = lk.fg;
 	}
-	if(bg != _cursor.bg)
+	if(lk.bg != _cursor.look.bg)
 	{
-		_out(fmt::format(esc::bg, escify(bg)));
-		_cursor.bg = bg;
+		_out(fmt::format(esc::bg, escify(lk.bg)));
+		_cursor.look.bg = lk.bg;
 	}
-}
 
-void Screen::cursor_style(Style style)
-{
-	if(style != _cursor.style)
+	if(lk.style != _cursor.look.style)
 	{
-		auto curr = [this]  (auto sb) -> bool { return (_cursor.style & sb) > 0; };
-		auto to =   [&style](auto sb) -> bool { return (style         & sb) > 0; };
+		auto curr = [this]  (auto sb) -> bool { return (_cursor.look.style & sb) > 0; };
+		auto to =   [&lk](auto sb) -> bool { return (lk.style         & sb) > 0; };
 
 		// TODO: avoid heap allocation
 		std::string seq;
@@ -404,7 +400,7 @@ void Screen::cursor_style(Style style)
 
 		_out(fmt::format(esc::style, seq));
 
-		_cursor.style = style;
+		_cursor.look.style = lk.style;
 	}
 }
 
