@@ -68,6 +68,16 @@ struct Rectangle
 	{
 		return { top_left, this->size.cap(size) };
 	}
+
+	inline std::size_t bottom() const
+	{
+		return top_left.y + size.height - 1;
+	}
+
+	inline std::size_t right() const
+	{
+		return top_left.x + size.width - 1;
+	}
 };
 
 
