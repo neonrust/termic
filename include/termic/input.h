@@ -49,15 +49,15 @@ struct Input
 	static constexpr std::size_t max_timers { 16 };
 	static constexpr std::chrono::milliseconds min_timer_duration { 10ms };
 
-
 private:
-	bool wait_input_and_timers();
-
+	// called by Api
 	Timer set_timer(std::chrono::nanoseconds initial, std::chrono::nanoseconds interval, std::function<void ()> callback);
 	void cancel_timer(const Timer &t);
 	void prepare_pollfds();
 	void kill_timers();
 
+private:
+	bool wait_input_and_timers();
 	bool setup_keys();
 	std::variant<event::Event, int> parse_mouse(std::string_view in, std::size_t &eaten);
 

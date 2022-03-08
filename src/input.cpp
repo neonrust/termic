@@ -186,11 +186,6 @@ void Input::cancel_timer(const Timer &t)
 	prepare_pollfds();
 }
 
-void Timer::cancel()
-{
-	App::the().cancel_timer(*this);
-}
-
 void Input::prepare_pollfds()
 {
 	_pollfds[0] = {
@@ -221,6 +216,11 @@ void Input::kill_timers()
 		cancel_timer(Timer(id));
 }
 
+void Timer::cancel()
+{
+	App::the().cancel_timer(*this);
+}
+
 std::vector<event::Event> Input::read()
 {
 	// TODO: use file descriptor instead:
@@ -240,8 +240,9 @@ std::vector<event::Event> Input::read()
 
 	auto revert = [this](const std::string_view chars) {
 		// put the read bytes back into the buffer (we'll read them next time)
+		// TODO: use file descriptor instead
 		for(auto iter = chars.rbegin(); iter != chars.rend(); iter++)
-			_in.putback(*iter);  // TODO: use file descriptor instead
+			_in.putback(*iter);
 	};
 
 
