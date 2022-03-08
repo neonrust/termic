@@ -3,6 +3,7 @@
 #include <optional>
 #include <chrono>
 #include <unordered_map>
+#include <unordered_set>
 #include <mutex>
 #include <functional>
 using namespace std::literals;
@@ -77,13 +78,17 @@ private:
 
 	// Timer id -> event fd
 	std::unordered_map<std::uint64_t, int> _timer_id_fd;
-	// event fd -> callback
-	std::unordered_map<int, std::function<void()>> _timer_fd_callback;
+	// event fd -> TimerInfo
+	struct TimerInfo
+	{
+		std::function<void()> callback;
+		bool single_shot;
+		std::uint64_t id;
+	};
+	std::unordered_map<int, TimerInfo> _timer_info;
 	std::mutex _timers_lock;
 
-
 	::pollfd _pollfds[max_timers];
-	std::size_t _timers_enabled { 0 };
 };
 
 } // NS: termic

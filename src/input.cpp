@@ -61,7 +61,7 @@ bool Input::wait_input_and_timers()
 		std::size_t timers_enabled { 0 };
 		{
 			std::lock_guard _(_timers_lock);
-			timers_enabled = _timers_enabled;
+			timers_enabled = _timer_info.size();
 			std::memcpy(pollfds, _pollfds, sizeof(::pollfd)*(timers_enabled + 1));
 		}
 
@@ -84,16 +84,23 @@ bool Input::wait_input_and_timers()
 			auto &pfd = pollfds[idx];
 			if(pfd.revents > 0)
 			{
-				auto found = _timer_fd_callback.find(pfd.fd);
-				if(found == _timer_fd_callback.end()) // somehow we got an event from an fd that we have no callback for?
+				auto found = _timer_info.find(pfd.fd);
+				if(found == _timer_info.end()) // somehow we got an event from an fd that we know nothing about!?!
 					continue;
-				auto &callback = found->second;
+
+				const auto &info = found->second;
+				auto &callback = info.callback;
 				callback();
 
-				// reset timer event
-				static std::uint64_t count { 0 };
-				// reads the number of times it has triggered since last check, which we don't care about
-				[[maybe_unused]] auto n = ::read(pfd.fd, &count, sizeof(count));
+				if(info.single_shot)
+					cancel_timer(info.id);
+				else
+				{
+					// reset timer event
+					static std::uint64_t count { 0 };
+					// reads the number of times it has triggered since last check, which we don't care about
+					[[maybe_unused]] auto n = ::read(pfd.fd, &count, sizeof(count));
+				}
 			}
 		}
 		// here we just wait again
@@ -148,12 +155,18 @@ Timer Input::set_timer(std::chrono::nanoseconds initial, std::chrono::nanosecond
 
 	std::uint64_t id { 0 };
 
+	const bool single_shot {interval.count() == 0 };
+
 	{
 		std::lock_guard _(_timers_lock);
 
 		id = ++s_timer_id;
 		_timer_id_fd[id] = fd;
-		_timer_fd_callback[fd] = callback;
+		_timer_info[fd] = {
+			.callback = callback,
+			.single_shot = single_shot,
+			.id = id,
+		};
 
 		prepare_pollfds();
 	}
@@ -172,7 +185,7 @@ void Input::cancel_timer(const Timer &t)
 	const int fd = found->second;
 	::close(fd);
 
-	_timer_fd_callback.erase(fd);
+	_timer_info.erase(fd);
 	_timer_id_fd.erase(found);
 
 	prepare_pollfds();
@@ -189,19 +202,19 @@ void Input::prepare_pollfds()
 		.revents = 0,
 	};
 
-	_timers_enabled = 0;
+	std::size_t idx { 1 };
 	for(const auto &[_, fd]: _timer_id_fd)
 	{
-		_pollfds[1 + _timers_enabled] = {
+		_pollfds[idx] = {
 			.fd = fd,
 			.events = POLLIN,
 			.revents = 0,
 		};
 
-		++_timers_enabled;
+		++idx;
 	}
 
-	if(g_log) fmt::print(g_log, "Input: timers enabled: {}\n", _timers_enabled);
+	if(g_log) fmt::print(g_log, "Input: timers enabled: {}\n", idx - 1);
 }
 
 void Input::kill_timers()
