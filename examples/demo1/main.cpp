@@ -140,10 +140,10 @@ int main()
 
 	auto prev_timer_time = std::chrono::system_clock::now();
 
-	app.set_timer(100ms, 100ms, [&app, &prev_timer_time, &render_demo, &offset](){
+	app.set_timer(33ms, 33ms, [&app, &prev_timer_time, &render_demo, &offset](){
 
 		auto now = std::chrono::system_clock::now();
-		offset += static_cast<float>(std::chrono::duration_cast<std::chrono::milliseconds>(now - prev_timer_time).count())/10000.f;
+		offset += static_cast<float>(std::chrono::duration_cast<std::chrono::milliseconds>(now - prev_timer_time).count())/2000.f;
 
 		prev_timer_time = now;
 

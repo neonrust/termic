@@ -3,6 +3,7 @@
 #include <optional>
 #include <chrono>
 #include <unordered_map>
+#include <mutex>
 #include <functional>
 using namespace std::literals;
 
@@ -78,6 +79,8 @@ private:
 	std::unordered_map<std::uint64_t, int> _timer_id_fd;
 	// event fd -> callback
 	std::unordered_map<int, std::function<void()>> _timer_fd_callback;
+	std::mutex _timers_lock;
+
 
 	::pollfd _pollfds[max_timers];
 	std::size_t _timers_enabled { 0 };

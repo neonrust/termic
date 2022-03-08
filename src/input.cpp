@@ -52,29 +52,19 @@ void Input::set_double_click_duration(std::chrono::milliseconds duration)
 
 bool Input::wait_input_and_timers()
 {
-	::pollfd pollfds[max_timers];
-	pollfds[0] = {
-		.fd = STDIN_FILENO,  // TODO: '_in' when it's a file descriptor
-		.events = POLLIN,
-		.revents = 0,
-	};
-
-	std::size_t timers_enabled { 0 };
-	for(const auto &[_, fd]: _timer_id_fd)
-	{
-		pollfds[1 + timers_enabled] = {
-			.fd = fd,
-			.events = POLLIN,
-			.revents = 0,
-		};
-		++timers_enabled;
-	}
-
 	sigset_t sigs;
 	sigemptyset(&sigs);
 
 	while(true)
 	{
+		::pollfd pollfds[max_timers];
+		std::size_t timers_enabled { 0 };
+		{
+			std::lock_guard _(_timers_lock);
+			timers_enabled = _timers_enabled;
+			std::memcpy(pollfds, _pollfds, sizeof(::pollfd)*(timers_enabled + 1));
+		}
+
 		for(auto idx = 1u; idx <= timers_enabled; ++idx)
 			pollfds[idx].revents = 0;
 
@@ -82,7 +72,7 @@ bool Input::wait_input_and_timers()
 		if(rc == -1 and errno == EINTR)  // something more urgent came up
 			return false;
 
-		// first check usual input
+		// first check input stream
 		if(pollfds[0].revents > 0)
 			break;
 
@@ -94,7 +84,10 @@ bool Input::wait_input_and_timers()
 			auto &pfd = pollfds[idx];
 			if(pfd.revents > 0)
 			{
-				auto &callback = _timer_fd_callback.find(pfd.fd)->second;
+				auto found = _timer_fd_callback.find(pfd.fd);
+				if(found == _timer_fd_callback.end()) // somehow we got an event from an fd that we have no callback for?
+					continue;
+				auto &callback = found->second;
 				callback();
 
 				// reset timer event
@@ -110,7 +103,6 @@ bool Input::wait_input_and_timers()
 }
 
 static std::uint64_t s_timer_id { 0 };
-static std::mutex s_timers_lock;
 
 Timer Input::set_timer(std::chrono::nanoseconds initial, std::chrono::nanoseconds interval, std::function<void ()> callback)
 {
@@ -157,7 +149,7 @@ Timer Input::set_timer(std::chrono::nanoseconds initial, std::chrono::nanosecond
 	std::uint64_t id { 0 };
 
 	{
-		std::lock_guard _(s_timers_lock);
+		std::lock_guard _(_timers_lock);
 
 		id = ++s_timer_id;
 		_timer_id_fd[id] = fd;
@@ -171,7 +163,7 @@ Timer Input::set_timer(std::chrono::nanoseconds initial, std::chrono::nanosecond
 
 void Input::cancel_timer(const Timer &t)
 {
-	std::lock_guard _(s_timers_lock);
+	std::lock_guard _(_timers_lock);
 
 	const auto found = _timer_id_fd.find(t.id());
 	if(found == _timer_id_fd.end())
@@ -188,6 +180,9 @@ void Input::cancel_timer(const Timer &t)
 
 void Input::prepare_pollfds()
 {
+	// '_timers_lock' must already be locked
+
+	// our input stream is always pollfd 0
 	_pollfds[0] = {
 		.fd = STDIN_FILENO,  // TODO: '_in' when it's a file descriptor
 		.events = POLLIN,
