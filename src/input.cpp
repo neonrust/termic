@@ -43,6 +43,7 @@ Input::Input(std::istream &s) : // TODO: use file descriptor instead
     _in(s)
 {
     setup_keys();
+    prepare_pollfds();
 }
 
 void Input::set_double_click_duration(std::chrono::milliseconds duration)
