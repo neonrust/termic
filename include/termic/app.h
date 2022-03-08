@@ -10,6 +10,8 @@
 #include <signals.hpp>
 
 #include <chrono>
+#include <functional>
+using namespace std::literals;
 
 namespace termic
 {
@@ -24,10 +26,9 @@ struct App
 
 	static App &the();
 
-	void set_timer_interval(std::chrono::nanoseconds duration);
-	void clear_timer();
-
-	operator bool() const;
+	Timer set_timer(std::chrono::nanoseconds duration, std::function<void()> callback);
+	Timer set_timer(std::chrono::nanoseconds initial, std::chrono::nanoseconds interval, std::function<void()> callback);
+	void cancel_timer(const Timer &t);
 
 	fteng::signal<void(const event::Key)> on_key_event;
 	fteng::signal<void(const event::Input)> on_input_event;
@@ -40,10 +41,9 @@ struct App
 	fteng::signal<void(const event::Resize)> on_resize_event;
 	fteng::signal<void(const event::Focus)> on_focus_event;
 
-	fteng::signal<void()> on_timer;
-
 	virtual int run();
 
+	void invalidate();
 	void quit();
 
 	Screen &screen() { return _screen; }
@@ -59,8 +59,6 @@ private:
 private:
 	Input _input;
 	Screen _screen;
-
-	int _timer_fd { 0 };
 
 	bool _emit_resize_event { false };
 	std::vector<event::Event> _internal_events;

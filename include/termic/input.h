@@ -1,30 +1,63 @@
 #pragma once
 
-#include <iostream>
 #include <optional>
+#include <chrono>
+#include <unordered_map>
+#include <functional>
+using namespace std::literals;
 
 #include "event.h"
 #include "stopwatch.h"
 
 #include <signals.hpp>
 
+#include <poll.h>
+
 
 namespace termic
 {
 
+struct Timer
+{
+	static constexpr std::uint64_t Invalid { 0 };
+
+	inline Timer(std::uint64_t id) : _id(id) {}
+	inline Timer(Timer &&other) : _id(other._id) {}
+
+	inline std::uint64_t id() const { return _id; }
+
+	inline bool valid() const { return _id != Invalid; }
+	inline operator bool () const { return valid(); }
+
+	void cancel();
+
+private:
+	const std::uint64_t _id;
+};
+
+
 struct Input
 {
+	friend struct App;
+
 	Input(std::istream &s);
 
-	void set_double_click_duration(float duration);
+	void set_double_click_duration(std::chrono::milliseconds duration);
 
 	std::vector<event::Event> read();
 
-	inline void set_timer_fd(int fd) { _timer_fd = fd; }
+	static constexpr std::size_t max_timers { 16 };
+	static constexpr std::chrono::milliseconds min_timer_duration { 10ms };
 
-	fteng::signal<void()> timer;
 
 private:
+	bool wait_input_and_timers();
+
+	Timer set_timer(std::chrono::nanoseconds initial, std::chrono::nanoseconds interval, std::function<void ()> callback);
+	void cancel_timer(const Timer &t);
+	void prepare_pollfds();
+	void kill_timers();
+
 	bool setup_keys();
 	std::variant<event::Event, int> parse_mouse(std::string_view in, std::size_t &eaten);
 
@@ -40,7 +73,14 @@ private:
 	std::vector<KeySequence> _key_sequences;
 	StopWatch _mouse_button_press;
 	float _double_click_duration { 0.3f };
-	int _timer_fd { 0 };
+
+	// Timer id -> event fd
+	std::unordered_map<std::uint64_t, int> _timer_id_fd;
+	// event fd -> callback
+	std::unordered_map<int, std::function<void()>> _timer_fd_callback;
+
+	::pollfd _pollfds[max_timers];
+	std::size_t _timers_enabled { 0 };
 };
 
 } // NS: termic

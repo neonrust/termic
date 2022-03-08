@@ -1,3 +1,4 @@
+#include <termic/app.h>
 #include <termic/input.h>
 #include <termic/utf8.h>
 
@@ -12,6 +13,8 @@ using namespace fmt::literals;
 
 #include <signal.h>
 #include <poll.h>
+#include <sys/ioctl.h>
+#include <sys/timerfd.h>
 #include <assert.h>
 
 
@@ -42,63 +45,192 @@ Input::Input(std::istream &s) : // TODO: use file descriptor instead
     setup_keys();
 }
 
-void Input::set_double_click_duration(float duration)
+void Input::set_double_click_duration(std::chrono::milliseconds duration)
 {
-    _double_click_duration = std::max(0.01f, duration);
+    _double_click_duration = static_cast<float>(std::max(10L, duration.count()))/1000.f;
+}
+
+bool Input::wait_input_and_timers()
+{
+	::pollfd pollfds[max_timers];
+	pollfds[0] = {
+		.fd = STDIN_FILENO,  // TODO: '_in' when it's a file descriptor
+		.events = POLLIN,
+		.revents = 0,
+	};
+
+	std::size_t timers_enabled { 0 };
+	for(const auto &[_, fd]: _timer_id_fd)
+	{
+		pollfds[1 + timers_enabled] = {
+			.fd = fd,
+			.events = POLLIN,
+			.revents = 0,
+		};
+		++timers_enabled;
+	}
+
+	sigset_t sigs;
+	sigemptyset(&sigs);
+
+	while(true)
+	{
+		for(auto idx = 1u; idx <= timers_enabled; ++idx)
+			pollfds[idx].revents = 0;
+
+		int rc = ::ppoll(pollfds, 1 + timers_enabled, nullptr, &sigs);
+		if(rc == -1 and errno == EINTR)  // something more urgent came up
+			return false;
+
+		// first check usual input
+		if(pollfds[0].revents > 0)
+			break;
+
+		// then check timers
+		// TODO: use epoll, it can return the signalled fd's directly, I think?
+		//   with (p)poll we need to this linear search
+		for(auto idx = 1u; idx <= timers_enabled; ++idx)
+		{
+			auto &pfd = pollfds[idx];
+			if(pfd.revents > 0)
+			{
+				auto &callback = _timer_fd_callback.find(pfd.fd)->second;
+				callback();
+
+				// reset timer event
+				static std::uint64_t count { 0 };
+				// reads the number of times it has triggered since last check, which we don't care about
+				[[maybe_unused]] auto n = ::read(pfd.fd, &count, sizeof(count));
+			}
+		}
+		// here we just wait again
+	}
+
+	return true;
+}
+
+static std::uint64_t s_timer_id { 0 };
+static std::mutex s_timers_lock;
+
+Timer Input::set_timer(std::chrono::nanoseconds initial, std::chrono::nanoseconds interval, std::function<void ()> callback)
+{
+	assert(initial.count() > 0 or interval.count() > 0);
+
+	if(_timer_id_fd.size() == Input::max_timers)
+		throw std::runtime_error(fmt::format("maxmium number of timers ({}) exceeded",Input:: max_timers));
+
+	int fd = ::timerfd_create(CLOCK_MONOTONIC, 0);
+
+	::timespec initial_spec { 0, 0 };
+	::timespec interval_spec { 0, 0 };
+
+	if(initial.count() > 0)
+	{
+		if(initial < Input::min_timer_duration)
+			throw std::runtime_error(fmt::format("non-zero initial duration is too small (<{}ms)", Input::min_timer_duration.count()));
+
+		const auto seconds = duration_cast<std::chrono::seconds>(initial);
+
+		initial_spec.tv_sec = seconds.count();
+		initial_spec.tv_nsec = duration_cast<std::chrono::nanoseconds>(initial - seconds).count();
+	}
+	if(interval.count() > 0)
+	{
+		if(interval < Input::min_timer_duration)
+			throw std::runtime_error(fmt::format("non-zero interval duration is too small (<{}ms)", Input::min_timer_duration.count()));
+
+		const auto seconds = duration_cast<std::chrono::seconds>(interval);
+
+		interval_spec.tv_sec = seconds.count();
+		interval_spec.tv_nsec = duration_cast<std::chrono::nanoseconds>(interval - seconds).count();
+	}
+
+	const ::itimerspec timer_interval {
+		.it_interval = interval_spec,
+		.it_value = initial_spec,
+	};
+
+	int rc = ::timerfd_settime(fd, 0, &timer_interval, nullptr);
+	if(rc != 0)
+		return Timer(Timer::Invalid);
+
+	std::uint64_t id { 0 };
+
+	{
+		std::lock_guard _(s_timers_lock);
+
+		id = ++s_timer_id;
+		_timer_id_fd[id] = fd;
+		_timer_fd_callback[fd] = callback;
+
+		prepare_pollfds();
+	}
+
+	return Timer(id);
+}
+
+void Input::cancel_timer(const Timer &t)
+{
+	std::lock_guard _(s_timers_lock);
+
+	const auto found = _timer_id_fd.find(t.id());
+	if(found == _timer_id_fd.end())
+		return;
+
+	const int fd = found->second;
+	::close(fd);
+
+	_timer_fd_callback.erase(fd);
+	_timer_id_fd.erase(found);
+
+	prepare_pollfds();
+}
+
+void Timer::cancel()
+{
+	App::the().cancel_timer(*this);
+}
+
+void Input::prepare_pollfds()
+{
+	_pollfds[0] = {
+		.fd = STDIN_FILENO,  // TODO: '_in' when it's a file descriptor
+		.events = POLLIN,
+		.revents = 0,
+	};
+
+	_timers_enabled = 0;
+	for(const auto &[_, fd]: _timer_id_fd)
+	{
+		_pollfds[1 + _timers_enabled] = {
+			.fd = fd,
+			.events = POLLIN,
+			.revents = 0,
+		};
+
+		++_timers_enabled;
+	}
+
+	if(g_log) fmt::print(g_log, "Input: timers enabled: {}\n", _timers_enabled);
+}
+
+void Input::kill_timers()
+{
+	auto copy = _timer_id_fd;
+	for(const auto &[id, fd]: copy)
+		cancel_timer(Timer(id));
 }
 
 std::vector<event::Event> Input::read()
 {
-	// TODO: use file descriptor instead
+	// TODO: use file descriptor instead:
 	//std::size_t avail { 0 };
 	//::ioctl(_in, FIONREAD, &avail);
 	if(_in.rdbuf()->in_avail() == 0) // TODO: use file descriptor instead
 	{
 		// no data yet, wait for data to arrive
-
-		static pollfd pollfds[2] = {
-			{
-				.fd = STDIN_FILENO,  // TODO: '_in' when it's a file descriptor
-				.events = POLLIN,
-				.revents = 0,
-			},
-		};
-
-		const auto timer_enabled = _timer_fd > 0;
-
-		if(timer_enabled)
-		{
-			// timer is enabled, check that fd as well
-			pollfds[1] = {
-				.fd = _timer_fd,
-				.events = POLLIN,
-				.revents = 0,
-			};
-		}
-
-		sigset_t sigs;
-		sigemptyset(&sigs);
-
-		while(true)
-		{
-			pollfds[0].revents = 0;
-			pollfds[1].revents = 0;
-
-			int rc = ::ppoll(pollfds, 1 + (timer_enabled? 1: 0), nullptr, &sigs);
-			if(rc == -1 and errno == EINTR)  // something more urgent came up
-				return {};
-
-			if(timer_enabled and pollfds[1].revents > 0)
-			{
-				timer();
-				// reset timer event
-				static std::uint64_t count { 0 };
-				[[maybe_unused]] auto n = ::read(_timer_fd, &count, sizeof(count)); // reads the number of times it has triggered, which we don't care about
-				assert(n == 8);
-			}
-			else
-				break; // stdin FD was triggered
-		}
+		if(not wait_input_and_timers())
+			return {};   // some interrupt happened
 	}
 
 	std::string in;

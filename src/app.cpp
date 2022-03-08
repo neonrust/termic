@@ -1,12 +1,12 @@
 #include <termic/app.h>
 #include <termic/terminal.h>
 
+#include <iostream>  // std::cin
 #include <csignal>
 #include <chrono>
-using namespace std::literals::chrono_literals;
+#include <atomic>
+using namespace std::literals;
 
-#include <sys/ioctl.h>
-#include <sys/timerfd.h>
 #include <assert.h>
 
 namespace termic
@@ -35,10 +35,10 @@ App::App(Options opts) :
 	std::signal(SIGFPE, signal_received);
 	std::signal(SIGWINCH, signal_received);
 
-	_input.timer.connect([this]() {
-		on_timer();
-		_screen.update();
-	});
+//	_input.timer.connect([this]() {
+//		on_timer();
+//		_screen.update();
+//	});
 }
 
 void app_atexit()
@@ -59,51 +59,66 @@ App &App::the()
 	return *g_app;
 }
 
-App::operator bool() const
-{
-	return _initialized;
-}
+//App::operator bool() const
+//{
+//	return _initialized;
+//}
 
 using std::chrono::duration_cast;
 
-void App::set_timer_interval(std::chrono::nanoseconds ns)
+//void App::set_timer_interval(std::chrono::nanoseconds ns)
+//{
+//	if(ns.count() == 0)
+//	{
+//		clear_timer();
+//		return;
+//	}
+
+//	if(_timer_fd == 0)
+//		_timer_fd = ::timerfd_create(CLOCK_MONOTONIC, 0);
+
+//	const auto seconds = duration_cast<std::chrono::seconds>(ns);
+//	const auto nano_seconds = duration_cast<std::chrono::nanoseconds>(ns - seconds);
+
+//	const ::timespec ts {
+//		.tv_sec = seconds.count(),
+//		.tv_nsec = nano_seconds.count(),
+//	};
+
+//	const ::itimerspec timer_interval {
+//		.it_interval = ts,
+//		.it_value = ts,
+//	};
+
+//	_input.set_timer_fd(_timer_fd);
+
+//	[[maybe_unused]] int rc = ::timerfd_settime(_timer_fd, 0, &timer_interval, nullptr);
+//	assert(rc == 0);
+//}
+
+//void App::clear_timer()
+//{
+//	if(_timer_fd)
+//		::close(_timer_fd);
+
+//	_timer_fd = 0;
+
+//	_input.set_timer_fd(0);
+//}
+
+Timer App::set_timer(std::chrono::nanoseconds duration, std::function<void ()> callback)
 {
-	if(ns.count() == 0)
-	{
-		clear_timer();
-		return;
-	}
-
-	if(_timer_fd == 0)
-		_timer_fd = ::timerfd_create(CLOCK_MONOTONIC, 0);
-
-	const auto seconds = duration_cast<std::chrono::seconds>(ns);
-	const auto nano_seconds = duration_cast<std::chrono::nanoseconds>(ns - seconds);
-
-	const ::timespec ts {
-		.tv_sec = seconds.count(),
-		.tv_nsec = nano_seconds.count(),
-	};
-
-	const ::itimerspec timer_interval {
-		.it_interval = ts,
-		.it_value = ts,
-	};
-
-	_input.set_timer_fd(_timer_fd);
-
-	[[maybe_unused]] int rc = ::timerfd_settime(_timer_fd, 0, &timer_interval, nullptr);
-	assert(rc == 0);
+	return set_timer(duration, 0s, callback);
 }
 
-void App::clear_timer()
+Timer App::set_timer(std::chrono::nanoseconds initial, std::chrono::nanoseconds interval, std::function<void ()> callback)
 {
-	if(_timer_fd)
-		::close(_timer_fd);
+	return _input.set_timer(initial, interval, callback);
+}
 
-	_timer_fd = 0;
-
-	_input.set_timer_fd(0);
+void App::cancel_timer(const Timer &t)
+{
+	_input.cancel_timer(t);
 }
 
 int App::run()
@@ -159,10 +174,15 @@ int App::run()
 	return 0;
 }
 
+void App::invalidate()
+{
+	_screen.update();
+}
+
 void App::quit()
 {
-	set_timer_interval(0ms);
 	_should_quit = true;
+	_input.kill_timers();
 }
 
 void App::shutdown(int rc)

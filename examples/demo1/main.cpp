@@ -53,10 +53,6 @@ int main()
 	::setbuf(g_log, nullptr);  // disable buffering
 
 	App app(HideCursor | MouseEvents);// | FocusEvents);
-	if(not app)
-		return 1;
-
-	app.set_timer_interval(100ms);
 
 	Screen &screen { app.screen() };
 
@@ -142,14 +138,25 @@ int main()
 		//if(g_log) fmt::print(g_log, "render_demo\n");
 	};
 
-	app.on_timer.connect(render_demo);
+	auto prev_timer_time = std::chrono::system_clock::now();
+
+	app.set_timer(100ms, 100ms, [&app, &prev_timer_time, &render_demo, &offset](){
+
+		auto now = std::chrono::system_clock::now();
+		offset += static_cast<float>(std::chrono::duration_cast<std::chrono::milliseconds>(now - prev_timer_time).count())/10000.f;
+
+		prev_timer_time = now;
+
+		render_demo();
+		app.invalidate();
+	});
 
 //	app.on_app_start.connect([&render_demo]() {
 //		render_demo();
 //	});
 
 	app.on_app_exit.connect([](int rc) {
-		fmt::print("termic::App exit ({})\n", rc);
+		fmt::print(g_log, "termic::App exit ({})\n", rc);
 	});
 
 	app.on_key_event.connect([&app, &render_demo, &rotation, &offset](const event::Key &k) {
