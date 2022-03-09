@@ -140,7 +140,7 @@ int main()
 
 	auto prev_timer_time = std::chrono::system_clock::now();
 
-	app.set_timer(33ms, 33ms, [&app, &prev_timer_time, &render_demo, &offset](){
+	auto timer = app.set_timer(33ms, 33ms, [&app, &prev_timer_time, &render_demo, &offset](){
 
 		auto now = std::chrono::system_clock::now();
 		offset += static_cast<float>(std::chrono::duration_cast<std::chrono::milliseconds>(now - prev_timer_time).count())/2000.f;
@@ -159,29 +159,33 @@ int main()
 		fmt::print(g_log, "termic::App exit ({})\n", rc);
 	});
 
-	app.on_key_event.connect([&app, &render_demo, &rotation, &offset](const event::Key &k) {
+	app.on_key_event.connect([&app, &render_demo, &rotation, &offset, &timer](const event::Key &k) {
 		fmt::print(g_log, "[main]    key: {}\n", key::to_string(k.key, k.modifiers));
 
-		if(k.key == key::ESCAPE and k.modifiers == key::NoMod)
+		if(k.key == key::ESCAPE and not k.modifiers)
 			app.quit();
 
-		if(k.key == key::RIGHT and k.modifiers == key::NoMod)
+		if(k.key == key::RIGHT and not k.modifiers)
 		{
 			rotation = std::fmod(std::fmod(rotation + 2.f, 360.f) + 360.f, 360.f);
 			fmt::print(g_log, "rotation: {}\n", rotation);
 		}
-		else if(k.key == key::LEFT and k.modifiers == key::NoMod)
+		else if(k.key == key::LEFT and not k.modifiers)
 		{
 			rotation = std::fmod(std::fmod(rotation - 2.f, 360.f) + 360.f, 360.f);
 			fmt::print(g_log, "rotation: {}\n", rotation);
 		}
-		else if(k.key == key::UP and k.modifiers == key::NoMod)
+		else if(k.key == key::UP and not k.modifiers)
 			offset += 0.02f;
-		else if(k.key == key::DOWN and k.modifiers == key::NoMod)
+		else if(k.key == key::DOWN and not k.modifiers)
 		{
 			offset -= 0.02f;
 			if(offset < 0)
 				offset += 1.f;
+		}
+		else if(k.key == key::P and not k.modifiers)
+		{
+			app.cancel_timer(timer);
 		}
 
 		render_demo(k.key, k.modifiers);
