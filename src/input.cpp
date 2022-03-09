@@ -177,6 +177,9 @@ Timer Input::set_timer(std::chrono::nanoseconds initial, std::chrono::nanosecond
 
 void Input::cancel_timer(const Timer &t)
 {
+	if(not t.valid())
+		return;
+
 	std::lock_guard _(_timers_lock);
 
 	const auto found = _timer_id_fd.find(t.id());
@@ -227,7 +230,8 @@ void Input::kill_timers()
 
 void Timer::cancel()
 {
-	App::the().cancel_timer(*this);
+	if(valid())
+		App::the().cancel_timer(*this);
 }
 
 std::vector<event::Event> Input::read()

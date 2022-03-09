@@ -23,8 +23,8 @@ struct Timer
 {
 	static constexpr std::uint64_t Invalid { 0 };
 
+	inline Timer() : _id(Invalid) {}
 	inline Timer(std::uint64_t id) : _id(id) {}
-	inline Timer(Timer &&other) : _id(other._id) {}
 
 	inline std::uint64_t id() const { return _id; }
 
@@ -34,7 +34,7 @@ struct Timer
 	void cancel();
 
 private:
-	const std::uint64_t _id;
+	std::uint64_t _id;
 };
 
 
