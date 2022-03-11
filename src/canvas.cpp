@@ -10,22 +10,22 @@ namespace termic
 
 void Canvas::clear()
 {
-	_scr.clear();
+	_screen.clear();
 }
 
 Size Canvas::size() const
 {
-	return _scr.size();
+	return _screen.size();
 }
 
 void Canvas::fill(Color c)
 {
-	fill(_scr.rect(), c);
+	fill(_screen.rect(), c);
 }
 
 void Canvas::fill(const color::Sampler *s, float sampler_angle)
 {
-	fill(_scr.rect(), s, sampler_angle);
+	fill(_screen.rect(), s, sampler_angle);
 }
 
 void Canvas::fill(Rectangle rect, Color c)
@@ -41,7 +41,7 @@ void Canvas::fill(Rectangle rect, const color::Sampler *s, float sampler_angle)
 
 	// TODO: _scr.iterator(rect) ?
 
-	const auto size = _scr.size();
+	const auto size = _screen.size();
 
 	for(auto y = rect.top_left.y; y <= rect.top_left.y + rect.size.height - 1 and y < size.height; y++)
 	{
@@ -50,14 +50,15 @@ void Canvas::fill(Rectangle rect, const color::Sampler *s, float sampler_angle)
 			const float u = static_cast<float>(x - rect.top_left.x + 1) / float(rect.size.width);
 			const float v = static_cast<float>(y - rect.top_left.y + 1) / float(rect.size.height);
 
-			_scr.set_cell({ x, y }, Cell::NoChange, 1, look::bg(s->sample({ u, v }, sampler_angle)));
+			_screen.set_cell({ x, y }, Cell::NoChange, 1, look::bg(s->sample({ u, v }, sampler_angle)));
 		}
 	}
+	_screen.invalidate();
 }
 
 void Canvas::filter(std::function<void(Look &, UV)> f)
 {
-	filter(_scr.rect(), f);
+	filter(_screen.rect(), f);
 }
 
 void Canvas::filter(Rectangle rect, std::function<void (Look &, UV)> f)
@@ -67,7 +68,7 @@ void Canvas::filter(Rectangle rect, std::function<void (Look &, UV)> f)
 
 	// TODO: _scr.iterator(rect) ?
 
-	const auto size = _scr.size();
+	const auto size = _screen.size();
 
 	for(auto y = rect.top_left.y; y <= rect.top_left.y + rect.size.height - 1 and y < size.height; y++)
 	{
@@ -76,7 +77,7 @@ void Canvas::filter(Rectangle rect, std::function<void (Look &, UV)> f)
 			const float u = static_cast<float>(x - rect.top_left.x + 1) / float(rect.size.width);
 			const float v = static_cast<float>(y - rect.top_left.y + 1) / float(rect.size.height);
 
-			auto &cell = _scr.cell({ x, y });
+			auto &cell = _screen.cell({ x, y });
 			Look lk { cell.look };
 
 			f(lk, UV{ u, v });
@@ -84,16 +85,17 @@ void Canvas::filter(Rectangle rect, std::function<void (Look &, UV)> f)
 			cell.look = lk;
 		}
 	}
+	_screen.invalidate();
 }
 
 void Canvas::fade(float blend)
 {
-	fade(_scr.rect(), color::Black, color::Black, blend);
+	fade(_screen.rect(), color::Black, color::Black, blend);
 }
 
 void Canvas::fade(Color fg, Color bg, float blend)
 {
-	fade(_scr.rect(), fg, bg, blend);
+	fade(_screen.rect(), fg, bg, blend);
 }
 
 void Canvas::fade(Rectangle rect, float blend)
@@ -103,6 +105,9 @@ void Canvas::fade(Rectangle rect, float blend)
 
 void Canvas::fade(Rectangle rect, Color fg, Color bg, float blend)
 {
+	if(blend == 0 or (fg == color::NoChange and bg == color::NoChange))
+		return;
+
 	filter(rect, [=](Look &lk, UV) {
 		if(fg != color::NoChange)
 			lk.fg = color::lerp(lk.fg, fg, blend);

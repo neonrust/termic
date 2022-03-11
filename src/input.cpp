@@ -6,8 +6,7 @@
 #include <unordered_set>
 #include <chrono>
 
-#include <fmt/core.h>
-#include <fmt/format.h>
+#include <fmt/chrono.h>
 using namespace fmt::literals;
 #include <fstream>
 
@@ -43,7 +42,7 @@ Input::Input(std::istream &s) : // TODO: use file descriptor instead
     _in(s)
 {
     setup_keys();
-    prepare_pollfds();
+    build_pollfds();
 }
 
 void Input::set_double_click_duration(std::chrono::milliseconds duration)
@@ -53,21 +52,23 @@ void Input::set_double_click_duration(std::chrono::milliseconds duration)
 
 bool Input::wait_input_and_timers()
 {
-	sigset_t sigs;
-	sigemptyset(&sigs);
-
 	while(true)
 	{
 		::pollfd pollfds[max_timers];
 		std::size_t timers_enabled { 0 };
+
 		{
 			std::lock_guard _(_timers_lock);
+
 			timers_enabled = _timer_info.size();
 			std::memcpy(pollfds, _pollfds, sizeof(::pollfd)*(timers_enabled + 1));
 		}
 
 		for(auto idx = 1u; idx <= timers_enabled; ++idx)
 			pollfds[idx].revents = 0;
+
+		sigset_t sigs;
+		sigemptyset(&sigs);
 
 		int rc = ::ppoll(pollfds, 1 + timers_enabled, nullptr, &sigs);
 		if(rc == -1 and errno == EINTR)  // something more urgent came up
@@ -80,18 +81,28 @@ bool Input::wait_input_and_timers()
 		// then check timers
 		// TODO: use epoll, it can return the signalled fd's directly, I think?
 		//   with (p)poll we need to this linear search
+		bool got_event { false };
 		for(auto idx = 1u; idx <= timers_enabled; ++idx)
 		{
 			auto &pfd = pollfds[idx];
 			if(pfd.revents > 0)
 			{
-				auto found = _timer_info.find(pfd.fd);
-				if(found == _timer_info.end()) // somehow we got an event from an fd that we know nothing about!?!
-					continue;
+				TimerInfo info;
 
-				const auto &info = found->second;
-				auto &callback = info.callback;
-				callback();
+				{
+					std::lock_guard _(_timers_lock);
+
+					auto found = _timer_info.find(pfd.fd);
+					if(found == _timer_info.end()) // somehow we got an event from an fd that we know nothing about!?!
+						continue;
+
+					got_event = true;
+
+					info = found->second;
+				}
+
+				if(info.callback)
+					info.callback();
 
 				if(info.single_shot)
 					cancel_timer(info.id);
@@ -100,11 +111,13 @@ bool Input::wait_input_and_timers()
 					// reset timer event
 					static std::uint64_t count { 0 };
 					// reads the number of times it has triggered since last check, which we don't care about
-					[[maybe_unused]] auto n = ::read(pfd.fd, &count, sizeof(count));
+					::read(pfd.fd, &count, sizeof(count));
 				}
 			}
 		}
-		// here we just wait again
+
+		if(got_event)
+			return false;
 	}
 
 	return true;
@@ -112,14 +125,13 @@ bool Input::wait_input_and_timers()
 
 static std::uint64_t s_timer_id { 0 };
 
-Timer Input::set_timer(std::chrono::nanoseconds initial, std::chrono::nanoseconds interval, std::function<void ()> callback)
+Timer Input::set_timer(std::chrono::milliseconds initial, std::chrono::milliseconds interval, std::function<void ()> callback)
 {
-	assert(initial.count() > 0 or interval.count() > 0);
-
 	if(_timer_id_fd.size() == Input::max_timers)
-		throw std::runtime_error(fmt::format("maxmium number of timers ({}) exceeded",Input:: max_timers));
+		throw std::runtime_error(fmt::format("maxmium number of timers ({}) exceeded", Input::max_timers));
 
-	int fd = ::timerfd_create(CLOCK_MONOTONIC, 0);
+	if(initial.count() == 0 and interval.count() == 0)
+		throw std::runtime_error("both 'initial' and 'interval' can not be zero");
 
 	::timespec initial_spec { 0, 0 };
 	::timespec interval_spec { 0, 0 };
@@ -127,7 +139,7 @@ Timer Input::set_timer(std::chrono::nanoseconds initial, std::chrono::nanosecond
 	if(initial.count() > 0)
 	{
 		if(initial < Input::min_timer_duration)
-			throw std::runtime_error(fmt::format("non-zero initial duration is too small (<{}ms)", Input::min_timer_duration.count()));
+			throw std::runtime_error(fmt::format("non-zero 'initial' is too small (<{})", Input::min_timer_duration));
 
 		const auto seconds = duration_cast<std::chrono::seconds>(initial);
 
@@ -137,7 +149,7 @@ Timer Input::set_timer(std::chrono::nanoseconds initial, std::chrono::nanosecond
 	if(interval.count() > 0)
 	{
 		if(interval < Input::min_timer_duration)
-			throw std::runtime_error(fmt::format("non-zero interval duration is too small (<{}ms)", Input::min_timer_duration.count()));
+			throw std::runtime_error(fmt::format("non-zero 'interval' is too small (<{})", Input::min_timer_duration));
 
 		const auto seconds = duration_cast<std::chrono::seconds>(interval);
 
@@ -150,6 +162,7 @@ Timer Input::set_timer(std::chrono::nanoseconds initial, std::chrono::nanosecond
 		.it_value = initial_spec,
 	};
 
+	int fd = ::timerfd_create(CLOCK_MONOTONIC, 0);
 	int rc = ::timerfd_settime(fd, 0, &timer_interval, nullptr);
 	if(rc != 0)
 		return Timer(Timer::Invalid);
@@ -169,7 +182,7 @@ Timer Input::set_timer(std::chrono::nanoseconds initial, std::chrono::nanosecond
 			.id = id,
 		};
 
-		prepare_pollfds();
+		build_pollfds();
 	}
 
 	return Timer(id);
@@ -182,7 +195,14 @@ void Input::cancel_timer(const Timer &t)
 
 	std::lock_guard _(_timers_lock);
 
-	const auto found = _timer_id_fd.find(t.id());
+	_cancel_timer(t.id());
+}
+
+void Input::_cancel_timer(std::uint64_t id)
+{
+	// '_timers_lock' must already be locked
+
+	const auto found = _timer_id_fd.find(id);
 	if(found == _timer_id_fd.end())
 		return;
 
@@ -192,10 +212,10 @@ void Input::cancel_timer(const Timer &t)
 	_timer_info.erase(fd);
 	_timer_id_fd.erase(found);
 
-	prepare_pollfds();
+	build_pollfds();
 }
 
-void Input::prepare_pollfds()
+void Input::build_pollfds()
 {
 	// '_timers_lock' must already be locked
 
@@ -221,11 +241,13 @@ void Input::prepare_pollfds()
 	if(g_log) fmt::print(g_log, "Input: timers enabled: {}\n", idx - 1);
 }
 
-void Input::kill_timers()
+void Input::cancel_all_timers()
 {
+	std::lock_guard _(_timers_lock);
+
 	auto copy = _timer_id_fd;
 	for(const auto &[id, fd]: copy)
-		cancel_timer(Timer(id));
+		_cancel_timer(id);
 }
 
 void Timer::cancel()
@@ -242,8 +264,9 @@ std::vector<event::Event> Input::read()
 	if(_in.rdbuf()->in_avail() == 0) // TODO: use file descriptor instead
 	{
 		// no data yet, wait for data to arrive
+
 		if(not wait_input_and_timers())
-			return {};   // some interrupt happened
+			return {};   // interrupt or timer
 	}
 
 	std::string in;

@@ -36,6 +36,7 @@ struct Screen //: public RegionI
 	Screen(int fd);
 
 //	Region region(Rectangle rect) const; // TODO: what about resizing? need to be able to define position/size as fixed or percentage of parent
+	void invalidate();
 
 	inline void clear()  { clear(color::Default, color::Default); }
 	void clear(Color bg, Color fg=color::NoChange);
@@ -72,11 +73,13 @@ private:
 	void _out(const std::string_view text);
 	void flush_buffer();
 
+
 private:
 	Pos _client_cursor { 0, 0 };
 
 	ScreenBuffer _back_buffer;
 	ScreenBuffer _front_buffer; // are multiple layers needed also here?
+	bool _dirty { false };
 
 	struct Cursor
 	{

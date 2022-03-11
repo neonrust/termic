@@ -57,6 +57,11 @@ Screen::Screen(int fd) :
 	_output_buffer.append(fmt::format(esc::cup, 1, 1)); // go to origin (b/c default _cursor.pos = 0,0)
 }
 
+void Screen::invalidate()
+{
+	_dirty = true;
+}
+
 std::size_t Screen::print(Alignment align, Pos anchor_pos, std::string_view s, Look lk)
 {
 	Pos pos { anchor_pos };
@@ -120,6 +125,8 @@ std::size_t Screen::print(Pos pos, std::string_view s, Look lk)
 	go_to(pos);
 
 	auto cx = pos.x;
+
+	_dirty = true;
 
 	auto max_width { 0ul };
 	auto curr_width { 0ul };
@@ -190,6 +197,7 @@ std::size_t Screen::print(Pos pos, std::string_view s, Look lk)
 void Screen::clear(Color bg, Color fg)
 {
 	_back_buffer.clear(bg, fg);
+	_dirty = true;
 
 	cursor_move({ 0, 0 });
 }
@@ -197,6 +205,7 @@ void Screen::clear(Color bg, Color fg)
 void Screen::clear(const Rectangle &rect, Color bg, Color fg)
 {
 	_back_buffer.clear(rect, bg, fg);
+	_dirty = true;
 
 	cursor_move({ 0, 0 });
 }
@@ -221,6 +230,9 @@ void Screen::set_size(Size size)
 
 void Screen::update()
 {
+	if(not _dirty)
+		return;
+
 	const auto t0 = std::chrono::high_resolution_clock::now();
 
 	// compare '_back_buffer' and '_front_buffer',
@@ -282,6 +294,8 @@ void Screen::update()
 		const auto t1 = std::chrono::high_resolution_clock::now();
 		if(g_log) fmt::print(g_log, "screen updated, {} µs  ({} cells)\n", std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count(), num_updated);
 	}
+
+	_dirty = false;
 }
 
 Size Screen::get_terminal_size()

@@ -106,12 +106,12 @@ using std::chrono::duration_cast;
 //	_input.set_timer_fd(0);
 //}
 
-Timer App::set_timer(std::chrono::nanoseconds duration, std::function<void ()> callback)
+Timer App::set_timer(std::chrono::milliseconds duration, std::function<void ()> callback)
 {
 	return set_timer(duration, 0s, callback);
 }
 
-Timer App::set_timer(std::chrono::nanoseconds initial, std::chrono::nanoseconds interval, std::function<void ()> callback)
+Timer App::set_timer(std::chrono::milliseconds initial, std::chrono::milliseconds interval, std::function<void ()> callback)
 {
 	return _input.set_timer(initial, interval, callback);
 }
@@ -139,7 +139,13 @@ int App::run()
 
 			const auto size = _screen.get_terminal_size();
 
-			enqueue_resize_event(size);
+			// enqueue resize event
+			_internal_events.emplace_back<event::Resize>({
+				.size = size,
+				.old = {
+					.size = _screen.size(),
+				},
+			});
 
 			_screen.set_size(size);
 
@@ -174,15 +180,10 @@ int App::run()
 	return 0;
 }
 
-void App::invalidate()
-{
-	_screen.update();
-}
-
 void App::quit()
 {
 	_should_quit = true;
-	_input.kill_timers();
+	_input.cancel_all_timers();
 }
 
 void App::shutdown(int rc)
@@ -216,16 +217,6 @@ bool App::dispatch_event(const event::Event &e)
 	if(g_log) fmt::print(g_log, "unhandled event type index:{}\n", e.index());
 
 	return false;
-}
-
-void App::enqueue_resize_event(Size size)
-{
-	_internal_events.emplace_back<event::Resize>({
-	    .size = size,
-	    .old = {
-	        .size = _screen.size(),
-	    },
-	});
 }
 
 void signal_received(int signum)

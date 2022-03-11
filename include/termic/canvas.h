@@ -18,7 +18,7 @@ struct UV;
 
 struct Canvas
 {
-	inline Canvas(Screen &scr) : _scr(scr) {};
+	inline Canvas(Screen &scr) : _screen(scr) {};
 
 	void clear();
 	Size size() const;
@@ -36,7 +36,7 @@ struct Canvas
 	void fade(Rectangle rect, Color fg, Color bg, float blend=0.5f);
 
 private:
-	Screen &_scr;
+	Screen &_screen;
 };
 
 } // NS: termic

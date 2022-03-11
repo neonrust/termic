@@ -26,8 +26,8 @@ struct App
 
 	static App &the();
 
-	Timer set_timer(std::chrono::nanoseconds duration, std::function<void()> callback);
-	Timer set_timer(std::chrono::nanoseconds initial, std::chrono::nanoseconds interval, std::function<void()> callback);
+	Timer set_timer(std::chrono::milliseconds duration, std::function<void()> callback);
+	Timer set_timer(std::chrono::milliseconds initial, std::chrono::milliseconds interval, std::function<void()> callback);
 	void cancel_timer(const Timer &t);
 
 	fteng::signal<void(const event::Key)> on_key_event;
@@ -43,7 +43,6 @@ struct App
 
 	virtual int run();
 
-	void invalidate();
 	void quit();
 
 	Screen &screen() { return _screen; }
@@ -51,10 +50,8 @@ struct App
 
 private:
 	void shutdown(int rc=0);
-
 	bool dispatch_event(const event::Event &e);
 
-	void enqueue_resize_event(Size size);
 
 private:
 	Input _input;

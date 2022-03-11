@@ -53,15 +53,16 @@ struct Input
 
 private:
 	// called by Api
-	Timer set_timer(std::chrono::nanoseconds initial, std::chrono::nanoseconds interval, std::function<void ()> callback);
+	Timer set_timer(std::chrono::milliseconds initial, std::chrono::milliseconds interval, std::function<void ()> callback);
 	void cancel_timer(const Timer &t);
-	void prepare_pollfds();
-	void kill_timers();
+	void build_pollfds();
+	void cancel_all_timers();
 
 private:
 	bool wait_input_and_timers();
 	bool setup_keys();
 	std::variant<event::Event, int> parse_mouse(std::string_view in, std::size_t &eaten);
+	void _cancel_timer(std::uint64_t id);
 
 private:
 	std::istream &_in;
