@@ -26,9 +26,29 @@ struct App
 
 	static App &the();
 
-	Timer set_timer(std::chrono::milliseconds duration, std::function<void()> callback);
-	Timer set_timer(std::chrono::milliseconds initial, std::chrono::milliseconds interval, std::function<void()> callback);
-	void cancel_timer(const Timer &t);
+	struct TimerAPI
+	{
+		inline Timer set(std::chrono::milliseconds duration, std::function<void()> callback)
+		{
+			return set(duration, 0s, callback);
+		}
+		inline Timer after(std::chrono::milliseconds duration, std::function<void()> callback)
+		{
+			return set(duration, 0s, callback);
+		}
+		Timer set(std::chrono::milliseconds initial, std::chrono::milliseconds interval, std::function<void()> callback);
+		inline Timer interval(std::chrono::milliseconds interval, std::function<void()> callback)
+		{
+			return set(interval, interval, callback);
+		}
+
+		void cancel(const Timer &t);
+
+	private:
+		App *_app;
+	} timer;
+
+	// app.timer.after(1s, ...)
 
 	fteng::signal<void(const event::Key)> on_key_event;
 	fteng::signal<void(const event::Input)> on_input_event;

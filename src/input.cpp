@@ -253,7 +253,7 @@ void Input::cancel_all_timers()
 void Timer::cancel()
 {
 	if(valid())
-		App::the().cancel_timer(*this);
+		App::the().timer.cancel(*this);
 }
 
 std::vector<event::Event> Input::read()

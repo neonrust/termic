@@ -141,7 +141,7 @@ int main()
 	auto prev_timer_time = std::chrono::system_clock::now();
 
 	Timer timer;
-	timer = app.set_timer(33ms, 33ms, [&prev_timer_time, &render_demo, &offset](){
+	timer = app.timer.interval(33ms, [&prev_timer_time, &render_demo, &offset](){
 
 		auto now = std::chrono::system_clock::now();
 		offset += static_cast<float>(std::chrono::duration_cast<std::chrono::milliseconds>(now - prev_timer_time).count())/2000.f;
@@ -185,7 +185,7 @@ int main()
 		}
 		else if(k.key == key::P and not k.modifiers)
 		{
-			app.cancel_timer(timer);
+			app.timer.cancel(timer);
 		}
 
 		render_demo(k.key, k.modifiers);

@@ -66,61 +66,6 @@ App &App::the()
 
 using std::chrono::duration_cast;
 
-//void App::set_timer_interval(std::chrono::nanoseconds ns)
-//{
-//	if(ns.count() == 0)
-//	{
-//		clear_timer();
-//		return;
-//	}
-
-//	if(_timer_fd == 0)
-//		_timer_fd = ::timerfd_create(CLOCK_MONOTONIC, 0);
-
-//	const auto seconds = duration_cast<std::chrono::seconds>(ns);
-//	const auto nano_seconds = duration_cast<std::chrono::nanoseconds>(ns - seconds);
-
-//	const ::timespec ts {
-//		.tv_sec = seconds.count(),
-//		.tv_nsec = nano_seconds.count(),
-//	};
-
-//	const ::itimerspec timer_interval {
-//		.it_interval = ts,
-//		.it_value = ts,
-//	};
-
-//	_input.set_timer_fd(_timer_fd);
-
-//	[[maybe_unused]] int rc = ::timerfd_settime(_timer_fd, 0, &timer_interval, nullptr);
-//	assert(rc == 0);
-//}
-
-//void App::clear_timer()
-//{
-//	if(_timer_fd)
-//		::close(_timer_fd);
-
-//	_timer_fd = 0;
-
-//	_input.set_timer_fd(0);
-//}
-
-Timer App::set_timer(std::chrono::milliseconds duration, std::function<void ()> callback)
-{
-	return set_timer(duration, 0s, callback);
-}
-
-Timer App::set_timer(std::chrono::milliseconds initial, std::chrono::milliseconds interval, std::function<void ()> callback)
-{
-	return _input.set_timer(initial, interval, callback);
-}
-
-void App::cancel_timer(const Timer &t)
-{
-	_input.cancel_timer(t);
-}
-
 int App::run()
 {
 	std::size_t prev_mx { static_cast<std::size_t>(-1) };
@@ -236,6 +181,18 @@ void signal_received(int signum)
 
 	std::signal(signum, SIG_DFL);
 	std::raise(signum);
+}
+
+// TimerAPI ---------------------------------------------------------
+
+Timer App::TimerAPI::set(std::chrono::milliseconds initial, std::chrono::milliseconds interval, std::function<void ()> callback)
+{
+	return _app->_input.set_timer(initial, interval, callback);
+}
+
+void App::TimerAPI::cancel(const Timer &t)
+{
+	_app->_input.cancel_timer(t);
 }
 
 } // NS: termic
