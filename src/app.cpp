@@ -19,8 +19,9 @@ void app_atexit();
 static App *g_app { nullptr };
 
 App::App(Options opts) :
-    _input(std::cin),
-    _screen(STDOUT_FILENO)
+	timer(this),
+	_input(std::cin),
+	_screen(STDOUT_FILENO)
 {
 	assert(g_app == nullptr);
 	g_app = this;

@@ -44,6 +44,8 @@ struct App
 
 		void cancel(const Timer &t);
 
+		inline TimerAPI(App *app) : _app(app) {}
+
 	private:
 		App *_app;
 	} timer;
