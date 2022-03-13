@@ -6,6 +6,7 @@ using namespace termic;
 
 #include <fmt/core.h>
 #include <fmt/format.h>
+#include <fmt/chrono.h>
 using namespace fmt::literals;
 #include <variant>
 
@@ -143,8 +144,11 @@ int main()
 	Timer timer;
 	timer = app.timer.interval(33ms, [&prev_timer_time, &render_demo, &offset](){
 
-		auto now = std::chrono::system_clock::now();
-		offset += static_cast<float>(std::chrono::duration_cast<std::chrono::milliseconds>(now - prev_timer_time).count())/2000.f;
+		const auto now = std::chrono::system_clock::now();
+		const auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - prev_timer_time);
+		if(elapsed > 40ms)
+			fmt::print(g_log, "\x1b[33;1mwarning!\x1b[m timer is lagging +{}\n", (elapsed - 33ms));
+		offset += static_cast<float>(elapsed.count())/2000.f;
 
 		prev_timer_time = now;
 
