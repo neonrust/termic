@@ -111,7 +111,7 @@ bool Input::wait_input_and_timers()
 					// reset timer event
 					static std::uint64_t count { 0 };
 					// reads the number of times it has triggered since last check, which we don't care about
-					::read(pfd.fd, &count, sizeof(count));
+					[[maybe_unused]] auto _ = ::read(pfd.fd, &count, sizeof(count));
 				}
 			}
 		}
