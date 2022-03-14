@@ -28,6 +28,10 @@ struct App
 
 	struct TimerAPI
 	{
+		TimerAPI() = delete;
+		TimerAPI(const TimerAPI &) = delete;
+		TimerAPI &operator = (const TimerAPI &) = delete;
+
 		inline Timer set(std::chrono::milliseconds duration, std::function<void()> callback)
 		{
 			return set(duration, 0s, callback);
