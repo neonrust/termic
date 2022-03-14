@@ -139,20 +139,24 @@ int main()
 		//if(g_log) fmt::print(g_log, "render_demo\n");
 	};
 
-	auto prev_timer_time = std::chrono::system_clock::now();
-
 	Timer timer;
-	timer = app.timer.interval(33ms, [&prev_timer_time, &render_demo, &offset](){
+	std::chrono::system_clock::time_point prev_timer_time;
+	app.timer.after(3s, [&](){
 
-		const auto now = std::chrono::system_clock::now();
-		const auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - prev_timer_time);
-		if(elapsed > 40ms)
-			fmt::print(g_log, "\x1b[33;1mwarning!\x1b[m timer is lagging +{}\n", (elapsed - 33ms));
-		offset += static_cast<float>(elapsed.count())/2000.f;
+		prev_timer_time = std::chrono::system_clock::now();
 
-		prev_timer_time = now;
+		timer = app.timer.interval(33ms, [&](){
 
-		render_demo();
+			const auto now = std::chrono::system_clock::now();
+			const auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - prev_timer_time);
+			if(elapsed > 40ms)
+				fmt::print(g_log, "\x1b[33;1mwarning!\x1b[m timer is lagging +{}\n", (elapsed - 33ms));
+			offset += static_cast<float>(elapsed.count())/2000.f;
+
+			prev_timer_time = now;
+
+			render_demo();
+		});
 	});
 
 //	app.on_app_start.connect([&render_demo]() {
@@ -188,9 +192,7 @@ int main()
 				offset += 1.f;
 		}
 		else if(k.key == key::P and not k.modifiers)
-		{
-			app.timer.cancel(timer);
-		}
+			timer.cancel();
 
 		render_demo(k.key, k.modifiers);
 	});
