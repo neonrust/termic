@@ -7,6 +7,7 @@
 #include <mutex>
 #include <functional>
 using namespace std::literals;
+using namespace std::chrono;
 
 #include "event.h"
 #include "stopwatch.h"
@@ -21,36 +22,48 @@ namespace termic
 
 struct Timer
 {
+	friend struct Input; // to call ctor
+
 	struct Data
 	{
-		const std::chrono::milliseconds initial;
-		const std::chrono::milliseconds interval;
-		const std::chrono::system_clock::time_point creation_time;
+		const milliseconds initial;
+		const milliseconds interval;
+		const system_clock::time_point creation_time;
 
 		std::size_t trigger_count { 0 };
 		std::size_t triggers_missed { 0 };
-		std::chrono::system_clock::time_point last_trigger_time;
-		std::chrono::milliseconds lag { 0 };
+		system_clock::time_point last_trigger_time;
+		milliseconds lag { 0 };
 	};
 
 	inline Timer() : _id(0) {}  // invalid
-	inline explicit Timer(std::uint64_t id, std::shared_ptr<Data> data) : _id(id), _data(data) {}
-
 	inline std::uint64_t id() const { return _id; }
 
 	inline operator bool () const { return _id > 0; }
 
 	void cancel();
 
-	// accessors for 'data' fields
-	inline const std::chrono::milliseconds initial() { return _data? _data->initial: 0s; };
-	inline const std::chrono::milliseconds interval()  { return _data? _data->interval: 0s; };
-	inline const std::chrono::system_clock::time_point creation_time() { return _data? _data->creation_time: std::chrono::system_clock::time_point{}; };
 
-	inline std::size_t trigger_count() { return _data? _data->trigger_count: 0; };
-	inline std::size_t triggers_missed() { return _data? _data->triggers_missed: 0; };
-	inline std::chrono::system_clock::time_point last_trigger_time() { return _data? _data->last_trigger_time: std::chrono::system_clock::time_point{}; };
-	inline std::chrono::milliseconds lag() { return _data? _data->lag: 0s; };
+	// these methods are only valid on valid Timer instances (i.e. not default ctor)
+	// initial delay (might be zero)
+	inline milliseconds initial() const { return _data->initial; };
+	// interval between multiple triggers (zero = timer is single-shot)
+	inline milliseconds interval() const { return _data->interval; };
+	// returns whether the timer is single-shot, or not
+	inline bool is_single_shot() const { return _data->interval.count() == 0; }
+	// time point the timer was created
+	inline system_clock::time_point creation_time() const { return _data->creation_time; };
+	// how many times the timer was successfully triggered (i.e. its callback was called)
+	inline std::size_t trigger_count() const { return _data->trigger_count; };
+	// number of triggers missied (i.e. if the timer is lagging behind)
+	inline std::size_t triggers_missed() const { return _data->triggers_missed; };
+	// last time the timer was successfully triggered (i.e. its callback was called)
+	inline system_clock::time_point last_trigger_time() const { return _data->last_trigger_time; };
+	// how much time the last trigger lagged  behind (can only be positive, or zero)
+	inline milliseconds lag() const { return _data->lag; };
+
+private:
+	inline Timer(std::uint64_t id, std::shared_ptr<Data> data) : _id(id), _data(data) {}
 
 private:
 	std::uint64_t _id;
@@ -64,16 +77,16 @@ struct Input
 
 	Input(std::istream &s);
 
-	void set_double_click_duration(std::chrono::milliseconds duration);
+	void set_double_click_duration(milliseconds duration);
 
 	std::vector<event::Event> read();
 
 	static constexpr std::size_t max_timers { 16 };
-	static constexpr std::chrono::milliseconds min_timer_duration { 10ms };
+	static constexpr milliseconds min_timer_duration { 10ms };
 
 private:
 	// called by Api
-	Timer set_timer(std::chrono::milliseconds initial, std::chrono::milliseconds interval, std::function<void ()> callback);
+	Timer set_timer(milliseconds initial, milliseconds interval, std::function<void ()> callback);
 	void cancel_timer(const Timer &t);
 
 	void build_pollfds();
