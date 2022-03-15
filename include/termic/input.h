@@ -21,20 +21,40 @@ namespace termic
 
 struct Timer
 {
-	static constexpr std::uint64_t Invalid { 0 };
+	struct Data
+	{
+		const std::chrono::milliseconds initial;
+		const std::chrono::milliseconds interval;
+		const std::chrono::system_clock::time_point creation_time;
 
-	inline Timer() : _id(Invalid) {}
-	inline Timer(std::uint64_t id) : _id(id) {}
+		std::size_t trigger_count { 0 };
+		std::size_t triggers_missed { 0 };
+		std::chrono::system_clock::time_point last_trigger_time;
+		std::chrono::milliseconds lag { 0 };
+	};
+
+	inline Timer() : _id(0) {}  // invalid
+	inline explicit Timer(std::uint64_t id, std::shared_ptr<Data> data) : _id(id), _data(data) {}
 
 	inline std::uint64_t id() const { return _id; }
 
-	inline bool valid() const { return _id != Invalid; }
-	inline operator bool () const { return valid(); }
+	inline operator bool () const { return _id > 0; }
 
 	void cancel();
 
+	// accessors for 'data' fields
+	inline const std::chrono::milliseconds initial() { return _data? _data->initial: 0s; };
+	inline const std::chrono::milliseconds interval()  { return _data? _data->interval: 0s; };
+	inline const std::chrono::system_clock::time_point creation_time() { return _data? _data->creation_time: std::chrono::system_clock::time_point{}; };
+
+	inline std::size_t trigger_count() { return _data? _data->trigger_count: 0; };
+	inline std::size_t triggers_missed() { return _data? _data->triggers_missed: 0; };
+	inline std::chrono::system_clock::time_point last_trigger_time() { return _data? _data->last_trigger_time: std::chrono::system_clock::time_point{}; };
+	inline std::chrono::milliseconds lag() { return _data? _data->lag: 0s; };
+
 private:
 	std::uint64_t _id;
+	std::shared_ptr<Data> _data;
 };
 
 
@@ -55,6 +75,7 @@ private:
 	// called by Api
 	Timer set_timer(std::chrono::milliseconds initial, std::chrono::milliseconds interval, std::function<void ()> callback);
 	void cancel_timer(const Timer &t);
+
 	void build_pollfds();
 	void cancel_all_timers();
 
@@ -85,6 +106,7 @@ private:
 		std::function<void()> callback;
 		bool single_shot;
 		std::uint64_t id;
+		std::shared_ptr<Timer::Data> data;
 	};
 	std::unordered_map<int, TimerInfo> _timer_info;
 	std::mutex _timers_lock;

@@ -143,17 +143,17 @@ int main()
 	std::chrono::system_clock::time_point prev_timer_time;
 	app.timer.after(3s, [&](){
 
-		prev_timer_time = std::chrono::system_clock::now();
+		//prev_timer_time = std::chrono::system_clock::now();
 
-		timer = app.timer.interval(33ms, [&](){
+		timer = app.timer.interval(30ms, [&](){
 
-			const auto now = std::chrono::system_clock::now();
-			const auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - prev_timer_time);
-			if(elapsed > 40ms)
-				fmt::print(g_log, "\x1b[33;1mwarning!\x1b[m timer is lagging +{}\n", (elapsed - 33ms));
+			//const auto now = std::chrono::system_clock::now();
+			const auto elapsed = timer.interval() + timer.lag();
+			if(timer.lag() > 10ms)
+				fmt::print(g_log, "\x1b[33;1mwarning!\x1b[m timer is lagging +{}  (missed: {})\n", timer.lag(), timer.triggers_missed());
 			offset += static_cast<float>(elapsed.count())/2000.f;
 
-			prev_timer_time = now;
+			prev_timer_time = timer.last_trigger_time();
 
 			render_demo();
 		});

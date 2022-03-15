@@ -28,6 +28,7 @@ struct App
 
 	struct TimerAPI
 	{
+		// prevent copying
 		TimerAPI() = delete;
 		TimerAPI(const TimerAPI &) = delete;
 		TimerAPI &operator = (const TimerAPI &) = delete;

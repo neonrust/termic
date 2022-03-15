@@ -88,6 +88,7 @@ bool Input::wait_input_and_timers()
 			if(pfd.revents > 0)
 			{
 				TimerInfo info;
+				Timer::Data *data { nullptr };
 
 				{
 					std::lock_guard _(_timers_lock);
@@ -99,19 +100,37 @@ bool Input::wait_input_and_timers()
 					got_event = true;
 
 					info = found->second;
+					data = info.data.get();
+				}
+
+				if(data)
+				{
+					const auto now = std::chrono::system_clock::now();
+
+					if(data->trigger_count == 0 and now > data->creation_time + data->initial)
+						data->lag = std::chrono::duration_cast<std::chrono::milliseconds>(now - data->creation_time - data->initial);
+					else if(now > data->last_trigger_time + data->interval)
+						data->lag = std::chrono::duration_cast<std::chrono::milliseconds>(now - data->last_trigger_time - data->interval);
+					else
+						data->lag = 0ms;
+
+					data->last_trigger_time = now;
+					++data->trigger_count;
 				}
 
 				if(info.callback)
 					info.callback();
 
 				if(info.single_shot)
-					cancel_timer(info.id);
+					_cancel_timer(info.id);
 				else
 				{
 					// reset timer event
 					static std::uint64_t count { 0 };
 					// reads the number of times it has triggered since last check, which we don't care about
 					[[maybe_unused]] auto _ = ::read(pfd.fd, &count, sizeof(count));
+					if(data)
+						data->triggers_missed += count - 1;
 				}
 			}
 		}
@@ -165,11 +184,14 @@ Timer Input::set_timer(std::chrono::milliseconds initial, std::chrono::milliseco
 	int fd = ::timerfd_create(CLOCK_MONOTONIC, 0);
 	int rc = ::timerfd_settime(fd, 0, &timer_interval, nullptr);
 	if(rc != 0)
-		return Timer(Timer::Invalid);
+		return Timer();
 
 	std::uint64_t id { 0 };
 
 	const bool single_shot {interval.count() == 0 };
+
+	const auto now = std::chrono::system_clock::now();
+	std::shared_ptr<Timer::Data> data(new Timer::Data{ initial, interval, now, 0, 0, {}, 0ms });
 
 	{
 		std::lock_guard _(_timers_lock);
@@ -180,17 +202,19 @@ Timer Input::set_timer(std::chrono::milliseconds initial, std::chrono::milliseco
 			.callback = callback,
 			.single_shot = single_shot,
 			.id = id,
+			.data = data,
 		};
 
 		build_pollfds();
 	}
 
-	return Timer(id);
+
+	return Timer(id, data);
 }
 
 void Input::cancel_timer(const Timer &t)
 {
-	if(not t.valid())
+	if(not t)
 		return;
 
 	std::lock_guard _(_timers_lock);
@@ -252,7 +276,7 @@ void Input::cancel_all_timers()
 
 void Timer::cancel()
 {
-	if(valid())
+	if(bool(*this))
 		App::the().timer.cancel(*this);
 }
 
