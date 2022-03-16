@@ -56,6 +56,7 @@ struct App
 	} timer;
 
 	// app.timer.after(1s, ...)
+	fteng::signal<void()> on_render;
 
 	fteng::signal<void(const event::Key)> on_key_event;
 	fteng::signal<void(const event::Input)> on_input_event;
@@ -70,6 +71,7 @@ struct App
 
 	virtual int run();
 
+	void request_render();
 	void quit();
 
 	Screen &screen() { return _screen; }
@@ -85,6 +87,7 @@ private:
 	Screen _screen;
 
 	bool _emit_resize_event { false };
+	bool _emit_render { false };
 	std::vector<event::Event> _internal_events;
 
 	bool _initialized { false };

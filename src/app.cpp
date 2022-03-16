@@ -103,6 +103,12 @@ int App::run()
 			dispatch_event(event);
 		_internal_events.clear();
 
+		if(_emit_render)
+		{
+			_emit_render = false;
+			on_render();
+		}
+
 		_screen.update();
 
 		for(const auto &event: _input.read())
@@ -124,6 +130,11 @@ int App::run()
 	if(g_log) fmt::print(g_log, "\x1b[33;1mApp:loop exiting\x1b[m\n");
 
 	return 0;
+}
+
+void App::request_render()
+{
+	_emit_render = true;
 }
 
 void App::quit()
