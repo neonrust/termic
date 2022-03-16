@@ -9,16 +9,22 @@ project(termic
 )
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+option(TERMIC_BUILD_EXAMPLES "Build examples.   Default=ON" ON)
+option(TERMIC_BUILD_TESTS    "Build tests.      Default=ON" ON)
+
 # library
 add_subdirectory(src)
 
+if(TERMIC_BUILD_EXAMPLES)
 # demo application(s)
 add_subdirectory(examples/demo1)
+endif()
 
-
+if(TERMIC_BUILD_TESTS)
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 	include(CTest)
 endif()
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
 	add_subdirectory(tests)
+endif()
 endif()
