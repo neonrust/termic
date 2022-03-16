@@ -159,9 +159,7 @@ int main()
 		});
 	});
 
-//	app.on_app_start.connect([&render_demo]() {
-//		render_demo();
-//	});
+	app.on_render.connect(render_demo);
 
 	app.on_app_exit.connect([](int rc) {
 		fmt::print(g_log, "termic::App exit ({})\n", rc);
