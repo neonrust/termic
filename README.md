@@ -33,7 +33,7 @@ Some C++20 features might be used somewhere, but C++17 is definitely required.
 
 ## Example
 
-A minuimal example of a simple application:
+A minimal example of a simple application:
 
 ```c++
 #include <termic/app.h>
@@ -47,7 +47,7 @@ void main()
     return 1;
 
   // listen to key presses
-  app.on_key_event.connect([&app](const event::Key &k) {
+  app.on_key_event.connect([&](const event::Key &k) {
     app.screen().clear();
     app.screen().print(
       { 10, 10 },              // x, y position (zero-based)
