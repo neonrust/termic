@@ -29,6 +29,7 @@ struct Timer
 
 	inline Timer() : _id(0) {}  // invalid
 	inline std::uint64_t id() const { return _id; }
+	~Timer();
 
 	inline operator bool () const { return _id > 0; }
 
