@@ -97,6 +97,9 @@ int App::run()
 			// the first resize event also means that we've just started
 			if(first_resize)
 				on_app_start();
+
+			if(first_resize)
+				_screen.update();
 		}
 
 		for(const auto &event: _input.read())
