@@ -159,13 +159,14 @@ int main()
 		});
 	});
 
+
 	app.on_render.connect(render_demo);
 
 	app.on_app_exit.connect([](int rc) {
 		fmt::print(g_log, "termic::App exit ({})\n", rc);
 	});
 
-	app.on_key_event.connect([&app, &render_demo, &rotation, &offset, &timer](const event::Key &k) {
+	app.on_key_event.connect([&](const event::Key &k) {
 		fmt::print(g_log, "[main]    key: {}\n", key::to_string(k.key, k.modifiers));
 
 		if(k.key == key::ESCAPE and not k.modifiers)
@@ -220,7 +221,7 @@ int main()
 			screen.print(Right, { width - 1, 0 }, fmt::format("width: {}  ({}, {})", wrap_width, mmx, mm.y));
 		}
 	});
-	app.on_mouse_button_event.connect([&render_demo](const event::MouseButton &mb) {
+	app.on_mouse_button_event.connect([&](const event::MouseButton &mb) {
 		fmt::print(g_log, "[main] button: {} {} @ {},{}\n",
 				mb.button,
 				mb.double_clicked? "double-click": (mb.pressed? "pressed": "released"),
@@ -233,7 +234,7 @@ int main()
 	app.on_mouse_wheel_event.connect([](const event::MouseWheel &mw) {
 		fmt::print(g_log, "[main]  wheel: {}\n", mw.delta);
 	});
-	app.on_resize_event.connect([&render_demo](const event::Resize &) {
+	app.on_resize_event.connect([&](const event::Resize &) {
 		render_demo();
 	});
 
