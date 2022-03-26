@@ -34,6 +34,8 @@ struct Timer
 
 	void cancel();
 
+	bool cancel_on_death { false };
+
 
 	// these methods are only valid on valid Timer instances (i.e. not default ctor)
 	// initial delay (might be zero)

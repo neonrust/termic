@@ -298,6 +298,12 @@ void Input::cancel_all_timers()
 		_cancel_timer(id);
 }
 
+Timer::~Timer()
+{
+	if(*this and cancel_on_death)
+		cancel();
+}
+
 void Timer::cancel()
 {
 	if(bool(*this))
