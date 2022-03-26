@@ -75,7 +75,7 @@ int main()
 
 	const auto start_time = std::chrono::high_resolution_clock::now();
 
-	auto render_demo = [&screen, &rotation, &gradient, &offset, & start_time](key::Key key=key::None, key::Modifier mods=key::NoMod, const event::MouseButton *mb=nullptr) {
+	auto render_demo = [&](key::Key key=key::None, key::Modifier mods=key::NoMod, const event::MouseButton *mb=nullptr) {
 
 		screen.clear();
 
@@ -155,7 +155,7 @@ int main()
 
 			prev_timer_time = timer.last_trigger_time();
 
-			render_demo();
+			app.trigger_render();
 		});
 	});
 
