@@ -192,7 +192,7 @@ void signal_received(int signum)
 
 // TimerAPI ---------------------------------------------------------
 
-Timer App::TimerAPI::set(std::chrono::milliseconds initial, std::chrono::milliseconds interval, std::function<void ()> callback)
+Timer App::TimerAPI::create(std::chrono::milliseconds initial, std::chrono::milliseconds interval, std::function<void ()> callback)
 {
 	return _app->_input.set_timer(initial, interval, callback);
 }

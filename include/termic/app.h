@@ -33,22 +33,24 @@ struct App
 		TimerAPI(const TimerAPI &) = delete;
 		TimerAPI &operator = (const TimerAPI &) = delete;
 
-		inline Timer set(std::chrono::milliseconds duration, std::function<void()> callback)
+		inline Timer create(std::chrono::milliseconds duration, std::function<void()> callback)
 		{
-			return set(duration, 0s, callback);
+			return create(duration, 0s, callback);
 		}
 		inline Timer after(std::chrono::milliseconds duration, std::function<void()> callback)
 		{
-			return set(duration, 0s, callback);
+			return create(duration, 0s, callback);
 		}
-		Timer set(std::chrono::milliseconds initial, std::chrono::milliseconds interval, std::function<void()> callback);
-		inline Timer interval(std::chrono::milliseconds interval, std::function<void()> callback)
+		Timer create(std::chrono::milliseconds initial, std::chrono::milliseconds interval, std::function<void()> callback);
+		inline Timer every(std::chrono::milliseconds interval, std::function<void()> callback)
 		{
-			return set(interval, interval, callback);
+			return create(interval, interval, callback);
 		}
 
 		void cancel(const Timer &t);
 
+	private:
+		friend struct App; // to call below ctor
 		inline TimerAPI(App *app) : _app(app) {}
 
 	private:

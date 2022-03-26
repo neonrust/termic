@@ -145,7 +145,7 @@ int main()
 
 		//prev_timer_time = std::chrono::system_clock::now();
 
-		timer = app.timer.interval(30ms, [&](){
+		timer = app.timer.every(30ms, [&](){
 
 			//const auto now = std::chrono::system_clock::now();
 			const auto elapsed = timer.interval() + timer.lag();
