@@ -159,8 +159,9 @@ struct Focus
 	bool focused;
 };
 
+struct Render {};
 
-using Event = std::variant<Key, Input, MouseButton, MouseWheel, MouseMove, Resize, Focus>;
+using Event = std::variant<Key, Input, MouseButton, MouseWheel, MouseMove, Resize, Focus, Render>;
 
 } // NS: event
 

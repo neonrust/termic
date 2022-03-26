@@ -80,36 +80,24 @@ int App::run()
 		{
 			_emit_resize_event = false;
 
-			const auto before = _screen.size();
-			const bool first_resize = before.width == 0 and before.height == 0;
+			const auto old_size = _screen.size();
+			const auto first_resize = old_size.empty();
 
-			const auto size = _screen.get_terminal_size();
+			const auto new_size = _screen.get_terminal_size();
 
-			// enqueue resize event
-			_internal_events.emplace_back<event::Resize>({
-				.size = size,
+			_screen.set_size(new_size);
+
+			dispatch_event(event::Resize{
+				.size = new_size,
 				.old = {
-					.size = _screen.size(),
+					.size = old_size,
 				},
 			});
 
-			_screen.set_size(size);
-
+			// the first resize event also means that we've just started
 			if(first_resize)
 				on_app_start();
 		}
-
-		for(const auto &event: _internal_events)
-			dispatch_event(event);
-		_internal_events.clear();
-
-		if(_emit_render)
-		{
-			_emit_render = false;
-			on_render();
-		}
-
-		_screen.update();
 
 		for(const auto &event: _input.read())
 		{
@@ -125,6 +113,8 @@ int App::run()
 
 			dispatch_event(event);
 		}
+
+		_screen.update();
 	}
 
 	if(g_log) fmt::print(g_log, "\x1b[33;1mApp:loop exiting\x1b[m\n");
@@ -132,9 +122,9 @@ int App::run()
 	return 0;
 }
 
-void App::request_render()
+void App::trigger_render()
 {
-	_emit_render = true;
+	_input.trigger_render();
 }
 
 void App::quit()
@@ -156,20 +146,22 @@ void App::shutdown(int rc)
 
 bool App::dispatch_event(const event::Event &e)
 {
-	if(std::holds_alternative<event::Key>(e))
-		return on_key_event(std::get<event::Key>(e)), true;
-	else if(std::holds_alternative<event::Input>(e))
-		return on_input_event(std::get<event::Input>(e)), true;
-	else if(std::holds_alternative<event::MouseButton>(e))
-		return on_mouse_button_event(std::get<event::MouseButton>(e)), true;
-	else if(std::holds_alternative<event::MouseMove>(e))
+	if(std::holds_alternative<event::MouseMove>(e))
 		return on_mouse_move_event(std::get<event::MouseMove>(e)), true;
 	else if(std::holds_alternative<event::MouseWheel>(e))
 		return on_mouse_wheel_event(std::get<event::MouseWheel>(e)), true;
 	else if(std::holds_alternative<event::Resize>(e))
 		return on_resize_event(std::get<event::Resize>(e)), true;
+	else if(std::holds_alternative<event::Key>(e))
+		return on_key_event(std::get<event::Key>(e)), true;
+	else if(std::holds_alternative<event::Input>(e))
+		return on_input_event(std::get<event::Input>(e)), true;
+	else if(std::holds_alternative<event::MouseButton>(e))
+		return on_mouse_button_event(std::get<event::MouseButton>(e)), true;
 	else if(std::holds_alternative<event::Focus>(e))
 		return on_focus_event(std::get<event::Focus>(e)), true;
+	else if(std::holds_alternative<event::Render>(e))
+		return on_render(), true;
 
 	if(g_log) fmt::print(g_log, "unhandled event type index:{}\n", e.index());
 

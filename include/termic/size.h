@@ -11,6 +11,11 @@ struct Size
 	std::size_t width;
 	std::size_t height;
 
+	inline bool empty() const
+	{
+		return width == 0 and height == 0;
+	}
+
 	inline bool operator == (const Size &t) const
 	{
 		return t.width == width and t.height == height;
@@ -24,7 +29,7 @@ struct Size
 		};
 	}
 
-	std::size_t area() const
+	inline std::size_t area() const
 	{
 		return width*height;
 	}

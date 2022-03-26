@@ -14,6 +14,7 @@ using namespace fmt::literals;
 #include <poll.h>
 #include <sys/ioctl.h>
 #include <sys/timerfd.h>
+#include <sys/eventfd.h>
 #include <assert.h>
 
 
@@ -42,6 +43,8 @@ Input::Input(std::istream &s) : // TODO: use file descriptor instead
     _in(s)
 {
     setup_keys();
+
+    _render_trigger_fd = ::eventfd(0, 0);
     build_pollfds();
 }
 
@@ -50,41 +53,50 @@ void Input::set_double_click_duration(std::chrono::milliseconds duration)
     _double_click_duration = static_cast<float>(std::max(10L, duration.count()))/1000.f;
 }
 
-bool Input::wait_input_and_timers()
+Input::WaitResult Input::wait()
 {
 	while(true)
 	{
-		::pollfd pollfds[max_timers];
+		::pollfd pollfds[sizeof(_pollfds)/sizeof(_pollfds[0])];
+
 		std::size_t timers_enabled { 0 };
 
 		{
 			std::lock_guard _(_timers_lock);
 
 			timers_enabled = _timer_info.size();
-			std::memcpy(pollfds, _pollfds, sizeof(::pollfd)*(timers_enabled + 1));
+			std::memcpy(pollfds, _pollfds, sizeof(_pollfds));
 		}
 
-		for(auto idx = 1u; idx <= timers_enabled; ++idx)
-			pollfds[idx].revents = 0;
+		for(auto idx = 0u; idx <  timers_enabled; ++idx)
+			pollfds[idx + first_timer_fd_idx].revents = 0;
 
 		sigset_t sigs;
 		sigemptyset(&sigs);
 
-		int rc = ::ppoll(pollfds, 1 + timers_enabled, nullptr, &sigs);
+		int rc = ::ppoll(pollfds, first_timer_fd_idx + timers_enabled, nullptr, &sigs);
 		if(rc == -1 and errno == EINTR)  // something more urgent came up
-			return false;
+			return SignalReceived;
 
 		// first check input stream
-		if(pollfds[0].revents > 0)
-			break;
+		if(pollfds[input_fd_idx].revents > 0)
+			return InputReceived;
+
+		// render trigger fd
+		if(pollfds[trigger_fd_idx].revents > 0)
+		{
+			static std::uint64_t value;
+			[[maybe_unused]] auto _ = ::read(pollfds[trigger_fd_idx].fd, &value, sizeof(value));
+			return RenderTriggered;
+		}
 
 		// then check timers
 		// TODO: use epoll, it can return the signalled fd's directly, I think?
 		//   with (p)poll we need to this linear search
 		bool got_event { false };
-		for(auto idx = 1u; idx <= timers_enabled; ++idx)
+		for(auto idx = 0u; idx < timers_enabled; ++idx)
 		{
-			auto &pfd = pollfds[idx];
+			auto &pfd = pollfds[idx + first_timer_fd_idx];
 			if(pfd.revents > 0)
 			{
 				TimerInfo info;
@@ -136,10 +148,11 @@ bool Input::wait_input_and_timers()
 		}
 
 		if(got_event)
-			return false;
+			return TimerTriggered;
 	}
 
-	return true;
+	assert(false);
+	return Invalid;  // should never get here
 }
 
 static std::uint64_t s_timer_id { 0 };
@@ -222,6 +235,12 @@ void Input::cancel_timer(const Timer &t)
 	_cancel_timer(t.id());
 }
 
+void Input::trigger_render()
+{
+	static constexpr std::uint64_t value { 1 };
+	::write(_render_trigger_fd, &value, sizeof(value));
+}
+
 void Input::_cancel_timer(std::uint64_t id)
 {
 	// '_timers_lock' must already be locked
@@ -249,8 +268,13 @@ void Input::build_pollfds()
 		.events = POLLIN,
 		.revents = 0,
 	};
+	_pollfds[1] = {
+		.fd = _render_trigger_fd,
+		.events = POLLIN,
+		.revents = 0,
+	};
 
-	std::size_t idx { 1 };
+	std::size_t idx { 2 };
 	for(const auto &[_, fd]: _timer_id_fd)
 	{
 		_pollfds[idx] = {
@@ -262,7 +286,7 @@ void Input::build_pollfds()
 		++idx;
 	}
 
-	if(g_log) fmt::print(g_log, "Input: timers enabled: {}\n", idx - 1);
+	if(g_log) fmt::print(g_log, "Input: timers enabled: {}\n", idx - 2);
 }
 
 void Input::cancel_all_timers()
@@ -287,10 +311,21 @@ std::vector<event::Event> Input::read()
 	//::ioctl(_in, FIONREAD, &avail);
 	if(_in.rdbuf()->in_avail() == 0) // TODO: use file descriptor instead
 	{
-		// no data yet, wait for data to arrive
+		// no data yet, wait for data to arrive (or something else to happen)
 
-		if(not wait_input_and_timers())
-			return {};   // interrupt or timer
+		const auto result = wait();
+		if(result == TimerTriggered or result == SignalReceived)
+		{
+			if(g_log) fmt::print(g_log, "wait: timer/signal\n");
+			return {};
+		}
+		if(result == RenderTriggered)
+		{
+			if(g_log) fmt::print(g_log, "wait: render\n");
+			return { event::Render{} };
+		}
+		if(result == InputReceived)
+			if(g_log) fmt::print(g_log, "wait: input\n");
 	}
 
 	std::string in;

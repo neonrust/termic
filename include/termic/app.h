@@ -71,7 +71,7 @@ struct App
 
 	virtual int run();
 
-	void request_render();
+	void trigger_render();
 	void quit();
 
 	Screen &screen() { return _screen; }
@@ -87,8 +87,6 @@ private:
 	Screen _screen;
 
 	bool _emit_resize_event { false };
-	bool _emit_render { false };
-	std::vector<event::Event> _internal_events;
 
 	bool _initialized { false };
 
