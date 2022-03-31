@@ -7,6 +7,7 @@
 #include <fmt/core.h>
 #include <cuchar>
 #include <string_view>
+#include <thread>
 
 #include <unistd.h>
 #include <termios.h>
@@ -93,8 +94,12 @@ bool init(int in_fd, int out_fd, Options opts)
 	clear_in_flags(in_fd, LocalEcho | LineBuffering);
 	//modify_io_flags(true, EightBit | CRtoLF);
 
+	const auto write = [&](std::string_view s) {
+		::write(out_fd, s.data(), s.size());
+	};
+
 	if(g_log) fmt::print(g_log, "   \x1b[2mterm >> switching to alternate screen...\x1b[m\n");
-	write(out_fd, esc::screen_alternate);
+	write(esc::screen_alternate);
 
 	if((opts & NoSignalDecode) > 0)
 	{
@@ -105,22 +110,22 @@ bool init(int in_fd, int out_fd, Options opts)
 	if((opts & HideCursor) > 0)
 	{
 		if(g_log) fmt::print(g_log, "   \x1b[2mterm >> hiding cursor...\x1b[m\n");
-		write(out_fd, esc::cursor_hide);
+		write(esc::cursor_hide);
 	}
 	if((opts & MouseButtonEvents) > 0)
 	{
 		if(g_log) fmt::print(g_log, "   \x1b[2mterm >> enabling mouse button events...\x1b[m\n");
-		write(out_fd, esc::mouse_buttons_on);
+		write(esc::mouse_buttons_on);
 	}
 	if((opts & MouseMoveEvents) > 0)
 	{
 		if(g_log) fmt::print(g_log, "   \x1b[2mterm >> enabling mouse move events...\x1b[m\n");
-		write(out_fd, esc::mouse_move_on);
+		write(esc::mouse_move_on);
 	}
 	if((opts & FocusEvents) > 0)
 	{
 		if(g_log) fmt::print(g_log, "   \x1b[2mterm >> enabling focus events...\x1b[m\n");
-		write(out_fd, esc::focus_on);
+		write(esc::focus_on);
 	}
 
 	return true;
@@ -130,13 +135,47 @@ void restore(int in_fd, int out_fd)
 {
 	if(g_log) fmt::print(g_log, "\x1b[31;1mshutdown()\x1b[m\n");
 
-	::tcsetattr(in_fd, TCSANOW, &initial_settings);
+	const auto write = [&](std::string_view s) {
+		::write(out_fd, s.data(), s.size());
+	};
 
-	write(out_fd, esc::focus_off);
-	write(out_fd, esc::mouse_move_off);
-	write(out_fd, esc::mouse_buttons_off);
-	write(out_fd, esc::screen_normal);
-	write(out_fd, esc::cursor_show);
+	write(esc::mouse_move_off);
+	write(esc::mouse_buttons_off);
+	write(esc::focus_off);
+	write(esc::cursor_show);
+	write(esc::screen_normal);
+
+	// how can we wait for terminal to ack the above changes?
+	// intead we just eat everything from the 'in_fd' for "a while"
+	const auto start_time = std::chrono::system_clock::now();
+
+	std::jthread([&](){
+		std::size_t avail { 0 };
+		while(true)
+		{
+			::ioctl(in_fd, FIONREAD, &avail);
+			if(avail > 0)
+			{
+				while(avail > 0)
+				{
+					char c[16];
+					auto n = std::min(avail, sizeof(c));
+					::read(in_fd, c, n);
+					avail -= n;
+				}
+			}
+			else
+			{
+				std::this_thread::sleep_for(100ms);
+
+				const auto now = std::chrono::system_clock::now();
+				if(now - start_time > 200ms)  // no idea, 100ms is too short
+					return;
+			}
+		}
+	});
+
+	::tcsetattr(in_fd, TCSANOW, &initial_settings);
 }
 
 Size get_size(int fd)
@@ -150,11 +189,6 @@ Size get_size(int fd)
 }
 
 } // NS: term
-
-ssize_t write(int fd, const std::string_view s)
-{
-	return ::write(fd, s.data(), s.size());
-}
 
 bool clear_in_flags(int fd, IOFlag flags)
 {

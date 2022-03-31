@@ -321,17 +321,9 @@ std::vector<event::Event> Input::read()
 
 		const auto result = wait();
 		if(result == TimerTriggered or result == SignalReceived)
-		{
-			if(g_log) fmt::print(g_log, "wait: timer/signal\n");
 			return {};
-		}
 		if(result == RenderTriggered)
-		{
-			if(g_log) fmt::print(g_log, "wait: render\n");
 			return { event::Render{} };
-		}
-		if(result == InputReceived)
-			if(g_log) fmt::print(g_log, "wait: input\n");
 	}
 
 	std::string in;
