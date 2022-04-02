@@ -59,12 +59,15 @@ struct Screen //: public RegionI
 
 	std::size_t measure(std::string_view s) const;
 
+	Cell pick(Pos pos) const;
+
 private:
 	friend struct Canvas;  // direct access to internals
 	friend struct App;     // for get_terminal_size()  :(
 
 	Size get_terminal_size();
 	Cell &cell(Pos pos);
+	const Cell &cell(Pos pos) const;
 	void set_cell(Pos pos, std::string_view ch, std::size_t width, Look lk=look::Default);
 	Pos cursor_move(Pos pos);
 	void cursor_style(Style style);

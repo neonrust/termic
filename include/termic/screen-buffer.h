@@ -23,6 +23,10 @@ struct ScreenBuffer
 	{
 		return _buffer[pos.y*_width + pos.x];
 	}
+	inline const Cell &cell(Pos pos) const
+	{
+		return _buffer[pos.y*_width + pos.x];
+	}
 	void set_cell(Pos pos, std::string_view ch, std::size_t width, Look lk=look::Default);
 
 	ScreenBuffer &operator = (const ScreenBuffer &that);

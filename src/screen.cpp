@@ -314,6 +314,11 @@ std::size_t Screen::measure(std::string_view s) const
 	return width;
 }
 
+Cell Screen::pick(Pos pos) const
+{
+	return cell(pos);
+}
+
 void Screen::_out(const std::string_view text)
 {
 	_output_buffer.append(text);
@@ -419,6 +424,11 @@ void Screen::cursor_set_look(Look lk)
 }
 
 Cell &Screen::cell(Pos pos)
+{
+	return _back_buffer.cell({ pos.x, pos.y });
+}
+
+const Cell &Screen::cell(Pos pos) const
 {
 	return _back_buffer.cell({ pos.x, pos.y });
 }
