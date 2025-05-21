@@ -60,7 +60,10 @@ target_compile_options(termic
 	-Wno-padded
 )
 
-FetchContent_Declare(fmt GIT_REPOSITORY https://github.com/fmtlib/fmt.git GIT_TAG 8.1.1)
+FetchContent_Declare(fmt
+	GIT_REPOSITORY git@github.com:fmtlib/fmt.git
+	GIT_TAG        11.2.0
+)
 FetchContent_MakeAvailable(fmt)
 
 FetchContent_Declare(signals GIT_REPOSITORY https://github.com/TheWisp/signals GIT_TAG 7ff59d1bc6387337ef34856a450be34cfa2c9e51)
@@ -74,6 +77,7 @@ target_include_directories(termic PUBLIC ../extern/mk-wcwidth)
 target_include_directories(termic
 	PUBLIC
 	../include/
+	../extern/mk-wcwidth
 	${fmt_SOURCE_DIR}/include
 	${signals_SOURCE_DIR}
 )
